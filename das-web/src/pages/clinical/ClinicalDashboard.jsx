@@ -716,11 +716,12 @@ function buildClinicalColumns(appointments, rooms) {
 
 function buildClinicalQueues(appointments, columns) {
   const dailyQueueNumbers = buildDailyQueueNumbers(appointments, columns);
+  const visibleStatuses = new Set(["checked_in", "in_treatment"]);
 
   return columns.map((column) => ({
     column,
     appointments: appointments
-      .filter((appointment) => appointment.dentist?._id === column._id)
+      .filter((appointment) => appointment.dentist?._id === column._id && visibleStatuses.has(appointment.status))
       .sort(compareQueueWithinSlot)
       .map((appointment) => ({
         ...appointment,

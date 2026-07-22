@@ -262,6 +262,7 @@ export default function ReceptionistDashboard() {
     const discountPercent = Number(invoicePlan.discountPercent || 0);
     const discountAmount = Math.round(amount * discountPercent / 100);
     const payableAmount = Math.max(amount - discountAmount, 0);
+    const paymentPlan = payableAmount >= 5000000 ? invoicePlan.paymentPlan : "one_time";
     if (amount <= 0) {
       setError("Chưa có dịch vụ hoặc chi phí phát sinh để tạo hóa đơn.");
       return;
@@ -273,8 +274,8 @@ export default function ReceptionistDashboard() {
         amount,
         items: performedItems.length ? performedItems : undefined,
         discountPercent,
-        paymentPlan: invoicePlan.paymentPlan,
-        installmentMonths: invoicePlan.paymentPlan === "monthly" ? Number(invoicePlan.installmentMonths || 3) : undefined
+        paymentPlan,
+        installmentMonths: paymentPlan === "monthly" ? Number(invoicePlan.installmentMonths || 3) : undefined
       });
       setMessage("Đã tạo hóa đơn và gửi thông báo cho bệnh nhân.");
       setInvoicePlans((current) => {

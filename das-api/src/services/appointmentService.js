@@ -20,6 +20,7 @@ const STAFF_ROLES = new Set(["receptionist", "admin", "nurse"]);
 const LOCKED_APPOINTMENT_STATUSES = new Set(["cancelled", "rejected"]);
 const CHANGEABLE_APPOINTMENT_STATUSES = new Set(["pending", "scheduled"]);
 const INSTALLMENT_MONTH_OPTIONS = new Set([3, 6, 9]);
+const MONTHLY_PAYMENT_MIN_TOTAL = 5000000;
 
 function createError(message, statusCode) {
   const err = new Error(message);
@@ -538,6 +539,9 @@ export async function createInvoiceForAppointment(appointmentId, body) {
   }
 
   const { paymentPlan, installmentMonths } = resolveInvoicePaymentPlan(data);
+  if (paymentPlan === "monthly" && total < MONTHLY_PAYMENT_MIN_TOTAL) {
+    throw createError("Hóa đơn dưới 5.000.000 đ chỉ được trả một lần.", 400);
+  }
   const installmentAmount = calculateInstallmentAmount(total, installmentMonths);
 
   const invoice = await appointmentRepository.createInvoice({

@@ -378,6 +378,57 @@
   grid-column: 1 / -1;
 }
 
+.clinical-edit-panel {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  background: #f8fbff;
+}
+
+.clinical-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.clinical-edit-grid .field {
+  gap: 5px;
+}
+
+.clinical-edit-grid .field span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.clinical-edit-grid .field.wide {
+  grid-column: 1 / -1;
+}
+
+.clinical-edit-grid input,
+.clinical-edit-grid select {
+  width: 100%;
+  min-height: 42px;
+  font-size: 0.95rem;
+}
+
+.clinical-edit-panel > .button {
+  width: 100%;
+  min-height: 42px;
+}
+
+@media (max-width: 680px) {
+  .clinical-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .clinical-edit-grid .field.wide {
+    grid-column: auto;
+  }
+}
+
 .schedule-empty-cell {
   display: grid;
   place-items: center;

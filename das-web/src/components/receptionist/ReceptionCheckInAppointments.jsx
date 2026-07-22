@@ -17,6 +17,7 @@ const paymentPlanLabels = {
 
 const installmentOptions = [3, 6, 9];
 const discountOptions = [0, 5, 10, 20, 30];
+const MONTHLY_PAYMENT_MIN_TOTAL = 5000000;
 
 function getInvoicePlan(invoicePlans, appointmentId) {
   return invoicePlans[appointmentId] || { paymentPlan: "one_time", installmentMonths: 3, discountPercent: 0 };
@@ -122,6 +123,8 @@ export default function ReceptionCheckInAppointments({
             const paidAmount = Number(invoice?.paidAmount || 0);
             const remaining = Math.max(total - paidAmount, 0);
             const items = invoice?.items?.length ? invoice.items : [...(appointment.performedServices || []), ...(appointment.extraCosts || [])];
+            const canUseMonthlyPlan = total >= MONTHLY_PAYMENT_MIN_TOTAL;
+            const selectedPaymentPlan = canUseMonthlyPlan ? invoicePlan.paymentPlan : "one_time";
             const plannedInstallmentAmount = calculateInstallmentAmount(total, invoicePlan.installmentMonths);
             const nextPayment = getNextPaymentInfo(invoice, total, paidAmount);
             const hasServiceItems = (appointment.performedServices || []).length > 0 || (appointment.extraCosts || []).length > 0;
@@ -191,14 +194,14 @@ export default function ReceptionCheckInAppointments({
                       <label className="payment-amount-field">
                         <span>Hình thức thanh toán</span>
                         <select
-                          value={invoicePlan.paymentPlan}
+                          value={selectedPaymentPlan}
                           onChange={(event) => updateInvoicePlan(appointment._id, { paymentPlan: event.target.value })}
                         >
                           <option value="one_time">Trả một lần hết</option>
-                          <option value="monthly">Trả theo tháng</option>
+                          {canUseMonthlyPlan && <option value="monthly">Trả theo tháng</option>}
                         </select>
                       </label>
-                      {invoicePlan.paymentPlan === "monthly" && (
+                      {selectedPaymentPlan === "monthly" && (
                         <label className="payment-amount-field">
                           <span>Kỳ hạn</span>
                           <select
@@ -211,7 +214,7 @@ export default function ReceptionCheckInAppointments({
                           </select>
                         </label>
                       )}
-                      {invoicePlan.paymentPlan === "monthly" && (
+                      {selectedPaymentPlan === "monthly" && (
                         <span className="payment-plan-preview">Mỗi tháng: {formatMoney(plannedInstallmentAmount)}</span>
                       )}
                       <label className="payment-amount-field">

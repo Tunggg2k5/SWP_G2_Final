@@ -1,4 +1,5 @@
 import { CalendarDays, DoorOpen } from "lucide-react";
+import { useState } from "react";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
 import { clinicDateInput, filterOpenSlotsForDate, formatTime, getAppointmentSlot, todayInput } from "../../utils/format.js";
@@ -23,6 +24,8 @@ export default function ReceptionClinicalQueue({
   slotClosures = [],
   updateManualSchedule
 }) {
+  const [editingAppointmentId, setEditingAppointmentId] = useState("");
+
   return (
     <section className="panel reception-schedule-panel">
       <div className="section-title">
@@ -104,6 +107,7 @@ export default function ReceptionClinicalQueue({
                       const canCheckIn = !locked && isTodayAppointment && ["scheduled", "confirmed"].includes(appointment.status);
                       const canMarkNoShow = !locked && isTodayAppointment && ["scheduled", "confirmed"].includes(appointment.status);
                       const canEditSchedule = appointment.status === "scheduled";
+                      const isEditingSchedule = editingAppointmentId === appointment._id;
                       const queueNumber = appointment.queueNumber;
                       const manualForm = manualSchedules[appointment._id] || defaultManualSchedule(appointment, rooms, services, slots, slotClosures);
                       const rowSlotOptions = filterOpenSlotsForDate(slots, slotClosures, manualForm.date);
@@ -131,83 +135,16 @@ export default function ReceptionClinicalQueue({
                             )}
                           </div>
 
-                          {canEditSchedule && (
-                            <div className="row-actions appointment-reschedule-tools clinical-edit-tools">
-                              <input
-                                type="date"
-                                min={todayInput()}
-                                max={maxBookingDate()}
-                                value={manualForm.date}
-                                onChange={(event) => {
-                                  const nextDate = event.target.value;
-                                  const nextSlotOptions = filterOpenSlotsForDate(slots, slotClosures, nextDate);
-                                  const nextSlot = nextSlotOptions[0];
-                                  updateManualSchedule?.(appointment, {
-                                    date: nextDate,
-                                    time: nextSlot?.value || "",
-                                    arrivalTime: nextSlot?.value || ""
-                                  });
-                                }}
-                              />
-                              <select
-                                aria-label="Dịch vụ"
-                                value={manualForm.serviceId}
-                                onChange={(event) => updateManualSchedule?.(appointment, { serviceId: event.target.value })}
-                              >
-                                {services.map((service) => (
-                                  <option value={service._id} key={service._id}>
-                                    {service.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <select
-                                value={manualTime}
-                                onChange={(event) => {
-                                  const nextSlot = rowSlotOptions.find((slotOption) => slotOption.value === event.target.value);
-                                  updateManualSchedule?.(appointment, {
-                                    time: event.target.value,
-                                    arrivalTime: nextSlot?.value || ""
-                                  });
-                                }}
-                              >
-                                {rowSlotOptions.length ? (
-                                  rowSlotOptions.map((slotOption) => (
-                                    <option value={slotOption.value} key={slotOption.value}>
-                                      {slotOption.label}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option value="">Chưa có khung giờ đang mở</option>
-                                )}
-                              </select>
-                              <input
-                                aria-label="Giờ đến"
-                                type="time"
-                                step="60"
-                                min={selectedSlot?.value || ""}
-                                max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
-                                value={arrivalTime}
-                                onChange={(event) => updateManualSchedule?.(appointment, { arrivalTime: event.target.value })}
-                                disabled={!selectedSlot}
-                              />
-                              <select
-                                aria-label="Bác sĩ"
-                                value={manualForm.roomId}
-                                onChange={(event) => updateManualSchedule?.(appointment, { roomId: event.target.value })}
-                              >
-                                {rooms.filter((room) => room.assignedDentist?._id).map((room) => (
-                                  <option value={room._id} key={room._id}>
-                                    {room.assignedDentist.fullName}
-                                  </option>
-                                ))}
-                              </select>
-                              <button className="button small primary" type="button" onClick={() => scheduleReceptionAppointment?.(appointment)}>
-                                Cập nhật lịch
-                              </button>
-                            </div>
-                          )}
-
                           <div className="row-actions schedule-status-actions">
+                            {canEditSchedule && (
+                              <button
+                                className="button small secondary"
+                                type="button"
+                                onClick={() => setEditingAppointmentId(isEditingSchedule ? "" : appointment._id)}
+                              >
+                                {isEditingSchedule ? "Đóng đổi lịch" : "Đổi lịch"}
+                              </button>
+                            )}
                             <button
                               className="button small"
                               disabled={!canCheckIn}
@@ -225,6 +162,106 @@ export default function ReceptionClinicalQueue({
                               Vắng mặt
                             </button>
                           </div>
+
+                          {canEditSchedule && isEditingSchedule && (
+                            <div className="clinical-edit-panel">
+                              <div className="clinical-edit-grid">
+                                <label className="field">
+                                  <span>Ngày khám</span>
+                                  <input
+                                    type="date"
+                                    min={todayInput()}
+                                    max={maxBookingDate()}
+                                    value={manualForm.date}
+                                    onChange={(event) => {
+                                      const nextDate = event.target.value;
+                                      const nextSlotOptions = filterOpenSlotsForDate(slots, slotClosures, nextDate);
+                                      const nextSlot = nextSlotOptions[0];
+                                      updateManualSchedule?.(appointment, {
+                                        date: nextDate,
+                                        time: nextSlot?.value || "",
+                                        arrivalTime: nextSlot?.value || ""
+                                      });
+                                    }}
+                                  />
+                                </label>
+                                <label className="field">
+                                  <span>Dịch vụ</span>
+                                  <select
+                                    aria-label="Dịch vụ"
+                                    value={manualForm.serviceId}
+                                    onChange={(event) => updateManualSchedule?.(appointment, { serviceId: event.target.value })}
+                                  >
+                                    {services.map((service) => (
+                                      <option value={service._id} key={service._id}>
+                                        {service.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                                <label className="field">
+                                  <span>Slot</span>
+                                  <select
+                                    value={manualTime}
+                                    onChange={(event) => {
+                                      const nextSlot = rowSlotOptions.find((slotOption) => slotOption.value === event.target.value);
+                                      updateManualSchedule?.(appointment, {
+                                        time: event.target.value,
+                                        arrivalTime: nextSlot?.value || ""
+                                      });
+                                    }}
+                                  >
+                                    {rowSlotOptions.length ? (
+                                      rowSlotOptions.map((slotOption) => (
+                                        <option value={slotOption.value} key={slotOption.value}>
+                                          {slotOption.label}
+                                        </option>
+                                      ))
+                                    ) : (
+                                      <option value="">Chưa có khung giờ đang mở</option>
+                                    )}
+                                  </select>
+                                </label>
+                                <label className="field">
+                                  <span>Giờ đến</span>
+                                  <input
+                                    aria-label="Giờ đến"
+                                    type="time"
+                                    step="60"
+                                    min={selectedSlot?.value || ""}
+                                    max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
+                                    value={arrivalTime}
+                                    onChange={(event) => updateManualSchedule?.(appointment, { arrivalTime: event.target.value })}
+                                    disabled={!selectedSlot}
+                                  />
+                                </label>
+                                <label className="field wide">
+                                  <span>Bác sĩ</span>
+                                  <select
+                                    aria-label="Bác sĩ"
+                                    value={manualForm.roomId}
+                                    onChange={(event) => updateManualSchedule?.(appointment, { roomId: event.target.value })}
+                                  >
+                                    {rooms.filter((room) => room.assignedDentist?._id).map((room) => (
+                                      <option value={room._id} key={room._id}>
+                                        {room.assignedDentist.fullName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              </div>
+                              <button
+                                className="button small primary"
+                                type="button"
+                                onClick={() => {
+                                  scheduleReceptionAppointment?.(appointment);
+                                  setEditingAppointmentId("");
+                                }}
+                              >
+                                Cập nhật lịch
+                              </button>
+                            </div>
+                          )}
                         </article>
                       );
                     })
