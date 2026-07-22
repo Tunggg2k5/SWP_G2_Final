@@ -1,5 +1,5 @@
-import { ReceiptText } from "lucide-react";
-import { useMemo } from "react";
+import { ReceiptText, Search, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import EmptyState from "../../EmptyState.jsx";
 import StatusBadge from "../../StatusBadge.jsx";
 import { formatDateTime, formatMoney } from "../../../utils/format.js";
@@ -16,18 +16,28 @@ export default function ClinicalPerformedServices({
   selectedAppointment,
   services
 }) {
+  const [serviceSearch, setServiceSearch] = useState("");
   const selectedServices = form.services || {};
+  const selectedRows = Object.entries(selectedServices)
+    .filter(([, item]) => item.selected)
+    .map(([serviceId, item]) => ({ serviceId, ...item }));
   const extraCosts = form.extraCosts || [];
   const canEditCharges = selectedAppointment?.status === "in_treatment";
   const isLockedForCharges = Boolean(selectedAppointment) && !canEditCharges;
 
+  const filteredServices = useMemo(() => {
+    const keyword = serviceSearch.trim().toLowerCase();
+    return services
+      .filter((service) => !selectedServices[service._id]?.selected)
+      .filter((service) => !keyword || service.name?.toLowerCase().includes(keyword))
+      .slice(0, 8);
+  }, [serviceSearch, selectedServices, services]);
+
   const total = useMemo(() => {
-    const serviceTotal = Object.values(selectedServices).reduce((sum, item) => {
-      return item.selected ? sum + Number(item.amount || 0) : sum;
-    }, 0);
+    const serviceTotal = selectedRows.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const extraTotal = extraCosts.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     return serviceTotal + extraTotal;
-  }, [extraCosts, selectedServices]);
+  }, [extraCosts, selectedRows]);
 
   return (
     <section className="panel clinical-treatment-panel">
@@ -35,6 +45,7 @@ export default function ClinicalPerformedServices({
         <ReceiptText size={20} />
         <h2>Dịch vụ đã thực hiện</h2>
       </div>
+
       <form className="stack" onSubmit={onSubmit}>
         <label className="field">
           <span>Lịch khám</span>
@@ -65,37 +76,80 @@ export default function ClinicalPerformedServices({
           </div>
         )}
 
-        {selectedAppointment && services.length ? (
-          <div className="mini-list performed-service-list">
-            {services.map((service) => {
-              const selected = selectedServices[service._id]?.selected || false;
-              const defaultAmount = Number(service.price || 0);
-              return (
-                <div className="mini-row performed-service-row" key={service._id}>
-                  <label className="checkbox-line">
-                    <input
-                      checked={selected}
-                      disabled={!canEditCharges}
-                      onChange={(event) => onToggleService(service, event.target.checked)}
-                      type="checkbox"
-                    />
-                    <span>{service.name}</span>
-                  </label>
+        {selectedAppointment && (
+          <div className="performed-service-picker">
+            <label className="field">
+              <span>Tìm dịch vụ</span>
+              <div className="input-with-icon">
+                <Search size={18} />
+                <input
+                  disabled={!canEditCharges}
+                  value={serviceSearch}
+                  onChange={(event) => setServiceSearch(event.target.value)}
+                  placeholder="Nhập tên dịch vụ cần thêm"
+                />
+              </div>
+            </label>
+
+            {canEditCharges && (
+              <div className="performed-service-results">
+                {filteredServices.length ? (
+                  filteredServices.map((service) => (
+                    <button
+                      className="button small secondary"
+                      key={service._id}
+                      type="button"
+                      onClick={() => {
+                        onToggleService(service, true, parseDefaultAmount(service.price));
+                        setServiceSearch("");
+                      }}
+                    >
+                      Thêm {service.name}
+                    </button>
+                  ))
+                ) : (
+                  <span className="mini">{serviceSearch ? "Không tìm thấy dịch vụ phù hợp." : "Nhập tên để tìm dịch vụ."}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedAppointment && (
+          <div className="performed-service-table">
+            <div className="performed-service-table-head">
+              <span>Dịch vụ</span>
+              <span>Số tiền</span>
+              <span></span>
+            </div>
+            {selectedRows.length ? (
+              selectedRows.map((item) => (
+                <div className="performed-service-table-row" key={item.serviceId}>
+                  <strong>{item.name}</strong>
                   <input
-                    disabled={!canEditCharges || !selected}
+                    disabled={!canEditCharges}
                     min="0"
                     step="1000"
                     type="number"
-                    value={selectedServices[service._id]?.amount ?? (Number.isFinite(defaultAmount) ? defaultAmount : 0)}
-                    onChange={(event) => onToggleService(service, true, event.target.value)}
+                    value={item.amount ?? 0}
+                    onChange={(event) => onToggleService({ _id: item.serviceId, name: item.name }, true, event.target.value)}
                   />
+                  <button
+                    aria-label={`Xóa ${item.name}`}
+                    className="button icon danger"
+                    disabled={!canEditCharges}
+                    type="button"
+                    onClick={() => onToggleService({ _id: item.serviceId, name: item.name }, false)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <div className="performed-service-table-empty">Chưa chọn dịch vụ. Có thể xác nhận hoàn tất nếu không phát sinh dịch vụ.</div>
+            )}
           </div>
-        ) : selectedAppointment ? (
-          <EmptyState title="Chưa có dịch vụ" text="Admin cần tạo dịch vụ trước khi y tá xác nhận chi phí." />
-        ) : null}
+        )}
 
         {selectedAppointment && (
           <div className="stack">
@@ -147,4 +201,10 @@ export default function ClinicalPerformedServices({
       </form>
     </section>
   );
+}
+
+function parseDefaultAmount(value) {
+  const numberText = String(value || "").match(/\d[\d.]*/)?.[0]?.replace(/\./g, "") || "0";
+  const amount = Number(numberText);
+  return Number.isFinite(amount) ? amount : 0;
 }

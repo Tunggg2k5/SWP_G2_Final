@@ -153,14 +153,6 @@ export async function searchTreatmentRecordsByPhone(user, query) {
   }
 
   const records = await clinicalRepository.findPatientTreatmentHistory(patient._id);
-  if (user.role === "dentist") {
-    const allowed = await clinicalRepository.hasRelatedAppointment({
-      patient: patient._id,
-      dentist: user._id
-    });
-    return { patient, records: allowed ? records : [] };
-  }
-
   return { patient, records };
 }
 

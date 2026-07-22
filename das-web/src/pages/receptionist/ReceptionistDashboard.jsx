@@ -37,8 +37,7 @@ export default function ReceptionistDashboard() {
   const [appointmentSearch, setAppointmentSearch] = useState("");
   const [consultationStatusFilter, setConsultationStatusFilter] = useState("waiting");
   const [patientSearch, setPatientSearch] = useState("");
-  const [accountMode, setAccountMode] = useState("existing");
-  const [newPatient, setNewPatient] = useState({ fullName: "", email: "", phone: "", gender: "unknown", createAccount: false });
+  const [newPatient, setNewPatient] = useState({ fullName: "", email: "", phone: "", gender: "unknown" });
   const [booking, setBooking] = useState({ patientId: "", serviceId: "", time: "08:00", note: "" });
   const [resetPasswords, setResetPasswords] = useState({});
   const [manualSchedules, setManualSchedules] = useState({});
@@ -139,10 +138,10 @@ export default function ReceptionistDashboard() {
       requireValue(booking.time, "Khung giờ khám"),
       validateNote(booking.note)
     );
-    const patientError =
-      accountMode === "existing"
-        ? requireValue(booking.patientId, "Bệnh nhân")
-        : firstError(validateName(newPatient.fullName), validatePhone(newPatient.phone), requireValue(newPatient.gender, "Giới tính"));
+    const normalizedNewPatient = { ...newPatient, phone: newPatient.phone || patientSearch.trim() };
+    const patientError = booking.patientId
+      ? ""
+      : firstError(validateName(normalizedNewPatient.fullName), validatePhone(normalizedNewPatient.phone), requireValue(normalizedNewPatient.gender, "Giới tính"));
     const validationError = firstError(commonError, patientError);
 
     if (validationError) {
@@ -158,26 +157,20 @@ export default function ReceptionistDashboard() {
 
     try {
       let patientId = booking.patientId;
-      let guestPatient;
 
-      if (accountMode === "new") {
-        if (newPatient.createAccount) {
-          const res = await api.post("/reception/patients", newPatient);
-          patientId = res.data.patient._id;
+      if (!patientId) {
+        const matchedPatient = patients.find((patient) => String(patient.phone || "").trim() === String(normalizedNewPatient.phone || "").trim());
+        if (matchedPatient) {
+          patientId = matchedPatient._id;
         } else {
-          patientId = "";
-          guestPatient = {
-            fullName: newPatient.fullName,
-            email: newPatient.email || undefined,
-            phone: newPatient.phone,
-            gender: newPatient.gender
-          };
+          const res = await api.post("/reception/patients", normalizedNewPatient);
+          patientId = res.data.patient._id;
         }
-        setNewPatient({ fullName: "", email: "", phone: "", gender: "unknown", createAccount: false });
+        setNewPatient({ fullName: "", email: "", phone: "", gender: "unknown" });
       }
 
       await api.post("/appointments", {
-        ...(patientId ? { patientId } : { guestPatient }),
+        patientId,
         serviceId: booking.serviceId,
         date,
         startAt: toClinicIso(date, booking.time),
@@ -322,7 +315,7 @@ export default function ReceptionistDashboard() {
 
   async function scheduleReceptionAppointment(appointment) {
     const form = manualSchedules[appointment._id] || defaultManualSchedule(appointment, rooms, slots, slotClosures);
-    if (!form.date || !form.time || !form.arrivalTime || !form.roomId) {
+    if (!form.date || !form.time || !form.arrivalTime || !form.roomId || !form.serviceId) {
       setError("Chọn đầy đủ ngày, khung giờ, giờ đến và bác sĩ/phòng trước khi xác nhận lịch hẹn.");
       return;
     }
@@ -355,7 +348,7 @@ export default function ReceptionistDashboard() {
 
     try {
       await api.patch(`/appointments/${appointment._id}/reception-schedule`, {
-        serviceId: appointment.service?._id,
+        serviceId: form.serviceId,
         date: form.date,
         startAt: toClinicIso(form.date, form.arrivalTime),
         roomId: room._id,
@@ -401,7 +394,6 @@ export default function ReceptionistDashboard() {
       if (matchedPatient) {
         setPatients(matchedPatients);
         setPatientSearch(phone);
-        setAccountMode("existing");
         setBooking((current) => ({
           ...current,
           patientId: matchedPatient._id,
@@ -411,14 +403,12 @@ export default function ReceptionistDashboard() {
         }));
         setMessage("Đã tìm thấy tài khoản bệnh nhân. Màn đặt lịch đã chuyển sang chế độ Đã có tài khoản.");
       } else {
-        setPatientSearch("");
-        setAccountMode("new");
+        setPatientSearch(phone);
         setNewPatient({
           fullName: consultation.fullName || "",
           email: "",
           phone,
-          gender: consultation.gender || "unknown",
-          createAccount: false
+          gender: consultation.gender || "unknown"
         });
         setBooking((current) => ({
           ...current,
@@ -595,23 +585,27 @@ export default function ReceptionistDashboard() {
           dentistColumns={dentistColumns}
           isLockedScheduleAppointment={isLockedScheduleAppointment}
           loading={loading}
+          manualSchedules={manualSchedules}
           onCheckInAppointment={checkInClinicalAppointment}
           onMarkNoShow={markNoShow}
           onToggleSlot={toggleAppointmentSlot}
           queueSlots={queueSlots}
           rooms={rooms}
+          scheduleReceptionAppointment={scheduleReceptionAppointment}
+          services={services}
           setDate={setDate}
+          slots={slots}
+          slotClosures={slotClosures}
+          updateManualSchedule={updateManualSchedule}
         />
       )}
 
       {activeFeature === "booking" && (
         <BookAppointmentForPatientForm
-          accountMode={accountMode}
           booking={booking}
           date={date}
           genderOptions={genderOptions}
           newPatient={newPatient}
-          onAccountModeChange={setAccountMode}
           onBookingChange={(next) => setBooking((current) => ({ ...current, ...next }))}
           onDateChange={setDate}
           onNewPatientChange={(next) => setNewPatient((current) => ({ ...current, ...next }))}
@@ -682,6 +676,7 @@ function defaultManualSchedule(appointment, rooms, slots = [], slotClosures = []
   const slot = slotOptions.find((option) => option.value === currentSlotValue) || slotOptions[0];
   return {
     date,
+    serviceId: appointment.service?._id || "",
     time: Number.isNaN(startAt.getTime())
       ? slotOptions[0]?.value || ""
       : slotOptions.some((slot) => slot.value === currentSlotValue)

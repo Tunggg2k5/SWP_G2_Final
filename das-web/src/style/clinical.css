@@ -191,6 +191,48 @@
   gap: 8px;
 }
 
+.clinical-queue-columns {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.clinical-queue-column {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 270px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fcff;
+}
+
+.clinical-queue-head {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: #eef6ff;
+}
+
+.clinical-queue-head strong {
+  color: var(--primary-dark);
+  font-size: 1rem;
+}
+
+.clinical-queue-head span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 760;
+}
+
+.clinical-queue-list {
+  display: grid;
+  gap: 10px;
+}
+
 .performed-service-row {
   grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
 }
@@ -212,4 +254,57 @@
   width: 18px;
   min-height: 18px;
   accent-color: var(--primary);
+}
+
+.performed-service-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.performed-service-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.performed-service-table {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.performed-service-table-head,
+.performed-service-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 180px) 44px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.performed-service-table-head {
+  color: var(--muted);
+  background: #f3f7ff;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.performed-service-table-row + .performed-service-table-row {
+  border-top: 1px solid var(--line);
+}
+
+.performed-service-table-row strong {
+  color: var(--primary-dark);
+}
+
+.performed-service-table-row input {
+  width: 100%;
+}
+
+.performed-service-table-empty {
+  padding: 14px;
+  color: var(--muted);
+  font-weight: 760;
 }

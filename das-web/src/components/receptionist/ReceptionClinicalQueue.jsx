@@ -1,7 +1,8 @@
 import { CalendarDays, DoorOpen } from "lucide-react";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
-import { clinicDateInput, formatTime, todayInput } from "../../utils/format.js";
+import { clinicDateInput, filterOpenSlotsForDate, formatTime, getAppointmentSlot, todayInput } from "../../utils/format.js";
+import { maxBookingDate } from "../../pages/BookingPage.jsx";
 
 export default function ReceptionClinicalQueue({
   allSlotOptions = [],
@@ -9,12 +10,18 @@ export default function ReceptionClinicalQueue({
   dentistColumns,
   isLockedScheduleAppointment,
   loading,
+  manualSchedules = {},
   onCheckInAppointment,
   onMarkNoShow,
   onToggleSlot,
   queueSlots,
   rooms,
-  setDate
+  scheduleReceptionAppointment,
+  services,
+  setDate,
+  slots = [],
+  slotClosures = [],
+  updateManualSchedule
 }) {
   return (
     <section className="panel reception-schedule-panel">
@@ -96,7 +103,14 @@ export default function ReceptionClinicalQueue({
                       const isPastAppointment = appointmentDate < today;
                       const canCheckIn = !locked && isTodayAppointment && ["scheduled", "confirmed"].includes(appointment.status);
                       const canMarkNoShow = !locked && isTodayAppointment && ["scheduled", "confirmed"].includes(appointment.status);
+                      const canEditSchedule = appointment.status === "scheduled";
                       const queueNumber = appointment.queueNumber;
+                      const manualForm = manualSchedules[appointment._id] || defaultManualSchedule(appointment, rooms, services, slots, slotClosures);
+                      const rowSlotOptions = filterOpenSlotsForDate(slots, slotClosures, manualForm.date);
+                      const manualTime = rowSlotOptions.some((slotOption) => slotOption.value === manualForm.time) ? manualForm.time : rowSlotOptions[0]?.value || "";
+                      const selectedSlot = rowSlotOptions.find((slotOption) => slotOption.value === manualTime) || rowSlotOptions[0];
+                      const arrivalTime = isArrivalTimeInsideSlot(manualForm.arrivalTime, selectedSlot) ? manualForm.arrivalTime : selectedSlot?.value || "";
+
                       return (
                         <article className={`schedule-cell-card ${locked ? "locked" : ""}`} key={appointment._id}>
                           <div>
@@ -116,6 +130,83 @@ export default function ReceptionClinicalQueue({
                               <small>Lịch khám đã qua ngày nên không thể cập nhật có mặt hoặc vắng mặt.</small>
                             )}
                           </div>
+
+                          {canEditSchedule && (
+                            <div className="row-actions appointment-reschedule-tools clinical-edit-tools">
+                              <input
+                                type="date"
+                                min={todayInput()}
+                                max={maxBookingDate()}
+                                value={manualForm.date}
+                                onChange={(event) => {
+                                  const nextDate = event.target.value;
+                                  const nextSlotOptions = filterOpenSlotsForDate(slots, slotClosures, nextDate);
+                                  const nextSlot = nextSlotOptions[0];
+                                  updateManualSchedule?.(appointment, {
+                                    date: nextDate,
+                                    time: nextSlot?.value || "",
+                                    arrivalTime: nextSlot?.value || ""
+                                  });
+                                }}
+                              />
+                              <select
+                                aria-label="Dịch vụ"
+                                value={manualForm.serviceId}
+                                onChange={(event) => updateManualSchedule?.(appointment, { serviceId: event.target.value })}
+                              >
+                                {services.map((service) => (
+                                  <option value={service._id} key={service._id}>
+                                    {service.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <select
+                                value={manualTime}
+                                onChange={(event) => {
+                                  const nextSlot = rowSlotOptions.find((slotOption) => slotOption.value === event.target.value);
+                                  updateManualSchedule?.(appointment, {
+                                    time: event.target.value,
+                                    arrivalTime: nextSlot?.value || ""
+                                  });
+                                }}
+                              >
+                                {rowSlotOptions.length ? (
+                                  rowSlotOptions.map((slotOption) => (
+                                    <option value={slotOption.value} key={slotOption.value}>
+                                      {slotOption.label}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="">Chưa có khung giờ đang mở</option>
+                                )}
+                              </select>
+                              <input
+                                aria-label="Giờ đến"
+                                type="time"
+                                step="60"
+                                min={selectedSlot?.value || ""}
+                                max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
+                                value={arrivalTime}
+                                onChange={(event) => updateManualSchedule?.(appointment, { arrivalTime: event.target.value })}
+                                disabled={!selectedSlot}
+                              />
+                              <select
+                                aria-label="Bác sĩ"
+                                value={manualForm.roomId}
+                                onChange={(event) => updateManualSchedule?.(appointment, { roomId: event.target.value })}
+                              >
+                                {rooms.filter((room) => room.assignedDentist?._id).map((room) => (
+                                  <option value={room._id} key={room._id}>
+                                    {room.assignedDentist.fullName}
+                                  </option>
+                                ))}
+                              </select>
+                              <button className="button small primary" type="button" onClick={() => scheduleReceptionAppointment?.(appointment)}>
+                                Cập nhật lịch
+                              </button>
+                            </div>
+                          )}
+
                           <div className="row-actions schedule-status-actions">
                             <button
                               className="button small"
@@ -150,4 +241,37 @@ export default function ReceptionClinicalQueue({
       )}
     </section>
   );
+}
+
+function defaultManualSchedule(appointment, rooms, services, slots = [], slotClosures = []) {
+  const startAt = appointment.startAt ? new Date(appointment.startAt) : new Date();
+  const appointmentDate = Number.isNaN(startAt.getTime()) ? "" : clinicDateInput(startAt);
+  const date = appointmentDate && appointmentDate >= todayInput() ? appointmentDate : todayInput();
+  const slotOptions = filterOpenSlotsForDate(slots, slotClosures, date);
+  const currentSlotValue = Number.isNaN(startAt.getTime()) ? "" : getAppointmentSlot(startAt, slotOptions).value;
+  const slot = slotOptions.find((option) => option.value === currentSlotValue) || slotOptions[0];
+
+  return {
+    date,
+    serviceId: appointment.service?._id || services[0]?._id || "",
+    time: Number.isNaN(startAt.getTime())
+      ? slotOptions[0]?.value || ""
+      : slotOptions.some((option) => option.value === currentSlotValue)
+        ? currentSlotValue
+        : slotOptions[0]?.value || currentSlotValue,
+    arrivalTime: isArrivalTimeInsideSlot(currentSlotValue, slot) ? currentSlotValue : slot?.value || "",
+    roomId: appointment.room?._id || rooms[0]?._id || ""
+  };
+}
+
+function isArrivalTimeInsideSlot(arrivalTime, slot) {
+  if (!arrivalTime || !slot?.value || !slot?.endTime) return false;
+  return arrivalTime >= slot.value && arrivalTime < slot.endTime;
+}
+
+function previousMinuteTime(value) {
+  const [hour, minute] = String(value || "").split(":").map(Number);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return "";
+  const total = Math.max(hour * 60 + minute - 1, 0);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }

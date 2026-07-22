@@ -1,14 +1,12 @@
-import { CalendarPlus, UserCheck, UserPlus } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
 
 export default function BookAppointmentForPatientForm({
-  accountMode,
   booking,
   date,
   genderOptions,
   newPatient,
-  onAccountModeChange,
   onBookingChange,
   onDateChange,
   onNewPatientChange,
@@ -19,53 +17,46 @@ export default function BookAppointmentForPatientForm({
   setPatientSearch,
   slotOptions
 }) {
+  const hasSelectedPatient = Boolean(booking.patientId);
+
   return (
     <section className="panel receptionist-booking-panel">
       <div className="section-title receptionist-booking-title">
         <CalendarPlus size={20} />
         <div>
           <h2>Đặt lịch hộ bệnh nhân</h2>
-          <p>Nhập thông tin bệnh nhân, chọn dịch vụ và khung giờ để tạo lịch chờ xác nhận.</p>
+          <p>Kiểm tra số điện thoại trước. Nếu chưa có tài khoản, hệ thống sẽ tạo tài khoản bệnh nhân khi đặt lịch.</p>
         </div>
       </div>
+
       <form className="stack receptionist-booking-form" onSubmit={onSubmit}>
-        <div className="reception-booking-mode" role="radiogroup" aria-label="Chọn loại bệnh nhân">
-          <label className={`booking-mode-card ${accountMode === "existing" ? "active" : ""}`}>
-            <input type="radio" name="accountMode" value="existing" checked={accountMode === "existing"} onChange={(event) => onAccountModeChange(event.target.value)} />
-            <span className="booking-mode-icon"><UserCheck size={20} /></span>
-            <span>
-              <strong>Đã có tài khoản</strong>
-              <small>Tìm bệnh nhân trong hệ thống</small>
-            </span>
+        <div className="form-grid reception-patient-grid">
+          <label className="field">
+            <span>Kiểm tra tên hoặc số điện thoại</span>
+            <input
+              value={patientSearch}
+              onChange={(event) => {
+                setPatientSearch(event.target.value);
+                onBookingChange({ patientId: "" });
+              }}
+              placeholder="Nhập tên hoặc số điện thoại"
+            />
           </label>
-          <label className={`booking-mode-card ${accountMode === "new" ? "active" : ""}`}>
-            <input type="radio" name="accountMode" value="new" checked={accountMode === "new"} onChange={(event) => onAccountModeChange(event.target.value)} />
-            <span className="booking-mode-icon"><UserPlus size={20} /></span>
-            <span>
-              <strong>Chưa có tài khoản</strong>
-              <small>Tạo hồ sơ nhanh khi đặt lịch</small>
-            </span>
+
+          <label className="field">
+            <span>Tài khoản bệnh nhân</span>
+            <select value={booking.patientId} onChange={(event) => onBookingChange({ patientId: event.target.value })}>
+              <option value="">Chưa có tài khoản, tạo tài khoản mới</option>
+              {selectablePatients.map((patient) => (
+                <option key={patient._id} value={patient._id}>
+                  {patient.fullName} - {patient.phone}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
-        {accountMode === "existing" ? (
-          <div className="form-grid reception-patient-grid">
-            <label className="field">
-              <span>Tìm tài khoản bệnh nhân</span>
-              <input value={patientSearch} onChange={(event) => setPatientSearch(event.target.value)} placeholder="Tên hoặc số điện thoại" />
-            </label>
-            <label className="field">
-              <span>Bệnh nhân</span>
-              <select value={booking.patientId} onChange={(event) => onBookingChange({ patientId: event.target.value })} required>
-                {selectablePatients.map((patient) => (
-                  <option key={patient._id} value={patient._id}>
-                    {patient.fullName} - {patient.phone}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        ) : (
+        {!hasSelectedPatient && (
           <div className="form-grid reception-patient-grid">
             <label className="field">
               <span>Họ tên</span>
@@ -81,25 +72,13 @@ export default function BookAppointmentForPatientForm({
             </label>
             <label className="field">
               <span>Giới tính</span>
-              <select value={newPatient.gender} onChange={(event) => onNewPatientChange({ gender: event.target.value })}>
+              <select value={newPatient.gender} onChange={(event) => onNewPatientChange({ gender: event.target.value })} required>
                 {genderOptions.map((option) => (
                   <option value={option.value} key={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="account-create-option">
-              <input
-                type="checkbox"
-                checked={Boolean(newPatient.createAccount)}
-                onChange={(event) => onNewPatientChange({ createAccount: event.target.checked })}
-              />
-              <span className="account-create-box">✓</span>
-              <span>
-                <strong>Tạo tài khoản cho bệnh nhân</strong>
-                <small>Không tick thì chỉ lưu thông tin vào lịch hẹn, không tạo tài khoản.</small>
-              </span>
             </label>
           </div>
         )}

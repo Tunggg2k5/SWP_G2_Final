@@ -7,7 +7,7 @@ import ClinicalPerformedServices from "../../components/clinical/nurse/ClinicalP
 import Feedback from "../../components/Feedback.jsx";
 import { useAuth } from "../../redux/AuthContext.jsx";
 import { api, getErrorMessage } from "../../utils/api.js";
-import { clinicDateInput, compareQueueWithinSlot, getAppointmentSlot, normalizeAppointmentSlots, todayInput } from "../../utils/format.js";
+import { clinicDateInput, compareQueueWithinSlot, normalizeAppointmentSlots, todayInput } from "../../utils/format.js";
 
 function getClinicalFeatures(role) {
   return [
@@ -132,7 +132,7 @@ export default function ClinicalDashboard() {
   }, [activeFeature, clinicalFeatures, location.search]);
 
   const clinicalColumns = useMemo(() => buildClinicalColumns(appointments, rooms), [appointments, rooms]);
-  const clinicalRows = useMemo(() => buildClinicalRows(appointments, clinicalColumns, slotOptions), [appointments, clinicalColumns, slotOptions]);
+  const clinicalQueues = useMemo(() => buildClinicalQueues(appointments, clinicalColumns), [appointments, clinicalColumns]);
   const selectedAppointment = appointments.find((appointment) => appointment._id === recordForm.appointmentId);
   const selectedSearchTreatmentRecord = treatmentSearchResults.find((record) => record._id === recordForm.recordId);
   const selectedTreatmentRecords = useMemo(() => getPatientTreatmentRecords(records, selectedAppointment), [records, selectedAppointment]);
@@ -555,7 +555,7 @@ export default function ClinicalDashboard() {
           appointments={appointments}
           canEditAppointment={canEditAppointment}
           clinicalColumns={clinicalColumns}
-          clinicalRows={clinicalRows}
+          clinicalQueues={clinicalQueues}
           date={date}
           isLockedAppointment={isLockedAppointment}
           loading={loading}
@@ -714,22 +714,18 @@ function buildClinicalColumns(appointments, rooms) {
   return Array.from(columns.values());
 }
 
-function buildClinicalRows(appointments, columns, slotOptions = []) {
+function buildClinicalQueues(appointments, columns) {
   const dailyQueueNumbers = buildDailyQueueNumbers(appointments, columns);
 
-  return slotOptions.map((slot) => ({
-    slotId: slot.slotId,
-    slotName: slot.slotName,
-    timeLabel: slot.timeLabel,
-    cells: columns.map((column) =>
-      appointments
-        .filter((appointment) => appointment.dentist?._id === column._id && getAppointmentSlot(appointment.startAt, slotOptions).slotId === slot.slotId)
-        .sort(compareQueueWithinSlot)
-        .map((appointment) => ({
-          ...appointment,
-          queueNumber: dailyQueueNumbers.get(appointment._id)
-        }))
-    )
+  return columns.map((column) => ({
+    column,
+    appointments: appointments
+      .filter((appointment) => appointment.dentist?._id === column._id)
+      .sort(compareQueueWithinSlot)
+      .map((appointment) => ({
+        ...appointment,
+        queueNumber: dailyQueueNumbers.get(appointment._id)
+      }))
   }));
 }
 
