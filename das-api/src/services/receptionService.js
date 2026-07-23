@@ -78,9 +78,6 @@ export async function resetPatientPassword(patientId, body) {
 
 export async function createPatient(body) {
   const data = createReceptionPatientSchema.parse(body);
-  if (!data.createAccount) {
-    throw createError("Chỉ tạo tài khoản khi lễ tân đã tick chọn tạo tài khoản.", 400);
-  }
 
   const duplicate = await receptionRepository.findUserByPhone(data.phone);
 

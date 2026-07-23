@@ -16,6 +16,5 @@ export const createReceptionPatientSchema = z.object({
   phone: phoneSchema,
   gender: z.enum(["male", "female", "other", "unknown"]).default("unknown"),
   address: z.string().trim().max(255).optional().or(z.literal("")),
-  createAccount: z.boolean().default(false),
   password: passwordSchema.default("nhakhoa2026")
 });

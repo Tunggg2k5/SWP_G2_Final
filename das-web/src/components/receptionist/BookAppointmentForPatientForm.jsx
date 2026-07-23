@@ -52,7 +52,7 @@ export default function BookAppointmentForPatientForm({
           </button>
         </div>
 
-        {canShowPatientInfo ? (
+        {canShowPatientInfo && (
           <div className="form-grid reception-patient-grid">
             <label className="field">
               <span>Họ tên</span>
@@ -96,11 +96,6 @@ export default function BookAppointmentForPatientForm({
                 ))}
               </select>
             </label>
-          </div>
-        ) : (
-          <div className="empty-state compact">
-            <strong>Chưa kiểm tra tài khoản</strong>
-            <span>Nhập số điện thoại rồi bấm kiểm tra tài khoản để tiếp tục đặt lịch.</span>
           </div>
         )}
 
