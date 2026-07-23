@@ -36,6 +36,8 @@ export default function ReceptionistDashboard() {
   const [appointmentSearch, setAppointmentSearch] = useState("");
   const [consultationStatusFilter, setConsultationStatusFilter] = useState("waiting");
   const [patientSearch, setPatientSearch] = useState("");
+  const [patientLookupStatus, setPatientLookupStatus] = useState("idle");
+  const [checkedPatient, setCheckedPatient] = useState(null);
   const [newPatient, setNewPatient] = useState({ fullName: "", email: "", phone: "", gender: "unknown" });
   const [booking, setBooking] = useState({ patientId: "", serviceId: "", time: "08:00", note: "" });
   const [manualSchedules, setManualSchedules] = useState({});
@@ -77,7 +79,7 @@ export default function ReceptionistDashboard() {
       setSlotClosures(nextSlotClosures);
       setBooking((current) => ({
         ...current,
-        patientId: current.patientId || res.data.patients[0]?._id || "",
+        patientId: current.patientId || "",
         serviceId: current.serviceId || res.data.services[0]?._id || "",
         time: nextSlotOptions.some((slot) => slot.value === current.time) ? current.time : nextSlotOptions[0]?.value || ""
       }));
@@ -125,7 +127,9 @@ export default function ReceptionistDashboard() {
     const normalizedNewPatient = { ...newPatient, phone: newPatient.phone || patientSearch.trim() };
     const patientError = booking.patientId
       ? ""
-      : firstError(validateName(normalizedNewPatient.fullName), validatePhone(normalizedNewPatient.phone), requireValue(normalizedNewPatient.gender, "Giới tính"));
+      : patientLookupStatus !== "not_found"
+        ? "Vui lòng kiểm tra số điện thoại bệnh nhân trước khi đặt lịch."
+        : firstError(validateName(normalizedNewPatient.fullName), validatePhone(normalizedNewPatient.phone), requireValue(normalizedNewPatient.gender, "Giới tính"));
     const validationError = firstError(commonError, patientError);
 
     if (validationError) {
@@ -163,12 +167,68 @@ export default function ReceptionistDashboard() {
         note: booking.note
       });
       setMessage("Đã tạo lịch hẹn. Lịch đang chờ lễ tân xác nhận trong mục Lịch hẹn.");
+      setPatientLookupStatus("idle");
+      setCheckedPatient(null);
+      setPatientSearch("");
       setActiveFeature("appointments");
       navigate("/dashboard?tab=appointments", { replace: true });
       await load();
     } catch (err) {
       setError(getErrorMessage(err));
     }
+  }
+
+  async function checkPatientAccount() {
+    const phone = patientSearch.trim();
+    const validationError = validatePhone(phone);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    try {
+      setError("");
+      setMessage("");
+      const res = await api.get("/reception/patients", { params: { q: phone } });
+      const matchedPatients = res.data.patients || [];
+      const matchedPatient = matchedPatients.find((patient) => String(patient.phone || "").trim() === phone);
+      setPatients(matchedPatients);
+
+      if (matchedPatient) {
+        setCheckedPatient(matchedPatient);
+        setPatientLookupStatus("found");
+        setBooking((current) => ({ ...current, patientId: matchedPatient._id }));
+        setNewPatient({
+          fullName: matchedPatient.fullName || "",
+          email: matchedPatient.email || "",
+          phone: matchedPatient.phone || phone,
+          gender: matchedPatient.gender || "unknown"
+        });
+        setMessage("Đã tìm thấy tài khoản bệnh nhân.");
+      } else {
+        setCheckedPatient(null);
+        setPatientLookupStatus("not_found");
+        setBooking((current) => ({ ...current, patientId: "" }));
+        setNewPatient((current) => ({
+          ...current,
+          fullName: "",
+          email: "",
+          phone,
+          gender: current.gender || "unknown"
+        }));
+        setMessage("Chưa có tài khoản bệnh nhân. Vui lòng nhập thông tin bên dưới để tạo tài khoản khi đặt lịch.");
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  }
+
+  function updatePatientSearch(value) {
+    setPatientSearch(value);
+    setPatientLookupStatus("idle");
+    setCheckedPatient(null);
+    setBooking((current) => ({ ...current, patientId: "" }));
+    setNewPatient((current) => ({ ...current, phone: value.trim() }));
   }
 
   async function rejectAppointment(appointment) {
@@ -379,6 +439,14 @@ export default function ReceptionistDashboard() {
       if (matchedPatient) {
         setPatients(matchedPatients);
         setPatientSearch(phone);
+        setCheckedPatient(matchedPatient);
+        setPatientLookupStatus("found");
+        setNewPatient({
+          fullName: matchedPatient.fullName || "",
+          email: matchedPatient.email || "",
+          phone: matchedPatient.phone || phone,
+          gender: matchedPatient.gender || "unknown"
+        });
         setBooking((current) => ({
           ...current,
           patientId: matchedPatient._id,
@@ -389,6 +457,8 @@ export default function ReceptionistDashboard() {
         setMessage("Đã tìm thấy tài khoản bệnh nhân. Màn đặt lịch đã chuyển sang chế độ Đã có tài khoản.");
       } else {
         setPatientSearch(phone);
+        setCheckedPatient(null);
+        setPatientLookupStatus("not_found");
         setNewPatient({
           fullName: consultation.fullName || "",
           email: "",
@@ -446,12 +516,6 @@ export default function ReceptionistDashboard() {
       return consultationStatusFilter === "all" || status === consultationStatusFilter;
     })
     .sort(compareConsultationsOldestFirst);
-  const patientKeyword = patientSearch.trim().toLowerCase();
-  const selectablePatients = patients.filter((patient) => {
-    if (!patientKeyword) return true;
-    return [patient.fullName, patient.phone].filter(Boolean).join(" ").toLowerCase().includes(patientKeyword);
-  });
-
   const dentistColumns = useMemo(() => {
     const roomDentists = rooms
       .filter((room) => room.assignedDentist?._id)
@@ -574,17 +638,19 @@ export default function ReceptionistDashboard() {
       {activeFeature === "booking" && (
         <BookAppointmentForPatientForm
           booking={booking}
+          checkedPatient={checkedPatient}
           date={date}
           genderOptions={genderOptions}
           newPatient={newPatient}
           onBookingChange={(next) => setBooking((current) => ({ ...current, ...next }))}
+          onCheckPatient={checkPatientAccount}
           onDateChange={setDate}
           onNewPatientChange={(next) => setNewPatient((current) => ({ ...current, ...next }))}
+          onPatientSearchChange={updatePatientSearch}
           onSubmit={createBooking}
+          patientLookupStatus={patientLookupStatus}
           patientSearch={patientSearch}
-          selectablePatients={selectablePatients}
           services={services}
-          setPatientSearch={setPatientSearch}
           slotOptions={slotOptions}
         />
       )}

@@ -1,23 +1,27 @@
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, Search } from "lucide-react";
 import { todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
 
 export default function BookAppointmentForPatientForm({
   booking,
+  checkedPatient,
   date,
   genderOptions,
   newPatient,
   onBookingChange,
+  onCheckPatient,
   onDateChange,
   onNewPatientChange,
+  onPatientSearchChange,
   onSubmit,
+  patientLookupStatus,
   patientSearch,
-  selectablePatients,
   services,
-  setPatientSearch,
   slotOptions
 }) {
-  const hasSelectedPatient = Boolean(booking.patientId);
+  const hasAccount = patientLookupStatus === "found" && checkedPatient;
+  const needsNewAccount = patientLookupStatus === "not_found";
+  const canShowPatientInfo = hasAccount || needsNewAccount;
 
   return (
     <section className="panel receptionist-booking-panel">
@@ -25,54 +29,66 @@ export default function BookAppointmentForPatientForm({
         <CalendarPlus size={20} />
         <div>
           <h2>Đặt lịch hộ bệnh nhân</h2>
-          <p>Kiểm tra số điện thoại trước. Nếu chưa có tài khoản, hệ thống sẽ tạo tài khoản bệnh nhân khi đặt lịch.</p>
+          <p>Nhập số điện thoại và kiểm tra tài khoản trước khi đặt lịch.</p>
         </div>
       </div>
 
       <form className="stack receptionist-booking-form" onSubmit={onSubmit}>
-        <div className="form-grid reception-patient-grid">
+        <div className="reception-phone-check">
           <label className="field">
-            <span>Kiểm tra tên hoặc số điện thoại</span>
-            <input
-              value={patientSearch}
-              onChange={(event) => {
-                setPatientSearch(event.target.value);
-                onBookingChange({ patientId: "" });
-              }}
-              placeholder="Nhập tên hoặc số điện thoại"
-            />
+            <span>Số điện thoại</span>
+            <div className="input-with-icon">
+              <Search size={17} />
+              <input
+                type="tel"
+                value={patientSearch}
+                onChange={(event) => onPatientSearchChange(event.target.value)}
+                placeholder="Nhập số điện thoại bệnh nhân"
+              />
+            </div>
           </label>
-
-          <label className="field">
-            <span>Tài khoản bệnh nhân</span>
-            <select value={booking.patientId} onChange={(event) => onBookingChange({ patientId: event.target.value })}>
-              <option value="">Chưa có tài khoản, tạo tài khoản mới</option>
-              {selectablePatients.map((patient) => (
-                <option key={patient._id} value={patient._id}>
-                  {patient.fullName} - {patient.phone}
-                </option>
-              ))}
-            </select>
-          </label>
+          <button className="button secondary" type="button" onClick={onCheckPatient}>
+            Kiểm tra tài khoản
+          </button>
         </div>
 
-        {!hasSelectedPatient && (
+        {canShowPatientInfo ? (
           <div className="form-grid reception-patient-grid">
             <label className="field">
               <span>Họ tên</span>
-              <input value={newPatient.fullName} onChange={(event) => onNewPatientChange({ fullName: event.target.value })} required />
+              <input
+                value={hasAccount ? checkedPatient.fullName || "" : newPatient.fullName}
+                onChange={(event) => onNewPatientChange({ fullName: event.target.value })}
+                readOnly={hasAccount}
+                required
+              />
             </label>
             <label className="field">
               <span>Số điện thoại</span>
-              <input type="tel" value={newPatient.phone} onChange={(event) => onNewPatientChange({ phone: event.target.value })} required />
+              <input
+                type="tel"
+                value={hasAccount ? checkedPatient.phone || "" : newPatient.phone}
+                readOnly
+                required
+              />
             </label>
             <label className="field">
               <span>Email</span>
-              <input type="email" value={newPatient.email || ""} onChange={(event) => onNewPatientChange({ email: event.target.value })} />
+              <input
+                type="email"
+                value={hasAccount ? checkedPatient.email || "" : newPatient.email || ""}
+                onChange={(event) => onNewPatientChange({ email: event.target.value })}
+                readOnly={hasAccount}
+              />
             </label>
             <label className="field">
               <span>Giới tính</span>
-              <select value={newPatient.gender} onChange={(event) => onNewPatientChange({ gender: event.target.value })} required>
+              <select
+                value={hasAccount ? checkedPatient.gender || "unknown" : newPatient.gender}
+                onChange={(event) => onNewPatientChange({ gender: event.target.value })}
+                disabled={hasAccount}
+                required
+              >
                 {genderOptions.map((option) => (
                   <option value={option.value} key={option.value}>
                     {option.label}
@@ -80,6 +96,11 @@ export default function BookAppointmentForPatientForm({
                 ))}
               </select>
             </label>
+          </div>
+        ) : (
+          <div className="empty-state compact">
+            <strong>Chưa kiểm tra tài khoản</strong>
+            <span>Nhập số điện thoại rồi bấm kiểm tra tài khoản để tiếp tục đặt lịch.</span>
           </div>
         )}
 
