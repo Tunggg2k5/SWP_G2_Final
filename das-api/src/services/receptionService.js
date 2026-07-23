@@ -1,10 +1,7 @@
 import * as receptionRepository from "../repository/receptionRepository.js";
 import { hashPassword } from "../utils/password.js";
 import { endOfLocalDay, startOfLocalDay } from "../utils/time.js";
-import {
-  createReceptionPatientSchema,
-  resetPatientPasswordSchema
-} from "../validations/receptionValidation.js";
+import { createReceptionPatientSchema } from "../validations/receptionValidation.js";
 
 function createError(message, statusCode) {
   const err = new Error(message);
@@ -58,22 +55,6 @@ export async function getDashboard(query) {
 
 export async function getPatients(query) {
   return receptionRepository.findReceptionPatients(await buildPatientFilter(query.q), 50);
-}
-
-export async function resetPatientPassword(patientId, body) {
-  const data = resetPatientPasswordSchema.parse(body || {});
-  const patient = await receptionRepository.findActivePatientById(patientId);
-
-  if (!patient) {
-    throw createError("Không tìm thấy tài khoản bệnh nhân.", 404);
-  }
-
-  const updatedPatient = await receptionRepository.updatePatientUser(patient._id, {
-    passwordHash: await hashPassword(data.password)
-  });
-  const object = { ...updatedPatient };
-  delete object.passwordHash;
-  return { patient: object, temporaryPassword: data.password };
 }
 
 export async function createPatient(body) {

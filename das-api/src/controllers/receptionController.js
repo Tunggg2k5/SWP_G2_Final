@@ -9,10 +9,6 @@ export async function getPatients(req, res) {
   res.json({ patients });
 }
 
-export async function resetPatientPassword(req, res) {
-  res.json(await receptionService.resetPatientPassword(req.params.id, req.body));
-}
-
 export async function createPatient(req, res) {
   const result = await receptionService.createPatient(req.body);
   res.status(result.statusCode).json({ patient: result.patient });

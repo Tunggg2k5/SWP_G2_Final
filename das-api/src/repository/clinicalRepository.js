@@ -64,10 +64,6 @@ export async function findClinicalAppointments(query, limit = 120) {
   return appointments.map(attachGuestPatient);
 }
 
-export function findActiveAppointmentSlots() {
-  return findMany(COLLECTIONS.appointmentSlots, {}, { sort: { order: 1, startTime: 1 } });
-}
-
 export async function findClinicalTreatmentRecords(query, limit = 100) {
   const records = await findMany(
     COLLECTIONS.treatmentRecords,

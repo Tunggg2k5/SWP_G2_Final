@@ -71,8 +71,7 @@
   }
 
   .patient-appointment-card,
-  .booking-form-modern,
-  .reset-account-card {
+  .booking-form-modern {
     grid-template-columns: 1fr;
   }
 

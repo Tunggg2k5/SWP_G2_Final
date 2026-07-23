@@ -124,12 +124,11 @@ async function assertPatientAccess(user, patientId) {
 }
 
 export async function getDashboard(user, query) {
-  const [appointments, records, rooms, services, slots] = await Promise.all([
+  const [appointments, records, rooms, services] = await Promise.all([
     clinicalRepository.findClinicalAppointments(buildScheduleQuery(user, query.date), 120),
     clinicalRepository.findClinicalTreatmentRecords(buildRecordQuery(user), 60),
     clinicalRepository.findClinicalRooms(),
-    clinicalRepository.findActiveDentalServices(),
-    clinicalRepository.findActiveAppointmentSlots()
+    clinicalRepository.findActiveDentalServices()
   ]);
 
   const visibleRooms = user.role === "dentist"
@@ -138,7 +137,7 @@ export async function getDashboard(user, query) {
       ? rooms.filter((room) => sameId(room.assignedNurse, user._id) || appointments.some((appointment) => sameId(appointment.room, room._id)))
       : rooms;
 
-  return { appointments, records, rooms: visibleRooms, services, slots };
+  return { appointments, records, rooms: visibleRooms, services };
 }
 
 export function getTreatmentRecords(user) {

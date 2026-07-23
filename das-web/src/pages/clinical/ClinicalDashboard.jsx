@@ -7,7 +7,7 @@ import ClinicalPerformedServices from "../../components/clinical/nurse/ClinicalP
 import Feedback from "../../components/Feedback.jsx";
 import { useAuth } from "../../redux/AuthContext.jsx";
 import { api, getErrorMessage } from "../../utils/api.js";
-import { clinicDateInput, compareQueueWithinSlot, normalizeAppointmentSlots, todayInput } from "../../utils/format.js";
+import { clinicDateInput, compareQueueWithinSlot, todayInput } from "../../utils/format.js";
 
 function getClinicalFeatures(role) {
   return [
@@ -65,7 +65,6 @@ export default function ClinicalDashboard() {
   const [records, setRecords] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [services, setServices] = useState([]);
-  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recordForm, setRecordForm] = useState(defaultRecordForm);
   const [treatmentSearchPhone, setTreatmentSearchPhone] = useState("");
@@ -75,8 +74,6 @@ export default function ClinicalDashboard() {
   const [performedServicesForm, setPerformedServicesForm] = useState(defaultPerformedServicesForm);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const slotOptions = useMemo(() => normalizeAppointmentSlots(slots), [slots]);
-
   async function load() {
     setLoading(true);
     try {
@@ -89,7 +86,6 @@ export default function ClinicalDashboard() {
       setRecords(res.data.records || []);
       setRooms(nextRooms);
       setServices(nextServices);
-      setSlots(res.data.slots || []);
       setTreatmentCreateForm((current) => ({
         ...current,
         serviceId: current.serviceId || nextServices[0]?._id || ""
@@ -102,7 +98,11 @@ export default function ClinicalDashboard() {
       }));
       setPerformedServicesForm((current) => ({
         ...current,
-        appointmentId: nextAppointments.some((appointment) => appointment._id === current.appointmentId && appointment.status === "in_treatment")
+        appointmentId: nextAppointments.some(
+          (appointment) =>
+            appointment._id === current.appointmentId &&
+            ["checked_in", "in_treatment"].includes(appointment.status)
+        )
           ? current.appointmentId
           : ""
       }));
@@ -138,7 +138,10 @@ export default function ClinicalDashboard() {
   const selectedTreatmentRecords = useMemo(() => getPatientTreatmentRecords(records, selectedAppointment), [records, selectedAppointment]);
   const selectedTreatmentRecord = selectedSearchTreatmentRecord || selectedTreatmentRecords[0] || null;
   const selectedTreatmentVisits = useMemo(() => normalizeTreatmentVisits(selectedTreatmentRecord), [selectedTreatmentRecord]);
-  const performedServiceAppointments = useMemo(() => appointments.filter((appointment) => appointment.status === "in_treatment"), [appointments]);
+  const performedServiceAppointments = useMemo(
+    () => appointments.filter((appointment) => ["checked_in", "in_treatment"].includes(appointment.status)),
+    [appointments]
+  );
   const selectedPerformedAppointment = performedServiceAppointments.find((appointment) => appointment._id === performedServicesForm.appointmentId);
 
   function updateRecord(field, value) {
@@ -596,7 +599,7 @@ export default function ClinicalDashboard() {
 
       {activeFeature === "performedServices" && user?.role === "nurse" && (
         <ClinicalPerformedServices
-          appointments={appointments}
+          appointments={performedServiceAppointments}
           form={performedServicesForm}
           onAddExtraCost={addExtraCost}
           onChange={updatePerformedServices}

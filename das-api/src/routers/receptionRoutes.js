@@ -5,7 +5,6 @@ import {
   getConsultations,
   getDashboard,
   getPatients,
-  resetPatientPassword,
   updateConsultation,
   updateAppointmentSlot
 } from "../controllers/receptionController.js";
@@ -17,7 +16,6 @@ router.use(requireAuth, authorize("receptionist", "admin"));
 
 router.get("/dashboard", getDashboard);
 router.get("/patients", getPatients);
-router.patch("/patients/:id/reset-password", resetPatientPassword);
 router.post("/patients", createPatient);
 router.patch("/slots/:id", updateAppointmentSlot);
 router.get("/consultations", getConsultations);

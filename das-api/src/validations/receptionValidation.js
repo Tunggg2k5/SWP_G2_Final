@@ -6,10 +6,6 @@ import {
   phoneSchema
 } from "../utils/validation.js";
 
-export const resetPatientPasswordSchema = z.object({
-  password: passwordSchema.default("nhakhoa2026")
-});
-
 export const createReceptionPatientSchema = z.object({
   fullName: nameSchema,
   email: optionalEmailSchema,

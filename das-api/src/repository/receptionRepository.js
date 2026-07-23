@@ -136,15 +136,6 @@ export async function findConsultationRequests(query = {}, limit = 100) {
   return requests;
 }
 
-export async function findActivePatientById(patientId) {
-  const patient = await findOne(COLLECTIONS.users, {
-    _id: toObjectId(patientId),
-    status: "active"
-  });
-  await attachRole(patient);
-  return patient?.role === "patient" ? patient : null;
-}
-
 export async function findUserByPhone(phone) {
   return attachRole(await findOne(COLLECTIONS.users, { phone }));
 }
