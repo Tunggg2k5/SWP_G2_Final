@@ -8,7 +8,8 @@ import {
   updateAdminUserSchema,
   updateClinicRoomSchema,
   updateDentalServiceSchema,
-  updateReviewVisibilitySchema
+  updateReviewVisibilitySchema,
+  resetAdminUserPasswordSchema
 } from "../validations/adminValidation.js";
 
 function throwHttpError(message, statusCode = 400) {
@@ -211,6 +212,21 @@ export async function updateUser(userId, body) {
   const object = await profileRepository.attachProfileToUser(user);
   delete object.passwordHash;
   return object;
+}
+
+export async function resetUserPassword(userId, body) {
+  const data = resetAdminUserPasswordSchema.parse(body || {});
+  const user = await adminRepository.findUserById(userId);
+  if (!user) {
+    throwHttpError("Không tìm thấy tài khoản.", 404);
+  }
+
+  const updatedUser = await adminRepository.updateUser(userId, {
+    passwordHash: await hashPassword(data.password)
+  });
+  const object = await profileRepository.attachProfileToUser(updatedUser);
+  delete object.passwordHash;
+  return { user: object, temporaryPassword: data.password };
 }
 
 export function createDentalService(body) {

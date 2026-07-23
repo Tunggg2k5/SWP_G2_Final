@@ -210,6 +210,21 @@ export default function AdminDashboard() {
     }
   }
 
+  async function resetPatientPassword(patient) {
+    const password = "nhakhoa2026";
+    if (!window.confirm(`Xác nhận đặt lại mật khẩu cho ${patient.fullName} về mặc định nhakhoa2026?`)) return;
+
+    try {
+      setError("");
+      setMessage("");
+      const res = await api.patch(`/admin/users/${patient._id}/reset-password`, { password });
+      setMessage(`Đã đặt lại mật khẩu cho ${res.data.user.fullName}. Mật khẩu tạm thời: ${res.data.temporaryPassword}`);
+      load();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  }
+
   function startEditRoom(room) {
     setEditingRoom({
       _id: room._id,
@@ -380,25 +395,27 @@ export default function AdminDashboard() {
 
   const dentistUsers = users.filter((user) => user.role === "dentist");
   const nurseUsers = users.filter((user) => user.role === "nurse");
-
   return (
     <div className="page-grid">
       <Feedback error={error} message={message} />
 
       {activeFeature === "users" && (
-        <AccountManagement
-          editingUser={editingUser}
-          loading={loading}
-          onCreateUser={createUser}
-          onEditUser={startEditUser}
-          onEditingUserChange={(next) => setEditingUser((current) => ({ ...current, ...next }))}
-          onSubmitEditUser={updateUser}
-          onCancelEditUser={() => setEditingUser(null)}
-          onUpdateUserStatus={updateUserStatus}
-          onUserFormChange={(next) => setUserForm((current) => ({ ...current, ...next }))}
-          userForm={userForm}
-          users={users}
-        />
+        <>
+          <AccountManagement
+            editingUser={editingUser}
+            loading={loading}
+            onCreateUser={createUser}
+            onEditUser={startEditUser}
+            onEditingUserChange={(next) => setEditingUser((current) => ({ ...current, ...next }))}
+            onResetPassword={resetPatientPassword}
+            onSubmitEditUser={updateUser}
+            onCancelEditUser={() => setEditingUser(null)}
+            onUpdateUserStatus={updateUserStatus}
+            onUserFormChange={(next) => setUserForm((current) => ({ ...current, ...next }))}
+            userForm={userForm}
+            users={users}
+          />
+        </>
       )}
 
       {activeFeature === "services" && (

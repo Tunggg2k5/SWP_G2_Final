@@ -39,6 +39,10 @@ export const updateAdminUserSchema = z.object({
   yearsOfExperience: z.coerce.number().int().min(0).max(80).optional()
 });
 
+export const resetAdminUserPasswordSchema = z.object({
+  password: passwordSchema.default("nhakhoa2026")
+});
+
 export const createDentalServiceSchema = z.object({
   name: nameSchema,
   description: noteSchema,

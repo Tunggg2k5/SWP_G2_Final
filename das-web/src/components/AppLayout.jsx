@@ -7,9 +7,7 @@ import {
   ClipboardList,
   DoorOpen,
   FileText,
-  Home,
-  LockKeyhole,
-  PhoneCall,
+  Home,  PhoneCall,
   ReceiptText,
   Settings2,
   Star,
@@ -33,9 +31,7 @@ const receptionistTabs = [
   { id: "appointments", label: "Lịch hẹn", icon: ClipboardList },
   { id: "schedule", label: "Lịch khám", icon: CalendarDays },
   { id: "payments", label: "Hóa đơn", icon: ReceiptText },
-  { id: "booking", label: "Đặt lịch hộ", icon: CalendarPlus },
-  { id: "accounts", label: "Tài khoản", icon: LockKeyhole },
-  { id: "consultations", label: "Tư vấn", icon: PhoneCall }
+  { id: "booking", label: "Đặt lịch hộ", icon: CalendarPlus },  { id: "consultations", label: "Tư vấn", icon: PhoneCall }
 ];
 
 const adminTabs = [

@@ -1,4 +1,4 @@
-import { PencilLine, Search, UsersRound } from "lucide-react";
+import { KeyRound, PencilLine, Search, UsersRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
@@ -11,6 +11,7 @@ export default function AccountManagement({
   onCreateUser,
   onEditUser,
   onEditingUserChange,
+  onResetPassword,
   onSubmitEditUser,
   onUpdateUserStatus,
   onUserFormChange,
@@ -90,6 +91,7 @@ export default function AccountManagement({
             </select>
           </label>
         </div>
+
         {loading ? (
           <EmptyState title="Đang tải tài khoản" text="Hệ thống đang lấy dữ liệu mới nhất." />
         ) : visibleUsers.length ? (
@@ -118,6 +120,10 @@ export default function AccountManagement({
                         <button className="button small secondary" type="button" onClick={() => onEditUser(user)} title="Cập nhật tài khoản">
                           <PencilLine size={15} />
                           Cập nhật TK
+                        </button>
+                        <button className="button small primary" type="button" onClick={() => onResetPassword(user)}>
+                          <KeyRound size={15} />
+                          Đặt lại MK
                         </button>
                         <button
                           className="button small"

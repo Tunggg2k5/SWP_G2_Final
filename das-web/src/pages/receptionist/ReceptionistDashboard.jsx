@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Feedback from "../../components/Feedback.jsx";
 import BookAppointmentForPatientForm from "../../components/receptionist/BookAppointmentForPatientForm.jsx";
 import ConsultationRequestList from "../../components/receptionist/ConsultationRequestList.jsx";
-import PatientAccountSearch from "../../components/receptionist/PatientAccountSearch.jsx";
 import ReceptionCheckInAppointments from "../../components/receptionist/ReceptionCheckInAppointments.jsx";
 import ReceptionClinicalQueue from "../../components/receptionist/ReceptionClinicalQueue.jsx";
 import ReceptionIntakeAppointments from "../../components/receptionist/ReceptionIntakeAppointments.jsx";
@@ -39,7 +38,6 @@ export default function ReceptionistDashboard() {
   const [patientSearch, setPatientSearch] = useState("");
   const [newPatient, setNewPatient] = useState({ fullName: "", email: "", phone: "", gender: "unknown" });
   const [booking, setBooking] = useState({ patientId: "", serviceId: "", time: "08:00", note: "" });
-  const [resetPasswords, setResetPasswords] = useState({});
   const [manualSchedules, setManualSchedules] = useState({});
   const [invoicePlans, setInvoicePlans] = useState({});
   const [paymentMethods, setPaymentMethods] = useState({});
@@ -101,7 +99,7 @@ export default function ReceptionistDashboard() {
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get("tab");
-    if (["appointments", "schedule", "payments", "booking", "accounts", "consultations"].includes(tab)) {
+    if (["appointments", "schedule", "payments", "booking", "consultations"].includes(tab)) {
       setActiveFeature(tab);
     }
   }, [location.search]);
@@ -112,20 +110,6 @@ export default function ReceptionistDashboard() {
       clearInterval(refresh);
     };
   }, [date]);
-
-  useEffect(() => {
-    if (activeFeature !== "accounts") return undefined;
-    const keyword = patientSearch.trim();
-    const timer = setTimeout(async () => {
-      try {
-        const res = await api.get("/reception/patients", { params: keyword ? { q: keyword } : {} });
-        setPatients(res.data.patients || []);
-      } catch (err) {
-        setError(getErrorMessage(err));
-      }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [activeFeature, patientSearch]);
 
   async function createBooking(event) {
     event.preventDefault();
@@ -451,20 +435,6 @@ export default function ReceptionistDashboard() {
       }
     }));
   }
-
-  async function resetPatientPassword(patient) {
-    const password = resetPasswords[patient._id] || "nhakhoa2026";
-    if (!window.confirm(`Xác nhận đặt lại mật khẩu cho ${patient.fullName}?`)) return;
-
-    try {
-      const res = await api.patch(`/reception/patients/${patient._id}/reset-password`, { password });
-      setMessage(`Đã đặt lại mật khẩu cho ${res.data.patient.fullName}. Mật khẩu tạm thời: ${res.data.temporaryPassword}`);
-      setResetPasswords((current) => ({ ...current, [patient._id]: "" }));
-    } catch (err) {
-      setError(getErrorMessage(err));
-    }
-  }
-
   const filteredBaseAppointments = appointments.filter((appointment) => matchesAppointmentFilters(appointment, appointmentSearch));
   const dateFilteredAppointments = filteredBaseAppointments.filter((appointment) => !date || clinicDateInput(appointment.startAt) === date);
   const intakeAppointments = filteredBaseAppointments.filter((appointment) => intakeStatuses.has(appointment.status));
@@ -618,19 +588,6 @@ export default function ReceptionistDashboard() {
           slotOptions={slotOptions}
         />
       )}
-
-      {activeFeature === "accounts" && (
-        <PatientAccountSearch
-          loading={loading}
-          onResetPassword={resetPatientPassword}
-          patientSearch={patientSearch}
-          resetPasswords={resetPasswords}
-          selectablePatients={patientKeyword ? selectablePatients : []}
-          setPatientSearch={setPatientSearch}
-          setResetPasswords={setResetPasswords}
-        />
-      )}
-
       {activeFeature === "consultations" && (
         <ConsultationRequestList
           consultations={filteredConsultations}

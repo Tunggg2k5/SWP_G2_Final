@@ -31,6 +31,10 @@ export async function updateUser(req, res) {
   res.json({ user });
 }
 
+export async function resetUserPassword(req, res) {
+  res.json(await adminService.resetUserPassword(req.params.id, req.body));
+}
+
 export async function createDentalService(req, res) {
   const service = await adminService.createDentalService(req.body);
   res.status(201).json({ service });
