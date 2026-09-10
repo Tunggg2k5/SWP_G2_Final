@@ -1,3 +1,4 @@
+import { Tabs } from "antd";
 import { ClipboardPenLine, ReceiptText, Stethoscope } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -418,35 +419,35 @@ export default function ClinicalDashboard() {
       setMessage("");
       const payload = user?.role === "nurse"
         ? {
-            vitalSigns: {
-              bloodPressure: recordForm.bloodPressure,
-              heartRate: recordForm.heartRate,
-              spo2: recordForm.spo2,
-              temperature: recordForm.temperature,
-              respiratoryRate: recordForm.respiratoryRate
-            },
-            treatmentNote: recordForm.treatmentNote,
-            visitNumber: recordForm.visitNumber,
-            visitDate: recordForm.visitDate,
-            diagnosis: recordForm.diagnosis,
-            medicalHistory: recordForm.medicalHistory,
-            treatmentResult: recordForm.treatmentResult,
-            treatmentPlan: recordForm.treatmentPlan,
-            prescription: recordForm.prescription,
-            aftercareInstructions: recordForm.aftercareInstructions
-          }
+          vitalSigns: {
+            bloodPressure: recordForm.bloodPressure,
+            heartRate: recordForm.heartRate,
+            spo2: recordForm.spo2,
+            temperature: recordForm.temperature,
+            respiratoryRate: recordForm.respiratoryRate
+          },
+          treatmentNote: recordForm.treatmentNote,
+          visitNumber: recordForm.visitNumber,
+          visitDate: recordForm.visitDate,
+          diagnosis: recordForm.diagnosis,
+          medicalHistory: recordForm.medicalHistory,
+          treatmentResult: recordForm.treatmentResult,
+          treatmentPlan: recordForm.treatmentPlan,
+          prescription: recordForm.prescription,
+          aftercareInstructions: recordForm.aftercareInstructions
+        }
         : {
-            diagnosis: recordForm.diagnosis,
-            medicalHistory: recordForm.medicalHistory,
-            visitNumber: recordForm.visitNumber,
-            visitDate: recordForm.visitDate,
-            treatmentResult: recordForm.treatmentResult,
-            treatmentNote: recordForm.treatmentNote,
-            treatmentPlan: recordForm.treatmentPlan,
-            prescription: recordForm.prescription,
-            aftercareInstructions: recordForm.aftercareInstructions,
-            estimatedCost: Number(recordForm.estimatedCost || 0)
-          };
+          diagnosis: recordForm.diagnosis,
+          medicalHistory: recordForm.medicalHistory,
+          visitNumber: recordForm.visitNumber,
+          visitDate: recordForm.visitDate,
+          treatmentResult: recordForm.treatmentResult,
+          treatmentNote: recordForm.treatmentNote,
+          treatmentPlan: recordForm.treatmentPlan,
+          prescription: recordForm.prescription,
+          aftercareInstructions: recordForm.aftercareInstructions,
+          estimatedCost: Number(recordForm.estimatedCost || 0)
+        };
       if (recordForm.recordId) {
         const res = await api.put(`/clinical/treatment-records/${recordForm.recordId}`, payload);
         const updatedRecord = res.data.record;
@@ -550,67 +551,86 @@ export default function ClinicalDashboard() {
   }
 
   return (
-    <div className="page-grid clinical-dashboard">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       <Feedback error={error} message={message} />
-
-      {activeFeature === "schedule" && (
-        <ClinicalWorkSchedule
-          appointments={appointments}
-          canEditAppointment={canEditAppointment}
-          clinicalColumns={clinicalColumns}
-          clinicalQueues={clinicalQueues}
-          date={date}
-          isLockedAppointment={isLockedAppointment}
-          loading={loading}
-          onDateChange={setDate}
-          onUpdateStatus={updateClinicalAppointmentStatus}
-          onSetRoomStatus={setRoomStatus}
-          onSelectTreatment={selectTreatmentAppointment}
-          rooms={rooms}
-          user={user}
-        />
-      )}
-
-      {activeFeature === "treatment" && (
-        <ClinicalTreatmentForm
-          appointments={performedServiceAppointments}
-          createForm={treatmentCreateForm}
-          form={recordForm}
-          onCreateChange={updateTreatmentCreateForm}
-          onCreateRecord={createTreatmentRecord}
-          onChange={updateRecord}
-          onDeleteRecord={deleteTreatmentRecord}
-          onSearch={searchTreatmentRecords}
-          onSearchPhoneChange={setTreatmentSearchPhone}
-          onSelectRecord={selectTreatmentRecord}
-          onStartCreateRecord={startCreateTreatmentRecord}
-          onSubmit={submitRecord}
-          records={records}
-          searchedPatient={treatmentSearchPatient}
-          searchPhone={treatmentSearchPhone}
-          searchResults={treatmentSearchResults}
-          selectedAppointment={selectedAppointment}
-          selectedRecord={selectedTreatmentRecord}
-          services={services}
-          treatmentVisits={selectedTreatmentVisits}
-          user={user}
-        />
-      )}
-
-      {activeFeature === "performedServices" && user?.role === "nurse" && (
-        <ClinicalPerformedServices
-          appointments={performedServiceAppointments}
-          form={performedServicesForm}
-          onAddExtraCost={addExtraCost}
-          onChange={updatePerformedServices}
-          onExtraCostChange={updateExtraCost}
-          onRemoveExtraCost={removeExtraCost}
-          onSubmit={submitPerformedServices}
-          onToggleService={togglePerformedService}
-          selectedAppointment={selectedPerformedAppointment}
-          services={services}
-        />
-      )}
+      
+      <Tabs
+        activeKey={activeFeature}
+        onChange={(key) => openFeature(key)}
+        renderTabBar={() => null}
+        items={clinicalFeatures.map((feature) => {
+          const Icon = feature.icon;
+          return {
+            key: feature.id,
+            label: (
+              <span className="flex items-center gap-2">
+                <Icon size={16} />
+                {feature.label}
+              </span>
+            ),
+            children: (
+              <>
+                {feature.id === "schedule" && (
+                  <ClinicalWorkSchedule
+                    appointments={appointments}
+                    canEditAppointment={canEditAppointment}
+                    clinicalColumns={clinicalColumns}
+                    clinicalQueues={clinicalQueues}
+                    date={date}
+                    isLockedAppointment={isLockedAppointment}
+                    loading={loading}
+                    onDateChange={setDate}
+                    onUpdateStatus={updateClinicalAppointmentStatus}
+                    onSetRoomStatus={setRoomStatus}
+                    onSelectTreatment={selectTreatmentAppointment}
+                    rooms={rooms}
+                    user={user}
+                  />
+                )}
+                {feature.id === "treatment" && (
+                  <ClinicalTreatmentForm
+                    appointments={performedServiceAppointments}
+                    createForm={treatmentCreateForm}
+                    form={recordForm}
+                    onCreateChange={updateTreatmentCreateForm}
+                    onCreateRecord={createTreatmentRecord}
+                    onChange={updateRecord}
+                    onDeleteRecord={deleteTreatmentRecord}
+                    onSearch={searchTreatmentRecords}
+                    onSearchPhoneChange={setTreatmentSearchPhone}
+                    onSelectRecord={selectTreatmentRecord}
+                    onStartCreateRecord={startCreateTreatmentRecord}
+                    onSubmit={submitRecord}
+                    records={records}
+                    searchedPatient={treatmentSearchPatient}
+                    searchPhone={treatmentSearchPhone}
+                    searchResults={treatmentSearchResults}
+                    selectedAppointment={selectedAppointment}
+                    selectedRecord={selectedTreatmentRecord}
+                    services={services}
+                    treatmentVisits={selectedTreatmentVisits}
+                    user={user}
+                  />
+                )}
+                {feature.id === "performedServices" && user?.role === "nurse" && (
+                  <ClinicalPerformedServices
+                    appointments={performedServiceAppointments}
+                    form={performedServicesForm}
+                    onAddExtraCost={addExtraCost}
+                    onChange={updatePerformedServices}
+                    onExtraCostChange={updateExtraCost}
+                    onRemoveExtraCost={removeExtraCost}
+                    onSubmit={submitPerformedServices}
+                    onToggleService={togglePerformedService}
+                    selectedAppointment={selectedPerformedAppointment}
+                    services={services}
+                  />
+                )}
+              </>
+            )
+          };
+        })}
+      />
     </div>
   );
 }
@@ -646,19 +666,19 @@ function normalizeTreatmentVisits(record) {
   ].some(Boolean);
   return hasLegacyData
     ? [{
-        visitNumber: 1,
-        vitalSigns: record.vitalSigns || {},
-        diagnosis: record.diagnosis || "",
-        medicalHistory: record.medicalHistory || "",
-        treatmentResult: record.treatmentResult || "",
-        treatmentNote: record.treatmentNote || "",
-        treatmentPlan: record.treatmentPlan || "",
-        prescription: record.prescription || "",
-        aftercareInstructions: record.aftercareInstructions || "",
-        estimatedCost: record.estimatedCost || "",
-        visitDate: record.treatmentDate || record.updatedAt,
-        updatedAt: record.updatedAt || record.treatmentDate
-      }]
+      visitNumber: 1,
+      vitalSigns: record.vitalSigns || {},
+      diagnosis: record.diagnosis || "",
+      medicalHistory: record.medicalHistory || "",
+      treatmentResult: record.treatmentResult || "",
+      treatmentNote: record.treatmentNote || "",
+      treatmentPlan: record.treatmentPlan || "",
+      prescription: record.prescription || "",
+      aftercareInstructions: record.aftercareInstructions || "",
+      estimatedCost: record.estimatedCost || "",
+      visitDate: record.treatmentDate || record.updatedAt,
+      updatedAt: record.updatedAt || record.treatmentDate
+    }]
     : [];
 }
 

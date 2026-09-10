@@ -1,121 +1,104 @@
 import { CalendarDays, Send } from "lucide-react";
 import { useState } from "react";
+import { Form, Input, Select, Button, Radio, Typography } from "antd";
 import { api, getErrorMessage } from "../../utils/api.js";
 import { firstError, validateName, validatePhone } from "../../utils/validation.js";
 
+const { Title, Text } = Typography;
+const { Option } = Select;
+
 const salutationOptions = [
-  { label: "Anh", gender: "male" },
-  { label: "Chị", gender: "female" },
-  { label: "Khác", gender: "other" }
+  { label: "Anh", value: "male" },
+  { label: "Chị", value: "female" },
+  { label: "Khác", value: "other" }
 ];
 
 export default function ConsultationForm({ onError, onMessage, services }) {
-  const [form, setForm] = useState({
-    gender: "male",
-    fullName: "",
-    phone: "",
-    service: ""
-  });
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  function updateForm(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
-  }
-
-  async function submitConsultation(event) {
-    event.preventDefault();
+  async function submitConsultation(values) {
     onMessage("");
     onError("");
 
-    const validationError = firstError(validateName(form.fullName), validatePhone(form.phone));
+    const validationError = firstError(validateName(values.fullName), validatePhone(values.phone));
     if (validationError) {
       onError(validationError);
       return;
     }
 
+    setLoading(true);
     try {
       await api.post("/consultations", {
-        fullName: form.fullName,
-        phone: form.phone,
-        gender: form.gender,
-        service: form.service || undefined
+        fullName: values.fullName,
+        phone: values.phone,
+        gender: values.gender,
+        service: values.service || undefined
       });
 
-      setForm({
-        gender: "male",
-        fullName: "",
-        phone: "",
-        service: ""
-      });
+      form.resetFields();
       onMessage("Đã ghi nhận yêu cầu tư vấn. Lễ tân sẽ liên hệ để xác nhận lịch.");
     } catch (err) {
       onError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <section className="smile-section smile-contact" id="consultation">
-      <div className="smile-section-heading centered">
-        <span className="smile-pill compact">
-          <CalendarDays size={15} />
-          Đặt lịch tư vấn
-        </span>
-        <h2>Đăng Ký Nhận Tư Vấn Miễn Phí Từ Chuyên Gia</h2>
-        <p>Để lại thông tin, đội ngũ bác sĩ SmileCare sẽ liên hệ tư vấn trong vòng 24h.</p>
-      </div>
-
-      <form className="smile-consult-form" onSubmit={submitConsultation}>
-        <div className="smile-segmented" role="radiogroup" aria-label="Danh xưng">
-          {salutationOptions.map((option) => (
-            <label key={option.gender}>
-              <input
-                type="radio"
-                name="gender"
-                value={option.gender}
-                checked={form.gender === option.gender}
-                onChange={(event) => updateForm("gender", event.target.value)}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
+    <section className="py-20 bg-gradient-to-br from-primary-700 to-teal-600 relative" id="consultation">
+      <div className="absolute inset-0 bg-white opacity-5 mix-blend-overlay"></div>
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
+        <div className="text-center max-w-2xl mx-auto mb-12 text-white">
+          <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <CalendarDays size={16} />
+            Đặt lịch tư vấn
+          </span>
+          <Title level={2} className="text-white mb-4">Đăng Ký Nhận Tư Vấn Miễn Phí Từ Chuyên Gia</Title>
+          <Text className="text-primary-100 text-lg block">Để lại thông tin, đội ngũ bác sĩ SmileCare sẽ liên hệ tư vấn trong vòng 24h.</Text>
         </div>
 
-        <label>
-          <span>Họ và tên *</span>
-          <input
-            value={form.fullName}
-            onChange={(event) => updateForm("fullName", event.target.value)}
-            placeholder="Nguyễn Văn A"
-            required
-            maxLength={120}
-          />
-        </label>
-        <label>
-          <span>Số điện thoại *</span>
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={(event) => updateForm("phone", event.target.value)}
-            placeholder="0912 345 678"
-            required
-            maxLength={13}
-          />
-        </label>
-        <label>
-          <span>Dịch vụ quan tâm</span>
-          <select value={form.service} onChange={(event) => updateForm("service", event.target.value)}>
-            <option value="">-- Chọn dịch vụ --</option>
-            {services.map((service) => (
-              <option value={service._id} key={service._id}>
-                {service.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="smile-submit" type="submit">
-          <Send size={18} />
-          Gửi đăng ký tư vấn miễn phí
-        </button>
-      </form>
+        <Form 
+          form={form}
+          className="card-base max-w-lg mx-auto p-8 rounded-2xl shadow-xl bg-white" 
+          onFinish={submitConsultation}
+          layout="vertical"
+          initialValues={{ gender: "male" }}
+        >
+          <Form.Item name="gender" className="mb-6">
+            <Radio.Group className="flex w-full gap-2 bg-slate-100 p-1 rounded-xl" optionType="button" buttonStyle="solid">
+              {salutationOptions.map(opt => (
+                <Radio.Button key={opt.value} value={opt.value} className="flex-1 text-center rounded-lg border-none shadow-none text-slate-500 bg-transparent before:hidden">
+                  {opt.label}
+                </Radio.Button>
+              ))}
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item label={<span className="font-semibold text-slate-700">Họ và tên *</span>} name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}>
+            <Input size="large" placeholder="Nguyễn Văn A" maxLength={120} />
+          </Form.Item>
+
+          <Form.Item label={<span className="font-semibold text-slate-700">Số điện thoại *</span>} name="phone" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
+            <Input size="large" type="tel" placeholder="0912 345 678" maxLength={13} />
+          </Form.Item>
+
+          <Form.Item label={<span className="font-semibold text-slate-700">Dịch vụ quan tâm</span>} name="service">
+            <Select size="large" placeholder="-- Chọn dịch vụ --">
+              <Option value="">-- Chọn dịch vụ --</Option>
+              {services.map((service) => (
+                <Option value={service._id} key={service._id}>
+                  {service.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Button type="primary" htmlType="submit" size="large" className="w-full h-12 rounded-xl flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-primary-600 to-teal-500 border-none hover:shadow-lg" loading={loading} icon={<Send size={20} />}>
+            Gửi đăng ký tư vấn miễn phí
+          </Button>
+        </Form>
+      </div>
     </section>
   );
 }

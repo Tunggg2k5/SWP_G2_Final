@@ -7,6 +7,7 @@ import {
 } from "../utils/time.js";
 
 const BLOCKING_STATUSES = ["pending", "scheduled", "confirmed", "checked_in", "in_treatment"];
+const MAX_APPOINTMENTS_PER_SLOT = 5;
 
 function httpError(message, statusCode = 400) {
   const err = new Error(message);
@@ -90,6 +91,19 @@ async function getAppointmentsForDate(date, excludeAppointmentId) {
 
   if (excludeAppointmentId) query._id = { $ne: excludeAppointmentId };
   return schedulingRepository.findAppointments(query);
+}
+
+function countAppointmentsInSlot(appointments, slot) {
+  return appointments.filter((appointment) => sameSlot(appointment, slot)).length;
+}
+
+async function assertSlotHasCapacity({ date, slot, excludeAppointmentId, knownAppointments }) {
+  const appointments = knownAppointments || await getAppointmentsForDate(date, excludeAppointmentId);
+  const bookedCount = countAppointmentsInSlot(appointments, slot);
+
+  if (bookedCount >= MAX_APPOINTMENTS_PER_SLOT) {
+    throw httpError("Khung giờ này đã đủ 5 bệnh nhân, vui lòng chọn khung giờ khác.", 409);
+  }
 }
 
 async function getPatientAppointmentsForDate(patientId, date, excludeAppointmentId) {
@@ -216,6 +230,9 @@ export async function findAvailableSlots({ date, serviceId, excludeAppointmentId
     const dentistAppointments = appointments.filter((item) => sameId(item.dentist, room.assignedDentist._id));
 
     for (const slotConfig of activeSlots) {
+      const slotBookedCount = countAppointmentsInSlot(appointments, slotConfig);
+      if (slotBookedCount >= MAX_APPOINTMENTS_PER_SLOT) continue;
+
       const { startAt } = slotTimes(date, slotConfig);
       const conflictingAppointments = uniqueAppointments([
         ...roomAppointments.filter((appointment) => sameSlot(appointment, slotConfig)),
@@ -224,7 +241,7 @@ export async function findAvailableSlots({ date, serviceId, excludeAppointmentId
       const isBooked = conflictingAppointments.length > 0;
 
       if (includeBooked || !isBooked) {
-        slots.push(buildSlot({ room, service, startAt, slotConfig, conflictingAppointments }));
+        slots.push(buildSlot({ room, service, startAt, slotConfig, conflictingAppointments, slotBookedCount }));
       }
     }
   }
@@ -232,13 +249,14 @@ export async function findAvailableSlots({ date, serviceId, excludeAppointmentId
   return slots.sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
 }
 
-function buildSlot({ room, service, startAt, slotConfig, conflictingAppointments = [] }) {
+function buildSlot({ room, service, startAt, slotConfig, conflictingAppointments = [], slotBookedCount = 0 }) {
   return {
     startAt,
     slot: slotOption(slotConfig),
     session: slotConfig.slotName,
     isBooked: conflictingAppointments.length > 0,
-    bookedCount: conflictingAppointments.length,
+    bookedCount: slotBookedCount,
+    capacity: MAX_APPOINTMENTS_PER_SLOT,
     turnoverMinutes: 0,
     service: {
       _id: service._id,
@@ -320,6 +338,7 @@ export async function createAppointmentFromSlot({
       throw httpError("Phòng khám không làm việc trong ngày đã chọn.", 400);
     }
 
+    await assertSlotHasCapacity({ date, slot: requestedSlot.slot });
     await assertPatientHasNoSameSlot({ ...owner, date, slot: requestedSlot.slot });
 
     return schedulingRepository.createAppointment({
@@ -355,6 +374,7 @@ export async function createAppointmentFromSlot({
   }
 
   await assertPatientHasNoSameSlot({ ...owner, date, slot: selected.slot, knownAppointments: patientAppointments });
+  await assertSlotHasCapacity({ date, slot: selected.slot });
 
   const nurse = selected.nurse || await selectAvailableNurse(selected.slot, date);
   if (!canRequestBookedSlot) {
@@ -439,6 +459,11 @@ export async function rescheduleAppointmentFromSlot({ appointment, serviceId, da
     slot: selected.slot,
     excludeAppointmentId: appointment._id,
     knownAppointments: patientAppointments
+  });
+  await assertSlotHasCapacity({
+    date,
+    slot: selected.slot,
+    excludeAppointmentId: appointment._id
   });
   const nurse = selected.nurse || await selectAvailableNurse(selected.slot, date);
   const confirmedStartAt = requestedStart || selected.startAt;

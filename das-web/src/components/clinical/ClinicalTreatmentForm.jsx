@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { ClipboardPenLine, Plus, Search, Trash2 } from "lucide-react";
+import { Card, Input, Button, Tabs, Descriptions, Space, Form, Select, DatePicker, Typography, Row, Col } from "antd";
+import dayjs from "dayjs";
 import StatusBadge from "../StatusBadge.jsx";
 import { formatDateOnly, todayInput } from "../../utils/format.js";
+
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 export default function ClinicalTreatmentForm({
   createForm,
@@ -43,115 +48,125 @@ export default function ClinicalTreatmentForm({
   }
 
   return (
-    <section className="panel clinical-treatment-panel">
-      <div className="section-title">
+    <Card className="shadow-sm">
+      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
         <ClipboardPenLine size={20} />
-        <h2>Hồ sơ điều trị</h2>
+        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Hồ sơ điều trị</Title>
       </div>
 
       {isNurse ? (
-        <div className="stack">
+        <div className="space-y-6">
           <form
-            className="toolbar-row"
+            className="flex flex-col sm:flex-row gap-4 items-end"
             onSubmit={(event) => {
               event.preventDefault();
               onSearch(searchPhone);
             }}
           >
-            <label className="field inline-field">
-              <span>Tìm theo SĐT</span>
-              <div className="input-with-icon">
-                <Search size={17} />
-                <input
-                  value={searchPhone}
-                  onChange={(event) => onSearchPhoneChange(event.target.value)}
-                  placeholder="Nhập số điện thoại bệnh nhân"
-                />
-              </div>
-            </label>
-            <button className="button small secondary" type="submit">
+            <div className="flex-1">
+              <Text strong className="block mb-1">Tìm theo SĐT</Text>
+              <Input
+                prefix={<Search size={17} className="text-slate-400" />}
+                value={searchPhone}
+                onChange={(event) => onSearchPhoneChange(event.target.value)}
+                placeholder="Nhập số điện thoại bệnh nhân"
+                size="large"
+              />
+            </div>
+            <Button size="large" type="default" htmlType="submit">
               Tìm hồ sơ
-            </button>
-            <button
-              className="button small primary"
-              type="button"
+            </Button>
+            <Button
+              size="large"
+              type="primary"
+              ghost
+              icon={<Plus size={16} />}
               onClick={() => {
                 onStartCreateRecord?.();
                 setShowCreateForm((current) => !current);
               }}
             >
-              <Plus size={16} />
               Tạo hồ sơ điều trị
-            </button>
+            </Button>
           </form>
 
           {showCreateForm && (
-            <form className="form-grid clinical-create-record-form" onSubmit={onCreateRecord}>
-              <label className="field">
-                <span>Số điện thoại</span>
-                <input value={createForm.phone} onChange={(event) => onCreateChange("phone", event.target.value)} required />
-              </label>
-              <label className="field">
-                <span>Dịch vụ</span>
-                <select value={createForm.serviceId} onChange={(event) => onCreateChange("serviceId", event.target.value)} required>
-                  <option value="">Chọn dịch vụ</option>
-                  {services.map((service) => (
-                    <option key={service._id} value={service._id}>{service.name}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Ngày</span>
-                <input type="date" min={todayInput()} value={createForm.treatmentDate} onChange={(event) => onCreateChange("treatmentDate", event.target.value)} required />
-              </label>
-              <div className="row-actions">
-                <button className="button primary" type="submit">Tạo hồ sơ</button>
-              </div>
-            </form>
+            <Card className="bg-slate-50/50">
+              <Form layout="vertical" onFinish={(values) => onCreateRecord({ preventDefault: () => {} })}>
+                <Row gutter={16}>
+                  <Col xs={24} md={8}>
+                    <Form.Item label="Số điện thoại" required>
+                      <Input value={createForm.phone} onChange={(e) => onCreateChange("phone", e.target.value)} required />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Form.Item label="Dịch vụ" required>
+                      <Select value={createForm.serviceId} onChange={(value) => onCreateChange("serviceId", value)} required>
+                        <Select.Option value="">Chọn dịch vụ</Select.Option>
+                        {services.map((service) => (
+                          <Select.Option key={service._id} value={service._id}>{service.name}</Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Form.Item label="Ngày" required>
+                      <Input type="date" min={todayInput()} value={createForm.treatmentDate} onChange={(e) => onCreateChange("treatmentDate", e.target.value)} required />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Button type="primary" htmlType="submit" block>Tạo hồ sơ</Button>
+              </Form>
+            </Card>
           )}
 
           {searchedPatient && (
-            <div className="clinical-selected-card wide">
-              <strong>{patientLabel(searchedPatient)}</strong>
-              <span>{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
+            <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100">
+              <strong className="text-primary-800">{patientLabel(searchedPatient)}</strong>
+              <span className="text-sm text-primary-600">{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
             </div>
           )}
 
           {displayedSearchResults.length ? (
-            <div className="mini-list treatment-record-list">
+            <div className="flex flex-col gap-3">
               {displayedSearchResults.map((record) => {
                 const canDelete = canDeleteTreatmentRecord(record);
                 return (
-                  <div className={`mini-row ${selectedRecord?._id === record._id ? "active" : ""}`} key={record._id}>
-                    <div className="treatment-record-info">
-                      <strong>{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
-                      <span>{patientLabel(record.patient)}</span>
-                      <small>Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                  <Card 
+                    key={record._id} 
+                    size="small" 
+                    className={`transition-colors ${selectedRecord?._id === record._id ? "border-primary-500 bg-primary-50" : "hover:border-primary-200"}`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex flex-col gap-1">
+                        <strong className="text-slate-800">{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
+                        <span className="text-slate-600 text-sm">{patientLabel(record.patient)}</span>
+                        <small className="text-slate-500">Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusBadge value={record.status || "active"} />
+                        <Button type="default" onClick={() => onSelectRecord(record)}>
+                          Cập nhật
+                        </Button>
+                        <Button
+                          danger
+                          icon={<Trash2 size={15} />}
+                          disabled={!canDelete}
+                          onClick={() => canDelete && onDeleteRecord(record)}
+                          title={canDelete ? "Xóa hồ sơ điều trị" : "Chỉ xóa được hồ sơ chưa có thông tin điều trị"}
+                        >
+                          Xóa
+                        </Button>
+                      </div>
                     </div>
-                    <div className="row-actions">
-                      <StatusBadge value={record.status || "active"} />
-                      <button className="button small secondary" type="button" onClick={() => onSelectRecord(record)}>
-                        Cập nhật
-                      </button>
-                      <button
-                        className="button small danger"
-                        disabled={!canDelete}
-                        type="button"
-                        onClick={() => canDelete && onDeleteRecord(record)}
-                        title={canDelete ? "Xóa hồ sơ điều trị" : "Chỉ xóa được hồ sơ chưa có thông tin điều trị"}
-                      >
-                        <Trash2 size={15} />
-                        Xóa
-                      </button>
-                    </div>
-                  </div>
+                  </Card>
                 );
               })}
             </div>
           ) : searchedPatient ? (
-            <div className="empty-state">
-              <strong>Không có hồ sơ điều trị</strong>
-              <span>Bệnh nhân này chưa có hồ sơ. Bấm tạo hồ sơ điều trị để bắt đầu lần 1.</span>
+            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
+              <strong className="text-slate-700">Không có hồ sơ điều trị</strong>
+              <span className="text-sm text-slate-500">Bệnh nhân này chưa có hồ sơ. Bấm tạo hồ sơ điều trị để bắt đầu lần 1.</span>
             </div>
           ) : null}
 
@@ -168,66 +183,71 @@ export default function ClinicalTreatmentForm({
               chooseVisit={chooseVisit}
             />
           ) : (
-            <div className="empty-state">
-              <strong>Chọn hồ sơ điều trị</strong>
-              <span>Tìm theo số điện thoại rồi bấm cập nhật ở hồ sơ cần chỉnh.</span>
+            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
+              <strong className="text-slate-700">Chọn hồ sơ điều trị</strong>
+              <span className="text-sm text-slate-500">Tìm theo số điện thoại rồi bấm cập nhật ở hồ sơ cần chỉnh.</span>
             </div>
           )}
         </div>
       ) : (
-        <div className="stack">
+        <div className="space-y-6">
           <form
-            className="toolbar-row"
+            className="flex flex-col sm:flex-row gap-4 items-end"
             onSubmit={(event) => {
               event.preventDefault();
               onSearch(searchPhone);
             }}
           >
-            <label className="field inline-field">
-              <span>Tìm theo SĐT</span>
-              <div className="input-with-icon">
-                <Search size={17} />
-                <input
-                  value={searchPhone}
-                  onChange={(event) => onSearchPhoneChange(event.target.value)}
-                  placeholder="Nhập số điện thoại bệnh nhân"
-                />
-              </div>
-            </label>
-            <button className="button small secondary" type="submit">
+            <div className="flex-1">
+              <Text strong className="block mb-1">Tìm theo SĐT</Text>
+              <Input
+                prefix={<Search size={17} className="text-slate-400" />}
+                value={searchPhone}
+                onChange={(event) => onSearchPhoneChange(event.target.value)}
+                placeholder="Nhập số điện thoại bệnh nhân"
+                size="large"
+              />
+            </div>
+            <Button size="large" type="default" htmlType="submit">
               Tìm hồ sơ
-            </button>
+            </Button>
           </form>
 
           {searchedPatient && (
-            <div className="clinical-selected-card wide">
-              <strong>{patientLabel(searchedPatient)}</strong>
-              <span>{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
+            <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100">
+              <strong className="text-primary-800">{patientLabel(searchedPatient)}</strong>
+              <span className="text-sm text-primary-600">{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
             </div>
           )}
 
           {displayedSearchResults.length ? (
-            <div className="mini-list treatment-record-list">
+            <div className="flex flex-col gap-3">
               {displayedSearchResults.map((record) => (
-                <div className={`mini-row ${selectedRecord?._id === record._id ? "active" : ""}`} key={record._id}>
-                  <div className="treatment-record-info">
-                    <strong>{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
-                    <span>{patientLabel(record.patient)}</span>
-                    <small>Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                <Card 
+                  key={record._id} 
+                  size="small" 
+                  className={`transition-colors ${selectedRecord?._id === record._id ? "border-primary-500 bg-primary-50" : "hover:border-primary-200"}`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <strong className="text-slate-800">{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
+                      <span className="text-slate-600 text-sm">{patientLabel(record.patient)}</span>
+                      <small className="text-slate-500">Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <StatusBadge value={record.status || "active"} />
+                      <Button type="default" onClick={() => onSelectRecord(record)}>
+                        Xem chi tiết
+                      </Button>
+                    </div>
                   </div>
-                  <div className="row-actions">
-                    <StatusBadge value={record.status || "active"} />
-                    <button className="button small secondary" type="button" onClick={() => onSelectRecord(record)}>
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </div>
+                </Card>
               ))}
             </div>
           ) : searchedPatient ? (
-            <div className="empty-state">
-              <strong>Không có hồ sơ điều trị</strong>
-              <span>Không tìm thấy hồ sơ điều trị phù hợp với bệnh nhân này.</span>
+            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
+              <strong className="text-slate-700">Không có hồ sơ điều trị</strong>
+              <span className="text-sm text-slate-500">Không tìm thấy hồ sơ điều trị phù hợp với bệnh nhân này.</span>
             </div>
           ) : null}
 
@@ -244,14 +264,14 @@ export default function ClinicalTreatmentForm({
               chooseVisit={chooseVisit}
             />
           ) : (
-            <div className="empty-state">
-              <strong>Chọn hồ sơ điều trị</strong>
-              <span>Tìm theo số điện thoại rồi bấm xem chi tiết ở hồ sơ cần xem.</span>
+            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
+              <strong className="text-slate-700">Chọn hồ sơ điều trị</strong>
+              <span className="text-sm text-slate-500">Tìm theo số điện thoại rồi bấm xem chi tiết ở hồ sơ cần xem.</span>
             </div>
           )}
         </div>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -269,101 +289,91 @@ function TreatmentEditor({
   const isLockedVisit = Boolean(activeVisit);
   const isReadOnly = isDentist || isLockedVisit;
 
-  return (
-    <form className="stack" onSubmit={onSubmit}>
-      <div className="form-grid">
-        <div className="treatment-page-tabs wide">
-          {Array.from({ length: visibleVisitCount }, (_, index) => {
-            const visitNumber = index + 1;
-            const disabled = visitNumber > nextAllowedVisit;
-            return (
-              <button
-                className={Number(form.visitNumber) === visitNumber ? "active" : ""}
-                disabled={disabled}
-                key={visitNumber}
-                onClick={() => chooseVisit(visitNumber)}
-                title={disabled ? `Cần cập nhật lần ${nextAllowedVisit} trước` : undefined}
-                type="button"
-              >
-                Lần {visitNumber}
-              </button>
-            );
-          })}
-          {!isDentist && (
-            <button className="add-page" onClick={addVisitPage} type="button">
-              +
-            </button>
+  const tabItems = Array.from({ length: visibleVisitCount }, (_, index) => {
+    const visitNumber = index + 1;
+    const disabled = visitNumber > nextAllowedVisit;
+    return {
+      key: visitNumber.toString(),
+      label: `Lần ${visitNumber}`,
+      disabled
+    };
+  });
+
+  const renderField = (label, fieldKey, isTextArea = false) => {
+    return (
+      <Col xs={24} md={isTextArea ? 24 : 8}>
+        <div className="flex flex-col gap-1.5 mb-4">
+          <Text type="secondary">{label}</Text>
+          {isReadOnly ? (
+            <div className="bg-slate-50 p-3 rounded-lg text-slate-700 min-h-[42px] border border-slate-100 whitespace-pre-wrap">
+              {form[fieldKey] || <Text type="secondary" italic>Trống</Text>}
+            </div>
+          ) : isTextArea ? (
+            <TextArea rows={3} value={form[fieldKey] || ""} onChange={(event) => onChange(fieldKey, event.target.value)} />
+          ) : (
+            <Input value={form[fieldKey] || ""} onChange={(event) => onChange(fieldKey, event.target.value)} />
           )}
         </div>
-        <div className="clinical-selected-card wide">
-          <strong>Lần {form.visitNumber}</strong>
-          <span>{activeVisit?.updatedAt ? `Cập nhật: ${formatDateOnly(activeVisit.updatedAt)}` : "Chưa cập nhật"}</span>
-        </div>
-        {isLockedVisit && !isDentist && (
-          <div className="empty-state wide">
-            <strong>Lần điều trị này đã được lưu</strong>
-            <span>Không thể cập nhật lại lần cũ. Hãy chọn lần kế tiếp để nhập thông tin mới.</span>
-          </div>
-        )}
-        <label className="field">
-          <span>Ngày lần điều trị</span>
-          <input type="date" disabled={isReadOnly} value={form.visitDate} onChange={(event) => onChange("visitDate", event.target.value)} />
-        </label>
-        <label className="field">
-          <span>Huyết áp</span>
-          <input disabled={isReadOnly} value={form.bloodPressure} onChange={(event) => onChange("bloodPressure", event.target.value)} />
-        </label>
-        <label className="field">
-          <span>Nhịp tim</span>
-          <input disabled={isReadOnly} value={form.heartRate} onChange={(event) => onChange("heartRate", event.target.value)} />
-        </label>
-        <label className="field">
-          <span>SpO2</span>
-          <input disabled={isReadOnly} value={form.spo2} onChange={(event) => onChange("spo2", event.target.value)} />
-        </label>
-        <label className="field">
-          <span>Nhiệt độ</span>
-          <input disabled={isReadOnly} value={form.temperature} onChange={(event) => onChange("temperature", event.target.value)} />
-        </label>
-        <label className="field">
-          <span>Nhịp thở</span>
-          <input disabled={isReadOnly} value={form.respiratoryRate} onChange={(event) => onChange("respiratoryRate", event.target.value)} />
-        </label>
-        <label className="field wide">
-          <span>Tiền sử bệnh án</span>
-          <textarea disabled={isReadOnly} value={form.medicalHistory || ""} onChange={(event) => onChange("medicalHistory", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Chẩn đoán</span>
-          <textarea disabled={isReadOnly} value={form.diagnosis} onChange={(event) => onChange("diagnosis", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Điều trị đã thực hiện</span>
-          <textarea disabled={isReadOnly} value={form.treatmentResult} onChange={(event) => onChange("treatmentResult", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Đơn thuốc</span>
-          <textarea disabled={isReadOnly} value={form.prescription} onChange={(event) => onChange("prescription", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Điều trị dự kiến</span>
-          <textarea disabled={isReadOnly} value={form.treatmentPlan} onChange={(event) => onChange("treatmentPlan", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Hướng dẫn sau điều trị</span>
-          <textarea disabled={isReadOnly} value={form.aftercareInstructions} onChange={(event) => onChange("aftercareInstructions", event.target.value)} rows="3" />
-        </label>
-        <label className="field wide">
-          <span>Ghi chú điều trị</span>
-          <textarea disabled={isReadOnly} value={form.treatmentNote} onChange={(event) => onChange("treatmentNote", event.target.value)} rows="3" />
-        </label>
+      </Col>
+    );
+  };
+
+  return (
+    <Form layout="vertical" onFinish={onSubmit} className="pt-4">
+      <Tabs 
+        activeKey={form.visitNumber.toString()} 
+        onChange={(key) => chooseVisit(Number(key))}
+        items={tabItems}
+        tabBarExtraContent={!isDentist ? <Button type="text" onClick={addVisitPage} icon={<Plus size={16} />} /> : null}
+      />
+
+      <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100 mb-4">
+        <strong className="text-primary-800">Lần {form.visitNumber}</strong>
+        <span className="text-sm text-primary-600">{activeVisit?.updatedAt ? `Cập nhật: ${formatDateOnly(activeVisit.updatedAt)}` : "Chưa cập nhật"}</span>
       </div>
-      {!isDentist && !isLockedVisit && (
-        <div className="row-actions clinical-treatment-actions">
-          <button className="button primary">Lưu hồ sơ điều trị</button>
+
+      {isLockedVisit && !isDentist && (
+        <div className="p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 flex flex-col gap-1 mb-4">
+          <strong className="font-semibold">Lần điều trị này đã được lưu</strong>
+          <span className="text-sm">Không thể cập nhật lại lần cũ. Hãy chọn lần kế tiếp để nhập thông tin mới.</span>
         </div>
       )}
-    </form>
+
+      <Row gutter={16}>
+        <Col xs={24} md={8}>
+          <div className="flex flex-col gap-1.5 mb-4">
+            <Text type="secondary">Ngày lần điều trị</Text>
+            {isReadOnly ? (
+              <div className="bg-slate-50 p-3 rounded-lg text-slate-700 min-h-[42px] border border-slate-100">
+                {form.visitDate || <Text type="secondary" italic>Trống</Text>}
+              </div>
+            ) : (
+              <Input type="date" value={form.visitDate} onChange={(event) => onChange("visitDate", event.target.value)} />
+            )}
+          </div>
+        </Col>
+
+        {renderField("Huyết áp", "bloodPressure")}
+        {renderField("Nhịp tim", "heartRate")}
+        {renderField("SpO2", "spo2")}
+        {renderField("Nhiệt độ", "temperature")}
+        {renderField("Nhịp thở", "respiratoryRate")}
+
+        {renderField("Tiền sử bệnh án", "medicalHistory", true)}
+        {renderField("Chẩn đoán", "diagnosis", true)}
+        {renderField("Điều trị đã thực hiện", "treatmentResult", true)}
+        {renderField("Đơn thuốc", "prescription", true)}
+        {renderField("Điều trị dự kiến", "treatmentPlan", true)}
+        {renderField("Hướng dẫn sau điều trị", "aftercareInstructions", true)}
+        {renderField("Ghi chú điều trị", "treatmentNote", true)}
+      </Row>
+
+      {!isDentist && !isLockedVisit && (
+        <div className="flex justify-end pt-4">
+          <Button type="primary" htmlType="submit" size="large">Lưu hồ sơ điều trị</Button>
+        </div>
+      )}
+    </Form>
   );
 }
 

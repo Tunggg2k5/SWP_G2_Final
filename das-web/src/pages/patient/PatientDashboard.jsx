@@ -1,5 +1,7 @@
+import { Tabs } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Calendar, Stethoscope, Clock, ChevronRight } from "lucide-react";
 import Feedback from "../../components/Feedback.jsx";
 import PatientAppointmentList from "../../components/patient/PatientAppointmentList.jsx";
 import PatientInvoiceList from "../../components/patient/PatientInvoiceList.jsx";
@@ -244,65 +246,95 @@ export default function PatientDashboard() {
       .filter(([appointmentId]) => appointmentId)
   );
 
+  const tabItems = [
+    {
+      key: "home",
+      label: "Trang chủ",
+      children: (
+        <div className="space-y-12">
+          <PatientHome onNavigate={openPatientFeature} onServices={scrollToPatientServices} />
+          <PatientServices services={services} />
+        </div>
+      )
+    },
+    {
+      key: "booking",
+      label: "Đặt lịch",
+      children: <BookingPage embedded />
+    },
+    {
+      key: "appointments",
+      label: "Lịch hẹn",
+      children: (
+        <PatientAppointmentList
+          appointments={appointments}
+          appointmentHistory={appointmentHistory}
+          canModifyAppointment={canModifyAppointment}
+          cancelAppointment={cancelAppointment}
+          dentistOptions={dentistOptions}
+          loading={loading}
+          rescheduleAppointment={rescheduleAppointment}
+          rescheduleForms={rescheduleForms}
+          slotClosures={slotClosures}
+          slotOptions={allSlotOptions}
+          updateRescheduleForm={updateRescheduleForm}
+        />
+      )
+    },
+    {
+      key: "history",
+      label: "Lịch sử hẹn",
+      children: (
+        <PatientAppointmentList
+          appointments={appointments}
+          appointmentHistory={appointmentHistory}
+          canModifyAppointment={canModifyAppointment}
+          cancelAppointment={cancelAppointment}
+          dentistOptions={dentistOptions}
+          historyOnly
+          loading={loading}
+          rescheduleAppointment={rescheduleAppointment}
+          rescheduleForms={rescheduleForms}
+          slotClosures={slotClosures}
+          slotOptions={allSlotOptions}
+          updateRescheduleForm={updateRescheduleForm}
+        />
+      )
+    },
+    {
+      key: "invoices",
+      label: "Hóa đơn",
+      children: (
+        <PatientInvoiceList
+          invoices={invoices}
+          loading={loading}
+          reviewByAppointment={reviewByAppointment}
+          reviewForms={reviewForms}
+          submitReview={submitReview}
+          updateReviewForm={updateReviewForm}
+        />
+      )
+    },
+    {
+      key: "records",
+      label: "Hồ sơ",
+      children: <PatientTreatmentRecords loading={loading} records={records} />
+    }
+  ];
+
   return (
-    <div className="patient-dashboard-shell">
+    <div className="max-w-6xl mx-auto px-4 py-6 md:py-8 space-y-6">
       <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
 
-      <main className="patient-dashboard-content">
-        {activeFeature === "home" && (
-          <>
-            <PatientHome onNavigate={openPatientFeature} onServices={scrollToPatientServices} />
-            <PatientServices services={services} />
-          </>
-        )}
-
-        {activeFeature === "booking" && <BookingPage embedded />}
-
-        {activeFeature === "appointments" && (
-          <PatientAppointmentList
-            appointments={appointments}
-            appointmentHistory={appointmentHistory}
-            canModifyAppointment={canModifyAppointment}
-            cancelAppointment={cancelAppointment}
-            dentistOptions={dentistOptions}
-            loading={loading}
-            rescheduleAppointment={rescheduleAppointment}
-            rescheduleForms={rescheduleForms}
-            slotClosures={slotClosures}
-            slotOptions={allSlotOptions}
-            updateRescheduleForm={updateRescheduleForm}
-          />
-        )}
-
-        {activeFeature === "history" && (
-          <PatientAppointmentList
-            appointments={appointments}
-            appointmentHistory={appointmentHistory}
-            canModifyAppointment={canModifyAppointment}
-            cancelAppointment={cancelAppointment}
-            dentistOptions={dentistOptions}
-            historyOnly
-            loading={loading}
-            rescheduleAppointment={rescheduleAppointment}
-            rescheduleForms={rescheduleForms}
-            slotClosures={slotClosures}
-            slotOptions={allSlotOptions}
-            updateRescheduleForm={updateRescheduleForm}
-          />
-        )}
-
-        {activeFeature === "invoices" && (
-          <PatientInvoiceList
-            invoices={invoices}
-            loading={loading}
-            reviewByAppointment={reviewByAppointment}
-            reviewForms={reviewForms}
-            submitReview={submitReview}
-            updateReviewForm={updateReviewForm}
-          />
-        )}
-
-        {activeFeature === "records" && <PatientTreatmentRecords loading={loading} records={records} />}
+      <main className="w-full">
+        <Tabs
+          activeKey={activeFeature}
+          onChange={openPatientFeature}
+          items={tabItems}
+          type="card"
+          renderTabBar={() => null}
+          className="patient-dashboard-tabs"
+        />
       </main>
     </div>
   );
@@ -310,19 +342,63 @@ export default function PatientDashboard() {
 
 function PatientHome({ onNavigate, onServices }) {
   return (
-    <section className="patient-dark-hero" id="home">
-      <div className="patient-dark-hero-copy">
-        <h1>Chăm sóc nụ cười của bạn</h1>
-        <div className="patient-home-actions">
-          <button className="button primary" type="button" onClick={() => onNavigate("booking")}>
-            Đặt lịch
+    <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl" id="home">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-teal-900 opacity-90"></div>
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+
+      <div className="relative p-8 md:p-12 max-w-3xl">
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+          Chăm sóc nụ cười của bạn với <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-200">SmileCare</span>
+        </h1>
+        <p className="text-primary-100 text-lg mb-8 max-w-2xl leading-relaxed">
+          Quản lý lịch khám, theo dõi hồ sơ điều trị và thanh toán dễ dàng tại một nơi duy nhất.
+        </p>
+
+        <div className="flex flex-wrap gap-4">
+          <button
+            className="bg-white text-primary-800 hover:bg-slate-50 font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2"
+            type="button"
+            onClick={() => onNavigate("booking")}
+          >
+            <Calendar size={20} />
+            Đặt lịch ngay
           </button>
-          <button className="button secondary" type="button" onClick={() => onNavigate("appointments")}>
-            Xem lịch
+          <button
+            className="glass hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2"
+            type="button"
+            onClick={() => onNavigate("appointments")}
+          >
+            <Clock size={20} />
+            Lịch hẹn của tôi
           </button>
-          <button className="button ghost" type="button" onClick={onServices}>
-            Xem dịch vụ
+          <button
+            className="text-primary-200 hover:text-white font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-1"
+            type="button"
+            onClick={onServices}
+          >
+            Xem dịch vụ <ChevronRight size={16} />
           </button>
+        </div>
+      </div>
+
+      <div className="relative border-t border-white/10 bg-black/10 backdrop-blur-sm p-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <div className="text-3xl font-bold text-white mb-1">100%</div>
+            <div className="text-primary-200 text-sm font-medium">Bác sĩ chuyên khoa</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-white mb-1">4.9/5</div>
+            <div className="text-primary-200 text-sm font-medium">Đánh giá hài lòng</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-white mb-1">24/7</div>
+            <div className="text-primary-200 text-sm font-medium">Hỗ trợ khách hàng</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-white mb-1">5K+</div>
+            <div className="text-primary-200 text-sm font-medium">Nụ cười rạng rỡ</div>
+          </div>
         </div>
       </div>
     </section>
@@ -330,23 +406,40 @@ function PatientHome({ onNavigate, onServices }) {
 }
 
 function PatientServices({ services }) {
+  const tones = [
+    "from-blue-500 to-cyan-500",
+    "from-emerald-500 to-teal-500",
+    "from-violet-500 to-purple-500",
+    "from-rose-500 to-pink-500",
+    "from-amber-500 to-orange-500"
+  ];
+
   return (
-    <section className="patient-dark-section patient-services-page" id="services">
-      <div className="patient-section-heading">
-        <h2>Dịch vụ SmileCare</h2>
+    <section className="space-y-8" id="services">
+      <div className="flex flex-col items-center text-center space-y-4">
+        <h2 className="text-3xl font-bold text-slate-900">Dịch vụ SmileCare</h2>
+        <div className="w-16 h-1.5 bg-primary-500 rounded-full"></div>
       </div>
-      <div className="patient-dark-service-grid">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {services.map((service, index) => (
-          <article className={`patient-dark-service-card service-tone-${index % 5}`} key={service._id}>
-            <span className="patient-service-badge">{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <h3>{service.name}</h3>
-              <strong>{formatPriceText(service.price)}</strong>
-              <p>{service.description || "Thông tin dịch vụ đang được cập nhật."}</p>
+          <article className="card-base card-hover overflow-hidden group flex flex-col" key={service._id}>
+            <div className={`h-2 w-full bg-gradient-to-r ${tones[index % tones.length]}`}></div>
+            <div className="p-6 flex flex-col flex-grow">
+              <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-4 group-hover:bg-primary-50 group-hover:text-primary-500 transition-colors">
+                <Stethoscope size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">{service.name}</h3>
+              <div className="text-lg font-bold text-emerald-600 mb-3">{formatPriceText(service.price)}</div>
+              <p className="text-slate-600 text-sm leading-relaxed flex-grow">{service.description || "Thông tin dịch vụ đang được cập nhật."}</p>
             </div>
           </article>
         ))}
-        {!services.length && <p className="muted">Chưa có dịch vụ đang hoạt động.</p>}
+        {!services.length && (
+          <div className="col-span-full py-12 text-center text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            Chưa có dịch vụ đang hoạt động.
+          </div>
+        )}
       </div>
     </section>
   );

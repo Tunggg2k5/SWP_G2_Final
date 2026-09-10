@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Tabs } from "antd";
 import Feedback from "../../components/Feedback.jsx";
 import BookAppointmentForPatientForm from "../../components/receptionist/BookAppointmentForPatientForm.jsx";
 import ConsultationRequestList from "../../components/receptionist/ConsultationRequestList.jsx";
@@ -46,6 +47,7 @@ export default function ReceptionistDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  
   const closedSlotIdsForDate = useMemo(() => new Set(
     slotClosures
       .filter((item) => item?.isClosed !== false && item.date === date)
@@ -141,8 +143,6 @@ export default function ReceptionistDashboard() {
       return;
     }
 
-    if (!window.confirm("Xác nhận tạo lịch hẹn cho bệnh nhân?")) return;
-
     try {
       let patientId = booking.patientId;
 
@@ -232,8 +232,6 @@ export default function ReceptionistDashboard() {
   }
 
   async function rejectAppointment(appointment) {
-    if (!window.confirm("Xác nhận từ chối lịch hẹn này?")) return;
-
     try {
       await api.patch(`/appointments/${appointment._id}/status`, {
         status: "rejected",
@@ -252,8 +250,6 @@ export default function ReceptionistDashboard() {
       return;
     }
 
-    if (!window.confirm("Xác nhận bệnh nhân đã có mặt tại quầy?")) return;
-
     try {
       await api.patch(`/appointments/${appointment._id}/check-in`, { paid: false });
       setMessage("Đã ghi nhận bệnh nhân có mặt. Lịch khám đã hiển thị cho bác sĩ và y tá theo khung giờ.");
@@ -264,8 +260,6 @@ export default function ReceptionistDashboard() {
   }
 
   async function markNoShow(appointment) {
-    if (!window.confirm("Xác nhận bệnh nhân vắng mặt trong lịch khám này?")) return;
-
     try {
       await api.patch(`/appointments/${appointment._id}/no-show`, { note: "Lễ tân đánh dấu bệnh nhân vắng mặt." });
       setMessage("Đã cập nhật lịch khám sang trạng thái vắng mặt.");
@@ -311,7 +305,6 @@ export default function ReceptionistDashboard() {
       setError("Chưa có dịch vụ hoặc chi phí phát sinh để tạo hóa đơn.");
       return;
     }
-    if (!window.confirm(`Tạo hóa đơn ${payableAmount.toLocaleString("vi-VN")} VND cho lịch khám này?`)) return;
 
     try {
       await api.post(`/appointments/${appointment._id}/invoice`, {
@@ -334,8 +327,6 @@ export default function ReceptionistDashboard() {
   }
 
   async function processPayment(appointment) {
-    if (!window.confirm("Xác nhận ghi nhận thanh toán cho hóa đơn này?")) return;
-
     try {
       await api.patch(`/appointments/${appointment._id}/payment`, { paymentMethod: paymentMethods[appointment._id] || "cash" });
       setMessage("Đã ghi nhận thanh toán và cập nhật trạng thái hóa đơn.");
@@ -347,8 +338,6 @@ export default function ReceptionistDashboard() {
   }
 
   async function deleteEmptyInvoiceAppointment(appointment) {
-    if (!window.confirm("Xóa dòng lịch khám chưa có dịch vụ phát sinh này?")) return;
-
     try {
       await api.delete(`/appointments/${appointment._id}/empty-invoice`);
       setMessage("Đã xóa dòng lịch khám chưa có dịch vụ phát sinh.");
@@ -388,8 +377,6 @@ export default function ReceptionistDashboard() {
       setError("Phòng khám này chưa có bác sĩ phụ trách.");
       return;
     }
-
-    if (!window.confirm(`Xác nhận lịch khám ngày ${form.date} lúc ${form.arrivalTime} với ${room.assignedDentist.fullName}?`)) return;
 
     try {
       await api.patch(`/appointments/${appointment._id}/reception-schedule`, {
@@ -484,8 +471,6 @@ export default function ReceptionistDashboard() {
 
   async function toggleAppointmentSlot(slot) {
     const nextClosed = !slot.isClosed;
-    if (!window.confirm(`${nextClosed ? "Đóng" : "Mở lại"} ${slot.label} trong ngày ${date}?`)) return;
-
     try {
       await api.patch(`/reception/slots/${slot._id}`, { date, isClosed: nextClosed });
       setMessage(nextClosed ? "Đã đóng khung giờ khám trong ngày đã chọn." : "Đã mở lại khung giờ khám trong ngày đã chọn.");
@@ -505,6 +490,7 @@ export default function ReceptionistDashboard() {
       }
     }));
   }
+  
   const filteredBaseAppointments = appointments.filter((appointment) => matchesAppointmentFilters(appointment, appointmentSearch));
   const dateFilteredAppointments = filteredBaseAppointments.filter((appointment) => !date || clinicDateInput(appointment.startAt) === date);
   const intakeAppointments = filteredBaseAppointments.filter((appointment) => intakeStatuses.has(appointment.status));
@@ -572,11 +558,11 @@ export default function ReceptionistDashboard() {
     }));
   }, [allSlotOptions, clinicalQueueAppointments, dentistColumns, slotOptions]);
 
-  return (
-    <div className="page-grid">
-      <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
-
-      {activeFeature === "appointments" && (
+  const tabItems = [
+    {
+      key: 'appointments',
+      label: 'Lịch hẹn',
+      children: (
         <ReceptionIntakeAppointments
           appointmentSearch={appointmentSearch}
           appointments={intakeAppointments}
@@ -593,27 +579,12 @@ export default function ReceptionistDashboard() {
           slotOptions={slotOptions}
           updateManualSchedule={updateManualSchedule}
         />
-      )}
-
-      {activeFeature === "payments" && (
-        <ReceptionCheckInAppointments
-          appointmentSearch={appointmentSearch}
-          checkInAppointments={paymentAppointments}
-          date={date}
-          generateInvoice={generateInvoice}
-          invoicePlans={invoicePlans}
-          loading={loading}
-          processPayment={processPayment}
-          onDeleteEmptyInvoice={deleteEmptyInvoiceAppointment}
-          paymentMethods={paymentMethods}
-          setAppointmentSearch={setAppointmentSearch}
-          setDate={setDate}
-          updateInvoicePlan={updateInvoicePlan}
-          setPaymentMethods={setPaymentMethods}
-        />
-      )}
-
-      {activeFeature === "schedule" && (
+      )
+    },
+    {
+      key: 'schedule',
+      label: 'Lịch khám',
+      children: (
         <ReceptionClinicalQueue
           allSlotOptions={allSlotOptions}
           date={date}
@@ -633,9 +604,29 @@ export default function ReceptionistDashboard() {
           slotClosures={slotClosures}
           updateManualSchedule={updateManualSchedule}
         />
-      )}
-
-      {activeFeature === "booking" && (
+      )
+    },
+    {
+      key: 'payments',
+      label: 'Thanh toán',
+      children: (
+        <ReceptionCheckInAppointments
+          checkInAppointments={paymentAppointments}
+          generateInvoice={generateInvoice}
+          invoicePlans={invoicePlans}
+          loading={loading}
+          onDeleteEmptyInvoice={deleteEmptyInvoiceAppointment}
+          paymentMethods={paymentMethods}
+          processPayment={processPayment}
+          setPaymentMethods={setPaymentMethods}
+          updateInvoicePlan={updateInvoicePlan}
+        />
+      )
+    },
+    {
+      key: 'booking',
+      label: 'Đặt lịch',
+      children: (
         <BookAppointmentForPatientForm
           booking={booking}
           checkedPatient={checkedPatient}
@@ -653,8 +644,12 @@ export default function ReceptionistDashboard() {
           services={services}
           slotOptions={slotOptions}
         />
-      )}
-      {activeFeature === "consultations" && (
+      )
+    },
+    {
+      key: 'consultations',
+      label: 'Tư vấn',
+      children: (
         <ConsultationRequestList
           consultations={filteredConsultations}
           statusFilter={consultationStatusFilter}
@@ -663,7 +658,23 @@ export default function ReceptionistDashboard() {
           onStatusFilterChange={setConsultationStatusFilter}
           onUpdateConsultationStatus={updateConsultationStatus}
         />
-      )}
+      )
+    }
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
+      <Tabs
+        activeKey={activeFeature}
+        onChange={(key) => {
+          setActiveFeature(key);
+          navigate(`/dashboard?tab=${key}`, { replace: true });
+        }}
+        items={tabItems}
+        renderTabBar={() => null}
+        className="bg-white p-4 rounded-xl shadow-sm border border-slate-100"
+      />
     </div>
   );
 }

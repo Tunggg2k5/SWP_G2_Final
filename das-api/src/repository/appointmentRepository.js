@@ -200,6 +200,38 @@ export function updateAppointmentRoomStatus(roomId, status) {
   return updateById(COLLECTIONS.clinicRooms, roomId, { status });
 }
 
+export function countArrivedAppointmentsInSlot({ dateStart, dateEnd, slotId, excludeAppointmentId }) {
+  const query = {
+    slot: toObjectId(slotId),
+    startAt: { $gte: dateStart, $lte: dateEnd },
+    status: { $in: ["checked_in", "in_treatment", "completed"] }
+  };
+
+  if (excludeAppointmentId) {
+    query._id = { $ne: toObjectId(excludeAppointmentId) };
+  }
+
+  return getCollection(COLLECTIONS.appointments).countDocuments(query);
+}
+
+export function closeAppointmentSlotForDate({ date, slotId }) {
+  return getCollection(COLLECTIONS.appointmentSlotClosures).updateOne(
+    { date, slot: toObjectId(slotId) },
+    {
+      $set: {
+        date,
+        slot: toObjectId(slotId),
+        isClosed: true,
+        updatedAt: new Date()
+      },
+      $setOnInsert: {
+        createdAt: new Date()
+      }
+    },
+    { upsert: true }
+  );
+}
+
 export function findActivePaymentServices() {
   return findMany(COLLECTIONS.dentalServices, {});
 }

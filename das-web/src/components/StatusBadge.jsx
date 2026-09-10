@@ -1,3 +1,5 @@
+import { Tag } from "antd";
+
 const labels = {
   pending: "Chờ xác nhận",
   scheduled: "Chưa diễn ra",
@@ -36,6 +38,49 @@ const labels = {
   draft: "Nháp"
 };
 
+const tagColors = {
+  pending: "warning",
+  scheduled: "processing",
+  confirmed: "processing",
+  waitlisted: "warning",
+  rejected: "error",
+  called: "cyan",
+  checked_in: "cyan",
+  in_treatment: "purple",
+  completed: "success",
+  cancelled: "error",
+  no_show: "error",
+  waiting: "warning",
+  contacted: "success",
+  booked: "processing",
+  expired: "default",
+  new: "cyan",
+  closed: "default",
+  active: "success",
+  inactive: "default",
+  visible: "success",
+  hidden: "default",
+  locked: "error",
+  available: "success",
+  in_use: "purple",
+  cleaning: "warning",
+  maintenance: "orange",
+  unavailable: "default",
+  paid: "success",
+  unpaid: "orange",
+  partial: "warning",
+  pending_checkin: "warning",
+  not_required: "default",
+  refunded: "cyan",
+  off: "default",
+  draft: "default"
+};
+
 export default function StatusBadge({ value }) {
-  return <span className={`status status-${value}`}>{labels[value] || value || "-"}</span>;
+  const color = tagColors[value] || "default";
+  return (
+    <Tag color={color} className="font-semibold px-2.5 py-0.5 rounded-full m-0 border-0 shadow-sm">
+      {labels[value] || value || "-"}
+    </Tag>
+  );
 }

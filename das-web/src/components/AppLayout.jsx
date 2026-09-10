@@ -1,4 +1,5 @@
 import {
+  Activity,
   BarChart3,
   Bell,
   CalendarDays,
@@ -7,12 +8,15 @@ import {
   ClipboardList,
   DoorOpen,
   FileText,
-  Home,  PhoneCall,
+  Home,
+  Menu,
+  PhoneCall,
   ReceiptText,
   Settings2,
   Star,
   Stethoscope,
-  UsersRound
+  UsersRound,
+  X
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -20,18 +24,23 @@ import Feedback from "../components/Feedback.jsx";
 import { useAuth } from "../redux/AuthContext.jsx";
 import { api, getErrorMessage } from "../utils/api.js";
 import { clinicDateInput, todayInput } from "../utils/format.js";
-import { canUsePublicLookup, isClinicalRole } from "../utils/roles.js";
+import { canUsePublicLookup, isClinicalRole, roleLabels } from "../utils/roles.js";
 import { firstError, validateEmail, validateName, validatePassword, validatePhone } from "../utils/validation.js";
 import ChangeUserPassword from "./user/ChangeUserPassword.jsx";
 import EditUserProfile from "./user/EditUserProfile.jsx";
+import LogoutButton from "./user/LogoutButton.jsx";
 import NotificationPanel from "./user/NotificationPanel.jsx";
 import ProfileDropdown from "./user/ProfileDropdown.jsx";
+import { Layout, Drawer, Popover, Dropdown, Badge, Avatar } from "antd";
+
+const { Header, Content } = Layout;
 
 const receptionistTabs = [
   { id: "appointments", label: "Lịch hẹn", icon: ClipboardList },
   { id: "schedule", label: "Lịch khám", icon: CalendarDays },
   { id: "payments", label: "Hóa đơn", icon: ReceiptText },
-  { id: "booking", label: "Đặt lịch hộ", icon: CalendarPlus },  { id: "consultations", label: "Tư vấn", icon: PhoneCall }
+  { id: "booking", label: "Đặt lịch hộ", icon: CalendarPlus },
+  { id: "consultations", label: "Tư vấn", icon: PhoneCall }
 ];
 
 const adminTabs = [
@@ -84,15 +93,12 @@ export default function AppLayout() {
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({ fullName: "", email: "", phone: "", gender: "unknown", address: "", bio: "" });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "" });
   const [feedback, setFeedback] = useState({ message: "", error: "" });
   const [navBadges, setNavBadges] = useState({});
   const fileInputRef = useRef(null);
-  const notificationButtonRef = useRef(null);
-  const notificationPopoverRef = useRef(null);
-  const accountButtonRef = useRef(null);
-  const accountPopoverRef = useRef(null);
 
   const defaultTab = user?.role === "patient" ? "home" : user?.role === "admin" ? "stats" : isClinicalRole(user?.role) ? "schedule" : "appointments";
   const activeTab = new URLSearchParams(location.search).get("tab") || defaultTab;
@@ -132,30 +138,8 @@ export default function AppLayout() {
     setShowAccountMenu(false);
     setProfileOpen(false);
     setPasswordOpen(false);
-  }, [user?._id, location.pathname]);
-
-  useEffect(() => {
-    function closeFloatingMenus(event) {
-      const target = event.target;
-      if (
-        showNotifications &&
-        !notificationPopoverRef.current?.contains(target) &&
-        !notificationButtonRef.current?.contains(target)
-      ) {
-        setShowNotifications(false);
-      }
-      if (
-        showAccountMenu &&
-        !accountPopoverRef.current?.contains(target) &&
-        !accountButtonRef.current?.contains(target)
-      ) {
-        setShowAccountMenu(false);
-      }
-    }
-
-    document.addEventListener("mousedown", closeFloatingMenus);
-    return () => document.removeEventListener("mousedown", closeFloatingMenus);
-  }, [showAccountMenu, showNotifications]);
+    setMobileMenuOpen(false);
+  }, [user?._id, location.pathname, location.search]);
 
   if (location.pathname === "/" || location.pathname === "/dat-lich-hen") {
     return <Outlet />;
@@ -184,7 +168,7 @@ export default function AppLayout() {
   }
 
   async function saveProfile(event) {
-    event.preventDefault();
+    if (event && event.preventDefault) event.preventDefault();
     const validationError = firstError(
       validateName(profileForm.fullName),
       profileForm.email ? validateEmail(profileForm.email) : "",
@@ -207,7 +191,7 @@ export default function AppLayout() {
   }
 
   async function changePassword(event) {
-    event.preventDefault();
+    if (event && event.preventDefault) event.preventDefault();
 
     const validationError = validatePassword(passwordForm.newPassword);
 
@@ -325,19 +309,32 @@ export default function AppLayout() {
   }
 
   return (
-    <div className={`app-shell top-nav-shell role-shell role-${user?.role || "guest"}`}>
+    <Layout className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <Feedback error={feedback.error} message={feedback.message} onClear={clearFeedback} />
-      <header className="app-topnav sticky-top">
-        <Link
-          className="top-brand"
-          onClick={scrollPageToTop}
-          to={user?.role === "patient" ? "/dashboard?tab=home" : "/"}
-        >
-          <DoorOpen size={24} />
-          <span>SmileCare</span>
-        </Link>
 
-        <nav className="top-nav-list" aria-label="Điều hướng chính">
+      <Header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md h-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <button
+            className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            onClick={() => setMobileMenuOpen(true)}
+            title="Mở menu"
+          >
+            <Menu size={24} />
+          </button>
+
+          <Link
+            className="flex items-center gap-2.5 group"
+            onClick={scrollPageToTop}
+            to={user?.role === "patient" ? "/dashboard?tab=home" : "/"}
+          >
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-teal-500 rounded-xl shadow-sm text-white group-hover:shadow-md transition-all">
+              <Activity size={20} />
+            </div>
+            <span className="text-gradient font-bold text-xl hidden sm:block tracking-tight">SmileCare</span>
+          </Link>
+        </div>
+
+        <nav className="hidden lg:flex items-center gap-1.5" aria-label="Điều hướng chính">
           {items.map((item) => {
             const Icon = item.icon;
             const badgeCount = navBadges[item.id] || 0;
@@ -345,96 +342,219 @@ export default function AppLayout() {
               ? location.pathname === "/dashboard" &&
               (item.section ? location.hash === `#${item.section}` : activeTab === item.id && location.hash !== "#services")
               : false;
+
+            const itemClasses = `relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+              active
+                ? "bg-primary-50 text-primary-700 shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`;
+
             return item.isTab ? (
               <Link
                 key={item.id}
                 to={item.to}
-                className={`top-nav-item ${active ? "active" : ""} ${badgeCount > 0 ? "has-badge" : ""}`}
+                className={itemClasses}
                 onClick={() => {
                   if (item.id === "home") scrollPageToTop();
                   if (user?.role) loadNavBadges(user.role);
                 }}
               >
-                <Icon size={17} />
+                <Icon size={18} className={active ? "text-primary-600" : "text-slate-400"} />
                 <span>{item.label}</span>
-                {badgeCount > 0 && <em className="top-nav-badge">{badgeCount}</em>}
+                {badgeCount > 0 && (
+                  <Badge count={badgeCount > 99 ? "99+" : badgeCount} className="absolute -top-1.5 -right-1.5" />
+                )}
               </Link>
             ) : (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={({ isActive }) => `top-nav-item ${isActive ? "active" : ""} ${badgeCount > 0 ? "has-badge" : ""}`}
+                className={({ isActive }) => `relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-primary-50 text-primary-700 shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
                 onClick={() => {
                   if (user?.role) loadNavBadges(user.role);
                 }}
               >
-                <Icon size={17} />
-                <span>{item.label}</span>
-                {badgeCount > 0 && <em className="top-nav-badge">{badgeCount}</em>}
+                {({ isActive }) => (
+                  <>
+                    <Icon size={18} className={isActive ? "text-primary-600" : "text-slate-400"} />
+                    <span>{item.label}</span>
+                    {badgeCount > 0 && (
+                      <Badge count={badgeCount > 99 ? "99+" : badgeCount} className="absolute -top-1.5 -right-1.5" />
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
         </nav>
 
-        <div className="top-user-box">
+        <div className="flex items-center gap-3">
           {user ? (
             <>
-              <button
-                className="top-notification-button"
-                onClick={() => {
-                  setShowNotifications((value) => !value);
-                  setShowAccountMenu(false);
-                }}
-                ref={notificationButtonRef}
-                title="Thông báo"
+              <Popover
+                content={
+                  <NotificationPanel
+                    notifications={notifications}
+                    onClose={() => setShowNotifications(false)}
+                    onDelete={deleteNotification}
+                    onDeleteAll={deleteAllNotifications}
+                    onMarkRead={markNotificationRead}
+                    userInitial={userInitial}
+                  />
+                }
+                trigger="click"
+                open={showNotifications}
+                onOpenChange={setShowNotifications}
+                placement="bottomRight"
               >
-                <Bell size={18} />
-                {unreadCount > 0 && <span>{unreadCount}</span>}
-              </button>
-              <button
-                className="top-avatar-button"
-                onClick={() => {
-                  setShowAccountMenu((value) => !value);
-                  setShowNotifications(false);
-                }}
-                ref={accountButtonRef}
-                title="Tài khoản"
+                <Badge count={unreadCount} overflowCount={9} size="small" offset={[-4, 4]}>
+                  <button
+                    className={`relative p-2.5 rounded-xl transition-colors ${showNotifications ? "bg-primary-50 text-primary-600" : "text-slate-500 hover:bg-slate-100"}`}
+                    title="Thông báo"
+                  >
+                    <Bell size={20} />
+                  </button>
+                </Badge>
+              </Popover>
+
+              <Dropdown
+                trigger={['click']}
+                open={showAccountMenu}
+                onOpenChange={setShowAccountMenu}
+                dropdownRender={() => (
+                  <ProfileDropdown
+                    fileInputRef={fileInputRef}
+                    onChangePassword={() => { setPasswordOpen(true); setShowAccountMenu(false); }}
+                    onEditProfile={() => { setProfileOpen(true); setShowAccountMenu(false); }}
+                    onLogout={handleLogout}
+                    onUploadAvatar={uploadAvatar}
+                    user={user}
+                    userInitial={userInitial}
+                  />
+                )}
               >
-                {user.avatarUrl ? <img src={user.avatarUrl} alt={user.fullName || "Avatar"} /> : <span>{userInitial}</span>}
-              </button>
+                <button
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 border-2 border-transparent hover:border-primary-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 overflow-hidden"
+                  title="Tài khoản"
+                >
+                  {user.avatarUrl ? (
+                    <Avatar src={user.avatarUrl} alt={user.fullName || "Avatar"} className="w-full h-full object-cover" />
+                  ) : (
+                    <Avatar className="bg-primary-100 text-primary-700 font-bold">{userInitial}</Avatar>
+                  )}
+                </button>
+              </Dropdown>
             </>
           ) : null}
         </div>
+      </Header>
 
-        {showNotifications && (
-          <NotificationPanel
-            notifications={notifications}
-            onClose={() => setShowNotifications(false)}
-            onDelete={deleteNotification}
-            onDeleteAll={deleteAllNotifications}
-            onMarkRead={markNotificationRead}
-            popoverRef={notificationPopoverRef}
-            userInitial={userInitial}
-          />
-        )}
+      <Drawer
+        title={
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-gradient-to-br from-primary-500 to-teal-500 rounded-lg shadow-sm text-white">
+              <Activity size={18} />
+            </div>
+            <span className="text-gradient font-bold text-lg tracking-tight">SmileCare</span>
+          </div>
+        }
+        placement="left"
+        closable={true}
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            {items.map((item) => {
+              const Icon = item.icon;
+              const badgeCount = navBadges[item.id] || 0;
+              const active = item.isTab
+                ? location.pathname === "/dashboard" &&
+                (item.section ? location.hash === `#${item.section}` : activeTab === item.id && location.hash !== "#services")
+                : false;
 
-        {showAccountMenu && user && (
-          <ProfileDropdown
-            accountPopoverRef={accountPopoverRef}
-            fileInputRef={fileInputRef}
-            onChangePassword={() => { setPasswordOpen(true); setShowAccountMenu(false); }}
-            onEditProfile={() => { setProfileOpen(true); setShowAccountMenu(false); }}
-            onLogout={handleLogout}
-            onUploadAvatar={uploadAvatar}
-            user={user}
-            userInitial={userInitial}
-          />
-        )}
-      </header>
+              const itemClasses = `flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
+                active
+                  ? "bg-primary-50 text-primary-700"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`;
 
-      <main className="content top-nav-content">
+              return item.isTab ? (
+                <Link
+                  key={item.id}
+                  to={item.to}
+                  className={itemClasses}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (item.id === "home") scrollPageToTop();
+                    if (user?.role) loadNavBadges(user.role);
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon size={18} className={active ? "text-primary-600" : "text-slate-400"} />
+                    <span>{item.label}</span>
+                  </div>
+                  {badgeCount > 0 && (
+                    <Badge count={badgeCount > 99 ? "99+" : badgeCount} />
+                  )}
+                </Link>
+              ) : (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => `flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary-50 text-primary-700"
+                      : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (user?.role) loadNavBadges(user.role);
+                  }}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <Icon size={18} className={isActive ? "text-primary-600" : "text-slate-400"} />
+                        <span>{item.label}</span>
+                      </div>
+                      {badgeCount > 0 && (
+                        <Badge count={badgeCount > 99 ? "99+" : badgeCount} />
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+          </div>
+
+          {user && (
+            <div className="p-4 border-t border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-3 mb-4">
+                {user.avatarUrl ? (
+                  <Avatar src={user.avatarUrl} alt="Avatar" size="large" />
+                ) : (
+                  <Avatar size="large" className="bg-primary-100 text-primary-700 font-bold">{userInitial}</Avatar>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-900 truncate">{user.fullName}</p>
+                  <p className="text-xs text-slate-500 truncate">{roleLabels[user.role] || user.role}</p>
+                </div>
+              </div>
+              <LogoutButton onLogout={() => { handleLogout(); setMobileMenuOpen(false); }} />
+            </div>
+          )}
+        </div>
+      </Drawer>
+
+      <Content className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         <Outlet />
-      </main>
+      </Content>
 
       {profileOpen && (
         <EditUserProfile
@@ -453,7 +573,7 @@ export default function AppLayout() {
           onSubmit={changePassword}
         />
       )}
-    </div>
+    </Layout>
   );
 }
 

@@ -1,0 +1,16 @@
+PORT=4100
+MONGODB_URI=mongodb+srv://tunggg:ibSVlJRBTvY6EspR@cluster0.7wmobmh.mongodb.net/das?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRES_IN=7d
+CLIENT_ORIGIN=http://localhost:5174
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=kieutrunghieu104@gmail.com
+SMTP_PASS=fvvuooihubaxtvjw
+SMTP_FROM="SmileCare <kieutrunghieu104@gmail.com>"
+SMTP_SECURE=false
+PASSWORD_RESET_OTP_TTL_MINUTES=10
+
+# Development only: return OTP in API response when SMTP is not configured.
+MAIL_DEV_RETURN_OTP=false

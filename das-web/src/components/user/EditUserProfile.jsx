@@ -1,62 +1,60 @@
-import { Save, Settings } from "lucide-react";
+import { Modal, Form, Input, Select } from "antd";
 
 const genderOptions = [
   { value: "unknown", label: "Chưa chọn" },
   { value: "male", label: "Nam" },
   { value: "female", label: "Nữ" },
-  { value: "other", label: "Khac" }
+  { value: "other", label: "Khác" }
 ];
 
 export default function EditUserProfile({ form, onCancel, onChange, onSubmit }) {
+  const [antdForm] = Form.useForm();
+
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" onMouseDown={(event) => event.currentTarget === event.target && onCancel()}>
-      <form className="account-modal panel" onSubmit={onSubmit}>
-        <div className="section-title">
-          <Settings size={20} />
-          <h2>Thông tin cá nhân</h2>
+    <Modal
+      title="Thông tin cá nhân"
+      open={true}
+      onCancel={onCancel}
+      onOk={(e) => {
+        antdForm.validateFields().then(() => {
+          onSubmit(e);
+        });
+      }}
+      okText="Lưu"
+      cancelText="Hủy"
+      okButtonProps={{ className: "bg-primary-500 hover:bg-primary-600 border-none" }}
+      destroyOnClose
+    >
+      <Form
+        form={antdForm}
+        layout="vertical"
+        initialValues={form}
+        onValuesChange={(_, allValues) => onChange({ ...form, ...allValues })}
+        className="mt-4"
+      >
+        <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}>
+          <Input type="tel" />
+        </Form.Item>
+        <Form.Item label="Email" name="email" rules={[{ type: 'email', message: 'Email không hợp lệ' }]}>
+          <Input type="email" />
+        </Form.Item>
+
+        <div className="flex gap-4">
+          <Form.Item label="Giới tính" name="gender" className="flex-1">
+            <Select options={genderOptions} />
+          </Form.Item>
+          <Form.Item label="Địa chỉ" name="address" className="flex-1">
+            <Input maxLength={255} />
+          </Form.Item>
         </div>
-        <label className="field">
-          <span>Họ tên</span>
-          <input value={form.fullName} onChange={(event) => onChange({ ...form, fullName: event.target.value })} required />
-        </label>
-        <label className="field">
-          <span>Số điện thoại</span>
-          <input type="tel" value={form.phone} onChange={(event) => onChange({ ...form, phone: event.target.value })} required />
-        </label>
-        <label className="field">
-          <span>Email</span>
-          <input type="email" value={form.email || ""} onChange={(event) => onChange({ ...form, email: event.target.value })} />
-        </label>
-        <div className="form-grid account-form-grid">
-          <label className="field">
-            <span>Giới tính</span>
-            <select value={form.gender} onChange={(event) => onChange({ ...form, gender: event.target.value })}>
-              {genderOptions.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Địa chỉ</span>
-            <input value={form.address} onChange={(event) => onChange({ ...form, address: event.target.value })} maxLength={255} />
-          </label>
-        </div>
-        <label className="field">
-          <span>Ghi chú hồ sơ</span>
-          <textarea value={form.bio} onChange={(event) => onChange({ ...form, bio: event.target.value })} rows="3" maxLength={1000} />
-        </label>
-        <div className="row-actions">
-          <button type="button" className="button ghost" onClick={onCancel}>
-            Hủy
-          </button>
-          <button className="button primary">
-            <Save size={17} />
-            Lưu
-          </button>
-        </div>
-      </form>
-    </div>
+
+        <Form.Item label="Ghi chú hồ sơ" name="bio">
+          <Input.TextArea rows={3} maxLength={1000} className="resize-none" />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 }

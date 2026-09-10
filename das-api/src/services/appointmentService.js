@@ -21,6 +21,7 @@ const LOCKED_APPOINTMENT_STATUSES = new Set(["cancelled", "rejected"]);
 const CHANGEABLE_APPOINTMENT_STATUSES = new Set(["pending", "scheduled"]);
 const INSTALLMENT_MONTH_OPTIONS = new Set([3, 6, 9]);
 const MONTHLY_PAYMENT_MIN_TOTAL = 5000000;
+const MAX_ARRIVED_APPOINTMENTS_PER_SLOT = 5;
 
 function createError(message, statusCode) {
   const err = new Error(message);
@@ -128,6 +129,40 @@ function formatClinicDateTime(value) {
     minute: "2-digit",
     hourCycle: "h23"
   }).format(new Date(value));
+}
+
+async function countArrivedAppointmentsInSlot(appointment, excludeAppointmentId) {
+  const slotId = normalizeId(appointment.slot);
+  if (!slotId || !appointment.startAt) return 0;
+
+  const date = toDateInputValue(appointment.startAt);
+  return appointmentRepository.countArrivedAppointmentsInSlot({
+    dateStart: startOfLocalDay(date),
+    dateEnd: endOfLocalDay(date),
+    slotId,
+    excludeAppointmentId
+  });
+}
+
+async function closeAppointmentSlotIfFull(appointment) {
+  const slotId = normalizeId(appointment.slot);
+  if (!slotId || !appointment.startAt) return;
+
+  const arrivedCount = await countArrivedAppointmentsInSlot(appointment);
+  if (arrivedCount < MAX_ARRIVED_APPOINTMENTS_PER_SLOT) return;
+
+  await appointmentRepository.closeAppointmentSlotForDate({
+    date: toDateInputValue(appointment.startAt),
+    slotId
+  });
+}
+
+async function assertAppointmentSlotCanCheckIn(appointment) {
+  const arrivedCount = await countArrivedAppointmentsInSlot(appointment, appointment._id);
+  if (arrivedCount < MAX_ARRIVED_APPOINTMENTS_PER_SLOT) return;
+
+  await closeAppointmentSlotIfFull(appointment);
+  throw createError("Khung giờ này đã đủ 5 bệnh nhân có mặt, không thể ghi nhận thêm bệnh nhân.", 409);
 }
 
 function resolveInvoicePaymentPlan(data) {
@@ -351,6 +386,7 @@ export async function updateAppointmentStatus(appointmentId, user, body) {
   }
   if (data.status === "checked_in") {
     assertAppointmentIsToday(appointment, "ghi nhận có mặt");
+    await assertAppointmentSlotCanCheckIn(appointment);
   }
   if (data.status === "no_show") {
     assertAppointmentIsToday(appointment, "đánh dấu vắng mặt");
@@ -412,6 +448,9 @@ export async function updateAppointmentStatus(appointmentId, user, body) {
 
   await appointmentRepository.saveAppointment(appointment);
 
+  if (data.status === "checked_in") {
+    await closeAppointmentSlotIfFull(appointment);
+  }
   if (data.status === "in_treatment") {
     await appointmentRepository.updateAppointmentRoomStatus(normalizeId(appointment.room), "in_use");
   }
@@ -469,12 +508,14 @@ export async function checkInAppointment(appointmentId, user, body) {
 
   assertAppointmentCanChange(appointment, user);
   assertAppointmentIsToday(appointment, "ghi nhận có mặt");
+  await assertAppointmentSlotCanCheckIn(appointment);
   appointment.status = "checked_in";
   appointment.checkedInAt = new Date();
 
   appointment.paymentStatus = "not_required";
 
   await appointmentRepository.saveAppointment(appointment);
+  await closeAppointmentSlotIfFull(appointment);
   await createAppointmentPatientNotification(appointment, {
     title: "Đã ghi nhận có mặt",
     message: "Lễ tân đã ghi nhận bạn có mặt tại quầy. Vui lòng chờ điều phối vào phòng khám.",

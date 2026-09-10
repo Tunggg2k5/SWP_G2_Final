@@ -11,6 +11,8 @@
 - Bệnh nhân hoặc lễ tân được đặt lịch với dịch vụ, ngày khám và slot khám hợp lệ.
 - Ngày đặt lịch không được nhỏ hơn ngày hiện tại và không được vượt quá giới hạn đặt trước của hệ thống.
 - Một bệnh nhân không được đặt trùng một slot trong cùng một ngày.
+- Một slot trong cùng một ngày chỉ nhận tối đa 5 lịch active; khi đủ 5 lịch thì slot được xem là đầy và không cho đặt thêm.
+- Khi đã có 5 bệnh nhân được ghi nhận có mặt trong một slot, hệ thống tự đóng slot đó cho ngày tương ứng.
 - Lịch do lễ tân đặt hộ có kênh `offline` và được đưa vào danh sách chờ xác nhận/xếp lịch.
 
 ## 3. Lễ tân

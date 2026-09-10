@@ -38,13 +38,15 @@ export default function BookingPage({ embedded = false }) {
   const [dentistId, setDentistId] = useState("random");
   const [time, setTime] = useState("");
   const [note, setNote] = useState("");
+  const [availabilitySlotIds, setAvailabilitySlotIds] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const slotOptions = useMemo(
-    () => filterOpenSlotsForDate(slots, slotClosures, date),
-    [date, slotClosures, slots]
-  );
+  const slotOptions = useMemo(() => {
+    const openSlots = filterOpenSlotsForDate(slots, slotClosures, date);
+    if (!availabilitySlotIds) return openSlots;
+    return openSlots.filter((slot) => availabilitySlotIds.has(String(slot._id || slot.slotId)));
+  }, [availabilitySlotIds, date, slotClosures, slots]);
 
   const dentistOptions = useMemo(() => {
     const roomDentists = rooms.map((room) => room.assignedDentist).filter(Boolean);
@@ -59,6 +61,34 @@ export default function BookingPage({ embedded = false }) {
   useEffect(() => {
     setDentistId((current) => current || "random");
   }, [dentistOptions]);
+
+  useEffect(() => {
+    if (!date || !serviceId) {
+      return;
+    }
+    let isMounted = true;
+    api
+      .get("/public/availability", {
+        params: { date, serviceId, includeBooked: "true" }
+      })
+      .then((res) => {
+        if (!isMounted) return;
+        const nextSlotIds = new Set(
+          (res.data.slots || [])
+            .map((item) => item.slot?._id || item.slot?.slotId || item.slot)
+            .filter(Boolean)
+            .map(String)
+        );
+        setAvailabilitySlotIds(nextSlotIds);
+      })
+      .catch(() => {
+        if (isMounted) setAvailabilitySlotIds(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [date, serviceId]);
 
   useEffect(() => {
     setTime((current) => (slotOptions.some((slot) => slot.value === current) ? current : slotOptions[0]?.value || ""));
@@ -127,34 +157,42 @@ export default function BookingPage({ embedded = false }) {
   }
 
   const updateForm = (next) => {
-    if (Object.prototype.hasOwnProperty.call(next, "serviceId")) setServiceId(next.serviceId);
-    if (Object.prototype.hasOwnProperty.call(next, "date")) setDate(next.date);
+    if (Object.prototype.hasOwnProperty.call(next, "serviceId")) {
+      setServiceId(next.serviceId);
+      setAvailabilitySlotIds(null);
+    }
+    if (Object.prototype.hasOwnProperty.call(next, "date")) {
+      setDate(next.date);
+      setAvailabilitySlotIds(null);
+    }
     if (Object.prototype.hasOwnProperty.call(next, "dentistId")) setDentistId(next.dentistId);
     if (Object.prototype.hasOwnProperty.call(next, "time")) setTime(next.time);
     if (Object.prototype.hasOwnProperty.call(next, "note")) setNote(next.note);
   };
 
   return (
-    <div className={embedded ? "booking-page embedded-booking" : "page-grid booking-page"}>
-      <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
-      <AppointmentBookingForm
-        bootstrapLoading={bootstrapLoading}
-        date={date}
-        dentistId={dentistId}
-        dentistOptions={dentistOptions}
-        embedded={embedded}
-        maxDate={maxDate}
-        minDate={minDate}
-        note={note}
-        onChange={updateForm}
-        onSubmit={book}
-        serviceId={serviceId}
-        services={services}
-        slotOptions={slotOptions}
-        submitting={submitting}
-        time={time}
-        user={user}
-      />
+    <div className={embedded ? "w-full" : "min-h-screen bg-slate-50 py-12 px-4"}>
+      <div className={embedded ? "w-full" : "max-w-2xl mx-auto space-y-6"}>
+        <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
+        <AppointmentBookingForm
+          bootstrapLoading={bootstrapLoading}
+          date={date}
+          dentistId={dentistId}
+          dentistOptions={dentistOptions}
+          embedded={embedded}
+          maxDate={maxDate}
+          minDate={minDate}
+          note={note}
+          onChange={updateForm}
+          onSubmit={book}
+          serviceId={serviceId}
+          services={services}
+          slotOptions={slotOptions}
+          submitting={submitting}
+          time={time}
+          user={user}
+        />
+      </div>
     </div>
   );
 }

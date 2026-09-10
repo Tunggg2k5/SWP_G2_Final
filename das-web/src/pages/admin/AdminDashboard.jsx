@@ -1,6 +1,7 @@
+import { Tabs } from "antd";
 import { BarChart3, DoorOpen, Settings2, Star, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AccountManagement from "../../components/admin/AccountManagement.jsx";
 import AdminReportPanel from "../../components/admin/AdminReportPanel.jsx";
 import AdminReviewList from "../../components/admin/AdminReviewList.jsx";
@@ -41,6 +42,7 @@ const defaultRoomForm = {
 
 export default function AdminDashboard() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState("stats");
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
@@ -95,7 +97,7 @@ export default function AdminDashboard() {
   }, [location.search]);
 
   async function createService(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     const validationError = firstError(
       validateName(serviceForm.name, "Tên dịch vụ"),
       validateNote(serviceForm.description),
@@ -122,7 +124,7 @@ export default function AdminDashboard() {
   }
 
   async function createUser(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     const validationError = firstError(
       validateName(userForm.fullName),
       userForm.email?.trim() ? validateEmail(userForm.email) : "",
@@ -158,7 +160,7 @@ export default function AdminDashboard() {
   }
 
   async function updateService(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     if (!editingService) return;
     const validationError = firstError(
       validateName(editingService.name, "Tên dịch vụ"),
@@ -248,7 +250,7 @@ export default function AdminDashboard() {
   }
 
   async function updateRoom(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     if (!editingRoom) return;
     const validationError = firstError(
       validateName(editingRoom.name, "Tên phòng"),
@@ -287,7 +289,7 @@ export default function AdminDashboard() {
   }
 
   async function updateUser(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     if (!editingUser) return;
     const validationError = firstError(
       validateName(editingUser.fullName),
@@ -318,7 +320,7 @@ export default function AdminDashboard() {
   }
 
   async function createRoom(event) {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     const validationError = firstError(
       validateName(roomForm.name, "Tên phòng"),
       roomForm.assignedDentist ? "" : "Vui lòng chọn bác sĩ phụ trách phòng khám."
@@ -343,6 +345,7 @@ export default function AdminDashboard() {
       setError(getErrorMessage(err));
     }
   }
+  
   async function toggleReviewVisibility(review, isHidden) {
     try {
       setError("");
@@ -395,30 +398,52 @@ export default function AdminDashboard() {
 
   const dentistUsers = users.filter((user) => user.role === "dentist");
   const nurseUsers = users.filter((user) => user.role === "nurse");
-  return (
-    <div className="page-grid">
-      <Feedback error={error} message={message} />
 
-      {activeFeature === "users" && (
-        <>
-          <AccountManagement
-            editingUser={editingUser}
-            loading={loading}
-            onCreateUser={createUser}
-            onEditUser={startEditUser}
-            onEditingUserChange={(next) => setEditingUser((current) => ({ ...current, ...next }))}
-            onResetPassword={resetPatientPassword}
-            onSubmitEditUser={updateUser}
-            onCancelEditUser={() => setEditingUser(null)}
-            onUpdateUserStatus={updateUserStatus}
-            onUserFormChange={(next) => setUserForm((current) => ({ ...current, ...next }))}
-            userForm={userForm}
-            users={users}
-          />
-        </>
-      )}
+  const handleTabChange = (key) => {
+    setActiveFeature(key);
+    navigate(`?tab=${key}`, { replace: true });
+  };
 
-      {activeFeature === "services" && (
+  const tabItems = [
+    {
+      key: "stats",
+      label: <span className="flex items-center gap-2"><BarChart3 size={16} /> Thống kê</span>,
+      children: (
+        <AdminReportPanel
+          onLoadPatientStatistics={loadPatientStatistics}
+          onLoadRevenueReport={loadRevenueReport}
+          onReportFiltersChange={(next) => setReportFilters((current) => ({ ...current, ...next }))}
+          patientStatistics={patientStatistics}
+          reportFilters={reportFilters}
+          revenueReport={revenueReport}
+          stats={stats}
+        />
+      )
+    },
+    {
+      key: "users",
+      label: <span className="flex items-center gap-2"><UsersRound size={16} /> Tài khoản</span>,
+      children: (
+        <AccountManagement
+          editingUser={editingUser}
+          loading={loading}
+          onCreateUser={createUser}
+          onEditUser={startEditUser}
+          onEditingUserChange={(next) => setEditingUser((current) => ({ ...current, ...next }))}
+          onResetPassword={resetPatientPassword}
+          onSubmitEditUser={updateUser}
+          onCancelEditUser={() => setEditingUser(null)}
+          onUpdateUserStatus={updateUserStatus}
+          onUserFormChange={(next) => setUserForm((current) => ({ ...current, ...next }))}
+          userForm={userForm}
+          users={users}
+        />
+      )
+    },
+    {
+      key: "services",
+      label: <span className="flex items-center gap-2"><Settings2 size={16} /> Dịch vụ</span>,
+      children: (
         <DentalServiceManagement
           editingService={editingService}
           loading={loading}
@@ -432,9 +457,12 @@ export default function AdminDashboard() {
           serviceForm={serviceForm}
           services={services}
         />
-      )}
-
-      {activeFeature === "rooms" && (
+      )
+    },
+    {
+      key: "rooms",
+      label: <span className="flex items-center gap-2"><DoorOpen size={16} /> Phòng khám</span>,
+      children: (
         <ClinicRoomManagement
           dentistUsers={dentistUsers}
           editingRoom={editingRoom}
@@ -450,22 +478,27 @@ export default function AdminDashboard() {
           roomForm={roomForm}
           rooms={rooms}
         />
-      )}
-      {activeFeature === "stats" && (
-        <AdminReportPanel
-          onLoadPatientStatistics={loadPatientStatistics}
-          onLoadRevenueReport={loadRevenueReport}
-          onReportFiltersChange={(next) => setReportFilters((current) => ({ ...current, ...next }))}
-          patientStatistics={patientStatistics}
-          reportFilters={reportFilters}
-          revenueReport={revenueReport}
-          stats={stats}
-        />
-      )}
-
-      {activeFeature === "reviews" && (
+      )
+    },
+    {
+      key: "reviews",
+      label: <span className="flex items-center gap-2"><Star size={16} /> Đánh giá</span>,
+      children: (
         <AdminReviewList loading={loading} onToggleVisibility={toggleReviewVisibility} reviews={reviews} />
-      )}
+      )
+    }
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <Feedback error={error} message={message} />
+      <Tabs
+        activeKey={activeFeature}
+        onChange={handleTabChange}
+        items={tabItems}
+        renderTabBar={() => null}
+        className="bg-white p-4 rounded-xl shadow-sm"
+      />
     </div>
   );
 }

@@ -18,6 +18,16 @@ app.use(helmet());
 app.use(corsMiddleware);
 app.use(express.json({ limit: "1mb" }));
 
+// Serverless connection middleware for Vercel
+app.use(async (req, res, next) => {
+  try {
+    await connectMongoDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use("/api", publicRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/appointments", appointmentRoutes);
@@ -37,10 +47,14 @@ async function startServer() {
   });
 }
 
-if (process.env.NODE_ENV !== "test") {
+// Only start the server locally, not in Vercel
+if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
   try {
     await startServer();
-  } catch {
+  } catch (error) {
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 }
+
+export default app;

@@ -1,4 +1,6 @@
-import { BarChart3, ReceiptText, UsersRound } from "lucide-react";
+import { BarChartOutlined, DollarOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { Button, Card, Col, DatePicker, Input, Row, Statistic, Table, Tag } from "antd";
+import dayjs from "dayjs";
 import { formatDateTime, formatMoney } from "../../utils/format.js";
 import AdminMetric from "./AdminMetric.jsx";
 
@@ -16,91 +18,103 @@ export default function AdminReportPanel({
     onLoadPatientStatistics();
   }
 
-  return (
-    <>
-      <section className="metrics-grid">
-        <AdminMetric icon={BarChart3} label="Doanh thu" value={formatMoney(stats?.revenue || 0)} />
-        <AdminMetric icon={UsersRound} label="Bệnh nhân mới" value={patientStatistics?.newPatients ?? stats?.newPatientCount ?? 0} />
-        <AdminMetric icon={UsersRound} label="Bệnh nhân quay lại" value={patientStatistics?.returningPatients ?? stats?.returningPatientCount ?? 0} />
-      </section>
+  const invoiceColumns = [
+    {
+      title: "Thời điểm",
+      dataIndex: "date",
+      key: "date",
+      render: (_, record) => formatDateTime(record.paidAt || record.invoiceDate || record.createdAt)
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag color={status === "paid" ? "success" : status === "partial" ? "warning" : "error"}>
+          {status === "paid" ? "Đã thanh toán" : status === "partial" ? "Đang trả theo tháng" : "Chưa thanh toán"}
+        </Tag>
+      )
+    },
+    {
+      title: "Số tiền",
+      dataIndex: "total",
+      key: "total",
+      align: "right",
+      render: (total) => <strong className="text-slate-900">{formatMoney(total || 0)}</strong>
+    }
+  ];
 
-      <section className="panel">
-        <div className="section-title">
-          <BarChart3 size={20} />
-          <h2>Thống kê</h2>
-        </div>
-        <div className="form-grid">
-          <label className="field">
-            <span>Từ ngày</span>
-            <input type="date" value={reportFilters.startDate} onChange={(event) => onReportFiltersChange({ startDate: event.target.value })} />
-          </label>
-          <label className="field">
-            <span>Đến ngày</span>
-            <input type="date" value={reportFilters.endDate} onChange={(event) => onReportFiltersChange({ endDate: event.target.value })} />
-          </label>
-          <button className="button primary" type="button" onClick={loadAll}>
+  const invoices = [
+    ...(revenueReport?.paidInvoices || []),
+    ...(revenueReport?.partialInvoices || []),
+    ...(revenueReport?.unpaidInvoices || [])
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={8}>
+          <AdminMetric icon={DollarOutlined} label="Doanh thu" value={formatMoney(stats?.revenue || 0)} />
+        </Col>
+        <Col xs={24} md={8}>
+          <AdminMetric icon={UsergroupAddOutlined} label="Bệnh nhân mới" value={patientStatistics?.newPatients ?? stats?.newPatientCount ?? 0} />
+        </Col>
+        <Col xs={24} md={8}>
+          <AdminMetric icon={UsergroupAddOutlined} label="Bệnh nhân quay lại" value={patientStatistics?.returningPatients ?? stats?.returningPatientCount ?? 0} />
+        </Col>
+      </Row>
+
+      <Card title={<><BarChartOutlined className="text-primary-600 mr-2" /> Thống kê</>} className="shadow-sm">
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+            <span className="text-sm font-medium text-slate-700">Từ ngày</span>
+            <Input type="date" value={reportFilters.startDate} onChange={(event) => onReportFiltersChange({ startDate: event.target.value })} />
+          </div>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+            <span className="text-sm font-medium text-slate-700">Đến ngày</span>
+            <Input type="date" value={reportFilters.endDate} onChange={(event) => onReportFiltersChange({ endDate: event.target.value })} />
+          </div>
+          <Button type="primary" onClick={loadAll} style={{ height: "42px" }}>
             Xem thống kê
-          </button>
+          </Button>
         </div>
-      </section>
+      </Card>
 
       {patientStatistics && (
-        <section className="panel">
-          <div className="section-title">
-            <UsersRound size={20} />
-            <h2>Thống kê bệnh nhân</h2>
-          </div>
-          <div className="mini-list">
-            <div className="mini-row">
-              <span>Bệnh nhân mới</span>
-              <strong>{patientStatistics.newPatients}</strong>
-            </div>
-            <div className="mini-row">
-              <span>Bệnh nhân quay lại</span>
-              <strong>{patientStatistics.returningPatients}</strong>
-            </div>
+        <Card title={<><UsergroupAddOutlined className="text-primary-600 mr-2" /> Thống kê bệnh nhân</>} className="shadow-sm">
+          <Row gutter={[16, 16]}>
+            <Col xs={12} md={6}>
+              <Card type="inner" className="bg-slate-50">
+                <Statistic title="Bệnh nhân mới" value={patientStatistics.newPatients} />
+              </Card>
+            </Col>
+            <Col xs={12} md={6}>
+              <Card type="inner" className="bg-slate-50">
+                <Statistic title="Bệnh nhân quay lại" value={patientStatistics.returningPatients} />
+              </Card>
+            </Col>
             {(patientStatistics.appointmentCounts || []).map((item) => (
-              <div className="mini-row" key={item._id || "unknown"}>
-                <span>Lịch hẹn {item._id || "khác"}</span>
-                <strong>{item.count}</strong>
-              </div>
+              <Col xs={12} md={6} key={item._id || "unknown"}>
+                <Card type="inner" className="bg-slate-50">
+                  <Statistic title={`Lịch hẹn ${item._id || "khác"}`} value={item.count} />
+                </Card>
+              </Col>
             ))}
-          </div>
-        </section>
+          </Row>
+        </Card>
       )}
 
       {revenueReport && (
-        <section className="panel">
-          <div className="section-title">
-            <ReceiptText size={20} />
-            <h2>Hóa đơn trong kỳ</h2>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Thời điểm</th>
-                  <th>Trạng thái</th>
-                  <th>Số tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ...(revenueReport.paidInvoices || []),
-                  ...(revenueReport.partialInvoices || []),
-                  ...(revenueReport.unpaidInvoices || [])
-                ].map((invoice) => (
-                  <tr key={invoice._id}>
-                    <td>{formatDateTime(invoice.paidAt || invoice.invoiceDate || invoice.createdAt)}</td>
-                    <td>{invoice.status === "paid" ? "Đã thanh toán" : invoice.status === "partial" ? "Đang trả theo tháng" : "Chưa thanh toán"}</td>
-                    <td>{formatMoney(invoice.total || 0)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <Card title={<><DollarOutlined className="text-primary-600 mr-2" /> Hóa đơn trong kỳ</>} className="shadow-sm">
+          <Table
+            dataSource={invoices}
+            columns={invoiceColumns}
+            rowKey="_id"
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: 600 }}
+          />
+        </Card>
       )}
-    </>
+    </div>
   );
 }

@@ -1,10 +1,11 @@
-import { Home, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
+import { HomeOutlined, LockOutlined, MailOutlined, PhoneOutlined } from "@ant-design/icons";
+import { Activity } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../redux/AuthContext.jsx";
-import PasswordField from "../PasswordField.jsx";
 import { getErrorMessage } from "../../utils/api.js";
-import { firstError, requireValue, validateEmail, validatePassword, validatePhone } from "../../utils/validation.js";
+import { Form, Input, Button, Radio, Alert } from "antd";
+import { validatePhone, validateEmail, validatePassword } from "../../utils/validation.js";
 
 const genderOptions = [
   { value: "unknown", label: "Chưa chọn" },
@@ -16,34 +17,28 @@ const genderOptions = [
 export default function RegisterForm() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    email: "",
-    phone: "",
-    gender: "unknown",
-    address: "",
-    password: "",
-    confirmPassword: ""
-  });
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function update(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function onFinish(values) {
     setError("");
     setMessage("");
 
-    const validationError = firstError(
-      validatePhone(form.phone),
-      form.email ? validateEmail(form.email) : "",
-      requireValue(form.gender, "Giới tính"),
-      validatePassword(form.password),
-      form.confirmPassword === form.password ? "" : "Mật khẩu nhập lại không khớp."
-    );
+    let validationError = validatePhone(values.phone);
+    if (!validationError && values.email) {
+      validationError = validateEmail(values.email);
+    }
+    if (!validationError && values.gender === undefined) {
+      validationError = "Giới tính là bắt buộc.";
+    }
+    if (!validationError) {
+      validationError = validatePassword(values.password);
+    }
+    if (!validationError && values.confirmPassword !== values.password) {
+      validationError = "Mật khẩu nhập lại không khớp.";
+    }
+
     if (validationError) {
       setError(validationError);
       return;
@@ -51,7 +46,7 @@ export default function RegisterForm() {
 
     setLoading(true);
     try {
-      const res = await register(form);
+      const res = await register(values);
       setMessage(res.message || "Đăng ký thành công. Vui lòng đăng nhập.");
       setTimeout(() => navigate("/login"), 700);
     } catch (err) {
@@ -62,82 +57,59 @@ export default function RegisterForm() {
   }
 
   return (
-    <>
-      <p className="eyebrow">Tạo tài khoản</p>
-      <h2>Tạo tài khoản bệnh nhân</h2>
+    <div className="max-w-md w-full mx-auto space-y-6">
+      <div className="text-center space-y-2">
+        <div className="flex justify-center items-center gap-2 mb-4">
+          <Activity className="text-primary-600" size={28} />
+          <span className="text-2xl font-extrabold text-gradient">SmileCare</span>
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900">Tạo tài khoản</h2>
+        <p className="text-slate-500">Đăng ký tài khoản bệnh nhân mới</p>
+      </div>
 
-      <form className="stack" onSubmit={handleSubmit}>
-        <label className="field">
-          <span>Số điện thoại</span>
-          <div className="input-icon">
-            <Phone size={18} />
-            <input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} required maxLength={13} />
-          </div>
-        </label>
+      <Form layout="vertical" onFinish={onFinish} requiredMark={false} className="space-y-4" initialValues={{ gender: "unknown" }}>
+        <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: 'Số điện thoại là bắt buộc.' }]} className="mb-2">
+            <Input prefix={<PhoneOutlined className="text-slate-400" />} type="tel" maxLength={13} placeholder="Nhập số điện thoại" size="large" />
+        </Form.Item>
 
-        <label className="field">
-          <span>Email</span>
-          <div className="input-icon">
-            <Mail size={18} />
-            <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} maxLength={120} />
-          </div>
-        </label>
+        <Form.Item label="Email" name="email" className="mb-2">
+            <Input prefix={<MailOutlined className="text-slate-400" />} type="email" maxLength={120} placeholder="Nhập email" size="large" />
+        </Form.Item>
 
-        <label className="field">
-          <span>Giới tính</span>
-          <div className="input-icon">
-            <UserRound size={18} />
-            <select value={form.gender} onChange={(e) => update("gender", e.target.value)} required>
-              {genderOptions.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
+        <Form.Item label="Giới tính" name="gender" rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]} className="mb-2">
+            <Radio.Group options={genderOptions} optionType="button" buttonStyle="solid" />
+        </Form.Item>
 
-        <label className="field">
-          <span>Địa chỉ</span>
-          <div className="input-icon">
-            <Home size={18} />
-            <input value={form.address} onChange={(e) => update("address", e.target.value)} maxLength={255} />
-          </div>
-        </label>
+        <Form.Item label="Địa chỉ" name="address" className="mb-2">
+            <Input prefix={<HomeOutlined className="text-slate-400" />} maxLength={255} placeholder="Nhập địa chỉ" size="large" />
+        </Form.Item>
 
-        <label className="field">
-          <span>Mật khẩu</span>
-          <div className="input-icon">
-            <LockKeyhole size={18} />
-            <PasswordField value={form.password} onChange={(e) => update("password", e.target.value)} required minLength={8} maxLength={72} />
-          </div>
-        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: 'Mật khẩu là bắt buộc.' }]} className="mb-0">
+              <Input.Password prefix={<LockOutlined className="text-slate-400" />} minLength={8} maxLength={72} placeholder="Mật khẩu" size="large" />
+          </Form.Item>
 
-        <label className="field">
-          <span>Nhập lại mật khẩu</span>
-          <div className="input-icon">
-            <LockKeyhole size={18} />
-            <PasswordField
-              value={form.confirmPassword}
-              onChange={(e) => update("confirmPassword", e.target.value)}
-              required
-              minLength={8}
-              maxLength={72}
-            />
-          </div>
-        </label>
+          <Form.Item label="Nhập lại" name="confirmPassword" rules={[{ required: true, message: 'Xác nhận mật khẩu là bắt buộc.' }]} className="mb-0">
+              <Input.Password prefix={<LockOutlined className="text-slate-400" />} minLength={8} maxLength={72} placeholder="Xác nhận" size="large" />
+          </Form.Item>
+        </div>
 
-        {error && <div className="alert error">{error}</div>}
-        {message && <div className="alert success">{message}</div>}
+        {error && <Alert message={error} type="error" showIcon />}
+        {message && <Alert message={message} type="success" showIcon />}
 
-        <button className="button primary full" disabled={loading}>
-          {loading ? "Đang xử lý..." : "Tạo tài khoản"}
-        </button>
-      </form>
+        <Form.Item className="mt-4 mb-0">
+          <Button type="primary" htmlType="submit" size="large" block loading={loading} className="btn-gradient border-none h-12 text-base rounded-xl font-semibold shadow-md transition-all duration-200 hover:shadow-lg">
+            Tạo tài khoản
+          </Button>
+        </Form.Item>
+      </Form>
 
-      <p className="muted">
-        Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+      <p className="text-center text-sm text-slate-500 pt-4 border-t border-slate-100">
+        Đã có tài khoản?{" "}
+        <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+          Đăng nhập
+        </Link>
       </p>
-    </>
+    </div>
   );
 }

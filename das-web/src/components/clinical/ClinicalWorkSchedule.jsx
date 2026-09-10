@@ -1,7 +1,11 @@
 import { Stethoscope } from "lucide-react";
+import { Tag, Card, Button, Popconfirm, DatePicker, Typography, Space, Row, Col } from "antd";
+import dayjs from "dayjs";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
 import { clinicDateInput, formatDateTime, todayInput } from "../../utils/format.js";
+
+const { Title, Text } = Typography;
 
 export default function ClinicalWorkSchedule({
   appointments,
@@ -21,14 +25,14 @@ export default function ClinicalWorkSchedule({
   const visibleRooms = rooms || [];
 
   return (
-    <section className="panel reception-schedule-panel clinical-schedule-panel">
-      <div className="section-title">
+    <Card className="shadow-sm">
+      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
         <Stethoscope size={20} />
-        <h2>Lịch khám trong ngày</h2>
+        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Lịch khám trong ngày</Title>
       </div>
 
-      <div className="clinical-schedule-toolbar">
-        <div className="clinical-room-strip">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
+        <Space wrap>
           {visibleRooms.length ? (
             visibleRooms.map((room) => {
               const roomInUse = room.status === "in_use" || appointments.some(
@@ -36,51 +40,56 @@ export default function ClinicalWorkSchedule({
               );
 
               return (
-                <div className="room-chip clinical-room-status-chip" key={room._id}>
-                  <span>{room.name} / {room.assignedDentist?.fullName || "Chưa gán bác sĩ"}</span>
+                <Tag
+                  key={room._id}
+                  color={roomInUse ? "warning" : room.status === "available" ? "success" : "default"}
+                  className="px-3 py-1 text-sm flex items-center gap-2"
+                >
+                  <Text>{room.name} / {room.assignedDentist?.fullName || "Chưa gán bác sĩ"}</Text>
                   <StatusBadge value={roomInUse ? "in_use" : room.status} />
                   {user?.role === "nurse" && (
-                    <span className="room-chip-actions">
-                      <button
-                        className="button tiny secondary"
-                        disabled={roomInUse}
-                        title={roomInUse ? "Phòng đang có bệnh nhân đang khám nên không thể đổi trạng thái." : undefined}
-                        type="button"
-                        onClick={() => onSetRoomStatus(room._id, room.status === "available" ? "unavailable" : "available")}
-                      >
-                        {roomInUse ? "Đang dùng" : room.status === "available" ? "Chưa sẵn sàng" : "Sẵn sàng"}
-                      </button>
-                    </span>
+                    <Button
+                      size="small"
+                      type="default"
+                      className="ml-2"
+                      disabled={roomInUse}
+                      title={roomInUse ? "Phòng đang có bệnh nhân đang khám nên không thể đổi trạng thái." : undefined}
+                      onClick={() => onSetRoomStatus(room._id, room.status === "available" ? "unavailable" : "available")}
+                    >
+                      {roomInUse ? "Đang dùng" : room.status === "available" ? "Chưa sẵn sàng" : "Sẵn sàng"}
+                    </Button>
                   )}
-                </div>
+                </Tag>
               );
             })
           ) : (
-            <span className="room-chip muted">Chưa có phòng được phân công</span>
+            <Text type="secondary">Chưa có phòng được phân công</Text>
           )}
-        </div>
+        </Space>
 
-        <label className="field inline-field">
-          <span>Ngày</span>
-          <input type="date" value={date} onChange={(event) => onDateChange(event.target.value)} />
-        </label>
+        <Space align="center">
+          <Text strong>Ngày:</Text>
+          <DatePicker 
+            value={date ? dayjs(date) : null} 
+            onChange={(d, dateString) => onDateChange(dateString)} 
+            format="YYYY-MM-DD"
+            allowClear={false}
+          />
+        </Space>
       </div>
 
       {loading ? (
         <EmptyState title="Đang tải lịch khám" text="Hệ thống đang lấy dữ liệu mới nhất." />
       ) : appointments.length && clinicalColumns.length ? (
-        <div
-          className="clinical-queue-columns"
-          style={{ gridTemplateColumns: `repeat(${clinicalQueues.length}, minmax(270px, 1fr))` }}
-        >
+        <Row gutter={[16, 16]}>
           {clinicalQueues.map(({ column, appointments: columnAppointments }) => (
-            <section className="clinical-queue-column" key={column._id}>
-              <div className="clinical-queue-head">
-                <strong>{column.fullName}</strong>
-                <span>{column.roomName || "Đang trực"}</span>
+            <Col xs={24} md={12} lg={8} key={column._id}>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                <Text strong className="block">{column.fullName}</Text>
+                <Text type="secondary">{column.roomName || "Đang trực"}</Text>
               </div>
 
-              <div className="clinical-queue-list">
+              <div className="flex flex-col gap-3">
                 {columnAppointments.length ? (
                   columnAppointments.map((appointment) => {
                     const isTodayAppointment = clinicDateInput(appointment.startAt) === todayInput();
@@ -88,56 +97,77 @@ export default function ClinicalWorkSchedule({
                     const queueNumber = appointment.queueNumber ? String(appointment.queueNumber).padStart(3, "0") : "";
 
                     return (
-                      <article className={`schedule-cell-card ${isLockedAppointment(appointment) ? "locked" : ""}`} key={appointment._id}>
-                        <div>
-                          <div className="schedule-card-heading">
-                            {queueNumber && <span className="queue-number-badge">STT {queueNumber}</span>}
-                            <strong>{[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
+                      <Card 
+                        key={appointment._id} 
+                        size="small" 
+                        className={`shadow-sm ${isLockedAppointment(appointment) ? "opacity-60" : ""}`}
+                      >
+                        <div className="mb-2">
+                          <div className="flex items-center gap-3 mb-2">
+                            {queueNumber && <Tag color="blue" className="text-lg py-1">STT {queueNumber}</Tag>}
+                            <Text strong>{[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")}</Text>
                           </div>
-                          <span>{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng khám"}</span>
-                          <small>Giờ khám: {formatDateTime(appointment.startAt)}</small>
+                          <Text type="secondary" className="block text-sm">{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng khám"}</Text>
+                          <Text type="secondary" className="block text-sm">Giờ khám: {formatDateTime(appointment.startAt)}</Text>
                         </div>
 
-                        <StatusBadge value={appointment.status} />
+                        <div className="mb-3">
+                          <StatusBadge value={appointment.status} />
+                        </div>
 
-                        <div className="row-actions schedule-status-actions">
+                        <Space wrap>
                           {canEditAppointment(user, appointment) && (
                             <>
                               {user?.role === "nurse" && appointment.status === "checked_in" && (
-                                <button
-                                  className="button small secondary"
+                                <Popconfirm
+                                  title="Chuyển sang đang khám?"
+                                  description="Bạn có chắc chắn muốn chuyển lịch này sang trạng thái đang khám?"
+                                  onConfirm={() => onUpdateStatus(appointment, "in_treatment")}
+                                  okText="Có"
+                                  cancelText="Không"
                                   disabled={!canStartTreatment}
-                                  title={!canStartTreatment ? "Chỉ chuyển sang đang khám trong ngày diễn ra lịch khám." : undefined}
-                                  type="button"
-                                  onClick={() => onUpdateStatus(appointment, "in_treatment")}
                                 >
-                                  Đang khám
-                                </button>
+                                  <Button 
+                                    type="primary" 
+                                    disabled={!canStartTreatment}
+                                    title={!canStartTreatment ? "Chỉ chuyển sang đang khám trong ngày diễn ra lịch khám." : undefined}
+                                  >
+                                    Đang khám
+                                  </Button>
+                                </Popconfirm>
                               )}
                               {user?.role === "nurse" && appointment.status === "in_treatment" && (
-                                <button className="button small primary" type="button" onClick={() => onUpdateStatus(appointment, "completed")}>
-                                  Hoàn tất
-                                </button>
+                                <Popconfirm
+                                  title="Xác nhận hoàn tất?"
+                                  description="Xác nhận hoàn tất lịch khám này?"
+                                  onConfirm={() => onUpdateStatus(appointment, "completed")}
+                                  okText="Có"
+                                  cancelText="Không"
+                                >
+                                  <Button type="primary" success="true" className="bg-emerald-500">
+                                    Hoàn tất
+                                  </Button>
+                                </Popconfirm>
                               )}
-                              <button className="button small" type="button" onClick={() => onSelectTreatment(appointment)}>
+                              <Button onClick={() => onSelectTreatment(appointment)}>
                                 Hồ sơ điều trị
-                              </button>
+                              </Button>
                             </>
                           )}
-                        </div>
-                      </article>
+                        </Space>
+                      </Card>
                     );
                   })
                 ) : (
-                  <div className="schedule-empty-cell">Chưa có bệnh nhân</div>
+                  <div className="text-center p-6 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">Chưa có bệnh nhân</div>
                 )}
               </div>
-            </section>
+            </Col>
           ))}
-        </div>
+        </Row>
       ) : (
         <EmptyState title="Chưa có lịch khám" text="Lịch được ghi nhận có mặt hoặc xếp trong ngày sẽ hiển thị tại đây." />
       )}
-    </section>
+    </Card>
   );
 }

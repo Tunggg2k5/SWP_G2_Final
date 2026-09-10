@@ -1,11 +1,9 @@
+import { Rate } from "antd";
+
 export default function RatingInput({ value, onChange }) {
+  const ratingValue = Number(value) || 0;
+
   return (
-    <input
-      type="number"
-      min="1"
-      max="5"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <Rate value={ratingValue} onChange={onChange} />
   );
 }

@@ -1,9 +1,11 @@
 import { ClipboardList } from "lucide-react";
+import { Button, Select, DatePicker, List, Card, Popconfirm } from "antd";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
 import { clinicDateInput, filterOpenSlotsForDate, formatDateTime, formatSlotWithDate, getAppointmentSlot, todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
 import ReceptionAppointmentFilters from "./ReceptionAppointmentFilters.jsx";
+import dayjs from "dayjs";
 
 export default function ReceptionIntakeAppointments({
   appointmentSearch,
@@ -22,10 +24,10 @@ export default function ReceptionIntakeAppointments({
   updateManualSchedule
 }) {
   return (
-    <section className="panel">
-      <div className="section-title">
-        <ClipboardList size={20} />
-        <h2>Lịch hẹn chờ xác nhận</h2>
+    <section className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <ClipboardList size={20} className="text-primary-600" />
+        <h2 className="text-lg font-bold text-slate-800">Lịch hẹn chờ xác nhận</h2>
       </div>
 
       <ReceptionAppointmentFilters
@@ -36,120 +38,130 @@ export default function ReceptionIntakeAppointments({
         showDate
       />
 
-      {loading ? (
-        <EmptyState title="Đang tải lịch hẹn" text="Hệ thống đang lấy dữ liệu mới nhất." />
-      ) : appointments.length ? (
-        <div className="appointment-list">
-          {appointments.map((appointment) => {
-            const appointmentDate = clinicDateInput(appointment.startAt);
-            const defaultDate = appointmentDate && appointmentDate >= todayInput() ? appointmentDate : todayInput();
-            const manualForm = manualSchedules[appointment._id] || {
-              date: defaultDate,
-              time: appointment.startAt ? getAppointmentSlot(appointment.startAt, slotOptions).value : slotOptions[0]?.value || "",
-              roomId: appointment.room?._id || rooms[0]?._id || ""
-            };
-            const rowSlotOptions = filterOpenSlotsForDate(slots, slotClosures, manualForm.date);
-            const manualTime = rowSlotOptions.some((slot) => slot.value === manualForm.time) ? manualForm.time : rowSlotOptions[0]?.value || "";
-            const selectedSlot = rowSlotOptions.find((slot) => slot.value === manualTime) || rowSlotOptions[0];
-            const arrivalTime = isArrivalTimeInsideSlot(manualForm.arrivalTime, selectedSlot)
-              ? manualForm.arrivalTime
-              : selectedSlot?.value || "";
-            return (
-              <article className="appointment-card reception-appointment-card pending-intake" key={appointment._id}>
-                <div className="appointment-card-main">
-                  <div className="patient-contact-row">
-                    <div>
-                      <h4>{appointment.patient?.fullName || "Bệnh nhân"}</h4>
-                      <p>{appointment.patient?.phone || "Chưa có SĐT"}</p>
+      <List
+        loading={loading}
+        dataSource={appointments}
+        locale={{ emptyText: <EmptyState title="Không có lịch hẹn" text="Lịch hẹn mới sẽ xuất hiện tại đây khi có dữ liệu trong hệ thống." /> }}
+        renderItem={(appointment) => {
+          const appointmentDate = clinicDateInput(appointment.startAt);
+          const defaultDate = appointmentDate && appointmentDate >= todayInput() ? appointmentDate : todayInput();
+          const manualForm = manualSchedules[appointment._id] || {
+            date: defaultDate,
+            time: appointment.startAt ? getAppointmentSlot(appointment.startAt, slotOptions).value : slotOptions[0]?.value || "",
+            roomId: appointment.room?._id || rooms[0]?._id || ""
+          };
+          const rowSlotOptions = filterOpenSlotsForDate(slots, slotClosures, manualForm.date);
+          const manualTime = rowSlotOptions.some((slot) => slot.value === manualForm.time) ? manualForm.time : rowSlotOptions[0]?.value || "";
+          const selectedSlot = rowSlotOptions.find((slot) => slot.value === manualTime) || rowSlotOptions[0];
+          const arrivalTime = isArrivalTimeInsideSlot(manualForm.arrivalTime, selectedSlot)
+            ? manualForm.arrivalTime
+            : selectedSlot?.value || "";
+
+          return (
+            <List.Item className="!p-0 !border-0 mb-4 block">
+              <Card className="w-full shadow-sm" styles={{ body: { padding: '20px' } }}>
+                <div className="flex flex-col md:flex-row gap-6 justify-between items-start">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-start justify-between sm:justify-start sm:gap-4">
+                      <div>
+                        <h4 className="font-bold text-slate-800">{appointment.patient?.fullName || "Bệnh nhân"}</h4>
+                        <p className="text-slate-600 text-sm">{appointment.patient?.phone || "Chưa có SĐT"}</p>
+                      </div>
+                      <StatusBadge value={appointment.status} />
                     </div>
-                    <StatusBadge value={appointment.status} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <strong className="text-slate-800 col-span-full">{appointment.service?.name || "Dịch vụ nha khoa"}</strong>
+                      <span>Khung giờ khách chọn: {formatSlotWithDate(appointment.startAt, appointment.slot?.startTime ? appointment.slot : slotOptions)}</span>
+                      <span>Khách gửi lúc: {formatDateTime(appointment.createdAt)}</span>
+                      <span>Bác sĩ: {appointment.dentist?.fullName || "Lễ tân sắp xếp"}</span>
+                      <span>Kênh: {appointment.channel === "online" ? "Online" : "Tại quầy"}</span>
+                    </div>
+                    {appointment.patientNote && <span className="text-sm text-amber-600 block bg-amber-50 p-2 rounded">Ghi chú: {appointment.patientNote}</span>}
                   </div>
-                  <div className="appointment-slot-box">
-                    <strong>{appointment.service?.name || "Dịch vụ nha khoa"}</strong>
-                    <span>Khung giờ bệnh nhân chọn: {formatSlotWithDate(appointment.startAt, appointment.slot?.startTime ? appointment.slot : slotOptions)}</span>
-                    <span>Thời gian bệnh nhân gửi: {formatDateTime(appointment.createdAt)}</span>
-                    <span>Bác sĩ: {appointment.dentist?.fullName || "Lễ tân sắp xếp"}</span>
-                    <span>Kênh: {appointment.channel === "online" ? "Online" : "Tại quầy"}</span>
-                  </div>
-                  {appointment.patientNote && <span className="mini">Ghi chú bệnh nhân: {appointment.patientNote}</span>}
-                </div>
-                <div className="appointment-card-actions">
-                  <div className="row-actions appointment-reschedule-tools manual-schedule-tools">
-                    <input
-                      type="date"
-                      min={todayInput()}
-                      max={maxBookingDate()}
-                      value={manualForm.date}
-                      onChange={(event) => {
-                        const nextDate = event.target.value;
-                        const nextSlotOptions = filterOpenSlotsForDate(slots, slotClosures, nextDate);
-                        const nextSlot = nextSlotOptions[0];
-                        updateManualSchedule(appointment, {
-                          date: nextDate,
-                          time: nextSlot?.value || "",
-                          arrivalTime: nextSlot?.value || ""
-                        });
-                      }}
-                    />
-                    <select
-                      value={manualTime}
-                      onChange={(event) => {
-                        const nextSlot = rowSlotOptions.find((slot) => slot.value === event.target.value);
-                        updateManualSchedule(appointment, {
-                          time: event.target.value,
-                          arrivalTime: nextSlot?.value || ""
-                        });
-                      }}
-                    >
-                      {rowSlotOptions.length ? (
-                        rowSlotOptions.map((slot) => (
-                          <option value={slot.value} key={slot.value}>
-                            {slot.label}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="">Chưa có khung giờ đang mở</option>
-                      )}
-                    </select>
-                    <label className="field inline-field compact-time-field">
-                      <span>Giờ đến</span>
-                      <input
-                        type="time"
-                        step="60"
-                        min={selectedSlot?.value || ""}
-                        max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
-                        value={arrivalTime}
-                        onChange={(event) => updateManualSchedule(appointment, { arrivalTime: event.target.value })}
-                        disabled={!selectedSlot}
-                        title={selectedSlot ? `Chọn từ ${selectedSlot.value} đến trước ${selectedSlot.endTime}` : "Chọn khung giờ trước"}
+
+                  <div className="w-full md:w-auto bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3 shrink-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <DatePicker
+                        value={manualForm.date ? dayjs(manualForm.date) : null}
+                        onChange={(d, dateString) => {
+                          const nextDate = dateString;
+                          const nextSlotOptions = filterOpenSlotsForDate(slots, slotClosures, nextDate);
+                          const nextSlot = nextSlotOptions[0];
+                          updateManualSchedule(appointment, {
+                            date: nextDate,
+                            time: nextSlot?.value || "",
+                            arrivalTime: nextSlot?.value || ""
+                          });
+                        }}
+                        format="YYYY-MM-DD"
+                        minDate={dayjs(todayInput())}
+                        maxDate={dayjs(maxBookingDate())}
+                        allowClear={false}
+                        className="w-full"
                       />
-                    </label>
-                    <select
-                      aria-label="Bác sĩ"
-                      value={manualForm.roomId}
-                      onChange={(event) => updateManualSchedule(appointment, { roomId: event.target.value })}
-                    >
-                      {rooms.filter((room) => room.assignedDentist?._id).map((room) => (
-                        <option value={room._id} key={room._id}>
-                          {room.assignedDentist.fullName}
-                        </option>
-                      ))}
-                    </select>
-                    <button className="button small danger" type="button" onClick={() => onRejectAppointment(appointment)}>
-                      Từ chối
-                    </button>
-                    <button className="button small primary" type="button" onClick={() => scheduleReceptionAppointment(appointment)}>
-                      Xác nhận
-                    </button>
+                      <Select
+                        value={manualTime}
+                        onChange={(val) => {
+                          const nextSlot = rowSlotOptions.find((slot) => slot.value === val);
+                          updateManualSchedule(appointment, {
+                            time: val,
+                            arrivalTime: nextSlot?.value || ""
+                          });
+                        }}
+                        className="w-full"
+                        options={rowSlotOptions.length ? rowSlotOptions.map(s => ({ value: s.value, label: s.label })) : [{ value: "", label: "Đã đóng" }]}
+                      />
+                      <div className="flex items-center gap-1 col-span-2 sm:col-span-1">
+                        <span className="text-xs text-slate-500 whitespace-nowrap">Giờ đến:</span>
+                        <input
+                          type="time"
+                          step="60"
+                          min={selectedSlot?.value || ""}
+                          max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
+                          value={arrivalTime}
+                          className="input-base px-2 py-1 text-sm w-full"
+                          onChange={(event) => updateManualSchedule(appointment, { arrivalTime: event.target.value })}
+                          disabled={!selectedSlot}
+                          title={selectedSlot ? `Chọn từ ${selectedSlot.value} đến trước ${selectedSlot.endTime}` : "Chọn khung giờ trước"}
+                        />
+                      </div>
+                      <Select
+                        value={manualForm.roomId}
+                        onChange={(val) => updateManualSchedule(appointment, { roomId: val })}
+                        className="w-full col-span-2 sm:col-span-1"
+                        options={rooms.filter(r => r.assignedDentist?._id).map(r => ({ value: r._id, label: r.assignedDentist.fullName }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+                      <Popconfirm
+                        title="Xác nhận từ chối lịch hẹn này?"
+                        onConfirm={() => onRejectAppointment(appointment)}
+                        okText="Đồng ý"
+                        cancelText="Hủy"
+                      >
+                        <Button danger className="flex-1">
+                          Từ chối
+                        </Button>
+                      </Popconfirm>
+                      <Popconfirm
+                        title="Xác nhận lịch khám?"
+                        onConfirm={() => scheduleReceptionAppointment(appointment)}
+                        okText="Đồng ý"
+                        cancelText="Hủy"
+                      >
+                        <Button type="primary" className="flex-1 bg-primary-600 hover:bg-primary-500">
+                          Xác nhận
+                        </Button>
+                      </Popconfirm>
+                    </div>
                   </div>
                 </div>
-              </article>
-            );
-          })}
-        </div>
-      ) : (
-        <EmptyState title="Không có lịch hẹn" text="Lịch hẹn mới sẽ xuất hiện tại đây khi có dữ liệu trong hệ thống." />
-      )}
+              </Card>
+            </List.Item>
+          );
+        }}
+      />
     </section>
   );
 }

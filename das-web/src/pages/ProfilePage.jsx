@@ -1,4 +1,5 @@
-import { Bell, Camera, LockKeyhole, Save, UserRound } from "lucide-react";
+import { BellOutlined, LockOutlined, UserOutlined, CameraOutlined, SaveOutlined } from "@ant-design/icons";
+import { Avatar, Button, Card, Descriptions, Input, List, Space, Tag } from "antd";
 import { useEffect, useState } from "react";
 import EmptyState from "../components/EmptyState.jsx";
 import Feedback from "../components/Feedback.jsx";
@@ -78,94 +79,96 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="page-grid">
+    <div className="max-w-3xl mx-auto space-y-6 px-4 py-6">
       <Feedback error={error} message={message} />
 
-      <section className="panel">
-        <div className="section-title">
-          <UserRound size={20} />
-          <h2>Hồ sơ cá nhân</h2>
+      <Card title={<><UserOutlined className="text-primary-600 mr-2" /> Hồ sơ cá nhân</>} className="shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
+          <Avatar 
+            size={96} 
+            src={profile.avatarUrl} 
+            icon={!profile.avatarUrl && <UserOutlined />} 
+            className="bg-slate-100 text-slate-400 border-2 border-slate-200"
+          />
+          <div className="text-center sm:text-left">
+            <h3 className="text-2xl font-bold text-slate-900 m-0">{profile.fullName || user?.fullName}</h3>
+            <Tag color="blue" className="mt-2">
+              {user?.role === "patient" ? "Bệnh nhân" : user?.role === "dentist" ? "Bác sĩ" : user?.role}
+            </Tag>
+          </div>
         </div>
-        <div className="profile-avatar-preview">
-          {profile.avatarUrl ? <img src={profile.avatarUrl} alt={profile.fullName || "Avatar"} /> : <UserRound size={34} />}
-          <span>{profile.fullName || user?.fullName}</span>
-        </div>
-        <form className="form-grid" onSubmit={saveProfile}>
-          <label className="field">
-            <span>Họ tên</span>
-            <input value={profile.fullName} onChange={(e) => updateProfile("fullName", e.target.value)} required maxLength={120} />
-          </label>
-          <label className="field">
-            <span>Số điện thoại</span>
-            <input type="tel" value={profile.phone} onChange={(e) => updateProfile("phone", e.target.value)} required maxLength={13} />
-          </label>
-          <label className="field wide">
-            <span>Avatar URL</span>
-            <div className="input-icon">
-              <Camera size={18} />
-              <input value={profile.avatarUrl} onChange={(e) => updateProfile("avatarUrl", e.target.value)} placeholder="https://..." />
-            </div>
-          </label>
-          <label className="field wide">
-            <span>Ghi chú hồ sơ</span>
-            <textarea value={profile.bio} onChange={(e) => updateProfile("bio", e.target.value)} rows="3" maxLength={1000} />
-          </label>
-          <button className="button primary">
-            <Save size={17} />
-            Lưu hồ sơ
-          </button>
-        </form>
-      </section>
 
-      <section className="panel">
-        <div className="section-title">
-          <LockKeyhole size={20} />
-          <h2>Đổi mật khẩu</h2>
-        </div>
-        <form className="form-grid" onSubmit={changePassword}>
-          <label className="field">
-            <span>Mật khẩu hiện tại</span>
-            <input
-              type="password"
+        <form className="space-y-4" onSubmit={saveProfile}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Họ tên</span>
+              <Input value={profile.fullName} onChange={(e) => updateProfile("fullName", e.target.value)} required maxLength={120} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
+              <Input type="tel" value={profile.phone} onChange={(e) => updateProfile("phone", e.target.value)} required maxLength={13} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Avatar URL</span>
+            <Input prefix={<CameraOutlined className="text-slate-400" />} value={profile.avatarUrl} onChange={(e) => updateProfile("avatarUrl", e.target.value)} placeholder="https://..." />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Ghi chú hồ sơ</span>
+            <Input.TextArea value={profile.bio} onChange={(e) => updateProfile("bio", e.target.value)} rows={3} maxLength={1000} />
+          </div>
+          <div className="pt-2">
+            <Button type="primary" htmlType="submit" icon={<SaveOutlined />} className="w-full sm:w-auto">
+              Lưu hồ sơ
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      <Card title={<><LockOutlined className="text-amber-600 mr-2" /> Đổi mật khẩu</>} className="shadow-sm">
+        <form className="space-y-4 max-w-sm" onSubmit={changePassword}>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Mật khẩu hiện tại</span>
+            <Input.Password
               value={passwords.currentPassword}
               onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
               required
             />
-          </label>
-          <label className="field">
-            <span>Mật khẩu mới</span>
-            <input
-              type="password"
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Mật khẩu mới</span>
+            <Input.Password
               value={passwords.newPassword}
               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
               required
               minLength={8}
               maxLength={72}
             />
-          </label>
-          <button className="button secondary">Đổi mật khẩu</button>
-        </form>
-      </section>
-
-      <section className="panel">
-        <div className="section-title">
-          <Bell size={20} />
-          <h2>Thông báo</h2>
-        </div>
-        {notifications.length ? (
-          <div className="mini-list">
-            {notifications.map((notification) => (
-              <div className="mini-row" key={notification._id}>
-                <span>
-                  <strong>{notification.title}</strong> - {notification.message}
-                </span>
-              </div>
-            ))}
           </div>
+          <div className="pt-2">
+            <Button htmlType="submit" className="w-full sm:w-auto">Đổi mật khẩu</Button>
+          </div>
+        </form>
+      </Card>
+
+      <Card title={<><BellOutlined className="text-primary-600 mr-2" /> Thông báo</>} className="shadow-sm">
+        {notifications.length ? (
+          <List
+            itemLayout="horizontal"
+            dataSource={notifications}
+            renderItem={(notification) => (
+              <List.Item className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-3 last:mb-0">
+                <List.Item.Meta
+                  title={<strong className="text-slate-900">{notification.title}</strong>}
+                  description={<span className="text-slate-700">{notification.message}</span>}
+                />
+              </List.Item>
+            )}
+          />
         ) : (
-          <EmptyState />
+          <EmptyState title="Không có thông báo" text="Bạn hiện không có thông báo nào mới." />
         )}
-      </section>
+      </Card>
     </div>
   );
 }

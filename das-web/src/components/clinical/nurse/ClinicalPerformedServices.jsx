@@ -1,8 +1,11 @@
-import { ReceiptText, Search, Trash2 } from "lucide-react";
+import { ReceiptText, Search, Trash2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Card, Select, Typography, Button, Table, Space, InputNumber, Input, Form, Row, Col } from "antd";
 import EmptyState from "../../EmptyState.jsx";
 import StatusBadge from "../../StatusBadge.jsx";
 import { formatDateTime, formatMoney } from "../../../utils/format.js";
+
+const { Title, Text } = Typography;
 
 export default function ClinicalPerformedServices({
   appointments,
@@ -16,7 +19,6 @@ export default function ClinicalPerformedServices({
   selectedAppointment,
   services
 }) {
-  const [serviceSearch, setServiceSearch] = useState("");
   const selectedServices = form.services || {};
   const selectedRows = Object.entries(selectedServices)
     .filter(([, item]) => item.selected)
@@ -25,181 +27,201 @@ export default function ClinicalPerformedServices({
   const canEditCharges = selectedAppointment?.status === "in_treatment";
   const isLockedForCharges = Boolean(selectedAppointment) && !canEditCharges;
 
-  const filteredServices = useMemo(() => {
-    const keyword = serviceSearch.trim().toLowerCase();
-    return services
-      .filter((service) => !selectedServices[service._id]?.selected)
-      .filter((service) => !keyword || service.name?.toLowerCase().includes(keyword))
-      .slice(0, 8);
-  }, [serviceSearch, selectedServices, services]);
-
   const total = useMemo(() => {
     const serviceTotal = selectedRows.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const extraTotal = extraCosts.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     return serviceTotal + extraTotal;
   }, [extraCosts, selectedRows]);
 
+  const serviceColumns = [
+    {
+      title: "Dịch vụ",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <Text strong>{text}</Text>
+    },
+    {
+      title: "Số tiền",
+      dataIndex: "amount",
+      key: "amount",
+      width: 200,
+      render: (amount, record) => (
+        <InputNumber
+          className="w-full"
+          disabled={!canEditCharges}
+          min={0}
+          step={1000}
+          value={amount ?? 0}
+          onChange={(value) => onToggleService({ _id: record.serviceId, name: record.name }, true, value)}
+          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+          parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+        />
+      )
+    },
+    {
+      title: "",
+      key: "action",
+      width: 60,
+      render: (_, record) => (
+        <Button
+          type="text"
+          danger
+          icon={<Trash2 size={16} />}
+          disabled={!canEditCharges}
+          onClick={() => onToggleService({ _id: record.serviceId, name: record.name }, false)}
+        />
+      )
+    }
+  ];
+
   return (
-    <section className="panel clinical-treatment-panel">
-      <div className="section-title">
+    <Card className="shadow-sm">
+      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
         <ReceiptText size={20} />
-        <h2>Dịch vụ đã thực hiện</h2>
+        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Dịch vụ đã thực hiện</Title>
       </div>
 
-      <form className="stack" onSubmit={onSubmit}>
-        <label className="field">
-          <span>Lịch khám</span>
-          <select value={form.appointmentId} onChange={(event) => onChange("appointmentId", event.target.value)}>
-            <option value="">Chọn lịch khám</option>
-            {appointments.map((appointment) => (
-              <option key={appointment._id} value={appointment._id}>
-                {[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")} - {appointment.service?.name || "Dịch vụ"} - {formatDateTime(appointment.startAt)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <Form layout="vertical" onFinish={(e) => onSubmit({ preventDefault: () => {} })}>
+        <Form.Item label="Lịch khám">
+          <Select 
+            showSearch
+            className="w-full" 
+            size="large"
+            value={form.appointmentId || undefined} 
+            onChange={(value) => onChange("appointmentId", value)}
+            placeholder="Chọn lịch khám"
+            optionFilterProp="children"
+            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            options={appointments.map((appointment) => ({
+              value: appointment._id,
+              label: `${[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")} - ${appointment.service?.name || "Dịch vụ"} - ${formatDateTime(appointment.startAt)}`
+            }))}
+          />
+        </Form.Item>
 
         {selectedAppointment ? (
-          <div className="clinical-selected-card">
-            <strong>{[selectedAppointment.patient?.fullName || "Bệnh nhân", selectedAppointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
-            <span>{selectedAppointment.service?.name} / {selectedAppointment.room?.name}</span>
-            <StatusBadge value={selectedAppointment.status} />
+          <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-2 border border-primary-100 mb-6">
+            <strong className="text-primary-800 text-lg">{[selectedAppointment.patient?.fullName || "Bệnh nhân", selectedAppointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
+            <span className="text-primary-600 text-sm">{selectedAppointment.service?.name} / {selectedAppointment.room?.name}</span>
+            <div><StatusBadge value={selectedAppointment.status} /></div>
           </div>
         ) : (
           <EmptyState title="Chọn lịch khám" text="Dịch vụ đã thực hiện chỉ hiển thị sau khi y tá chọn một lịch khám cụ thể." />
         )}
 
         {isLockedForCharges && (
-          <div className="empty-state compact">
-            <strong>Chưa được chọn dịch vụ</strong>
-            <span>Y tá chỉ xác nhận dịch vụ khi lịch khám đang ở trạng thái Đang khám.</span>
+          <div className="p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 flex flex-col gap-1 mb-6">
+            <strong className="font-semibold">Chưa được chọn dịch vụ</strong>
+            <span className="text-sm">Y tá chỉ xác nhận dịch vụ khi lịch khám đang ở trạng thái Đang khám.</span>
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="performed-service-picker">
-            <label className="field">
-              <span>Tìm dịch vụ</span>
-              <div className="input-with-icon">
-                <Search size={18} />
-                <input
-                  disabled={!canEditCharges}
-                  value={serviceSearch}
-                  onChange={(event) => setServiceSearch(event.target.value)}
-                  placeholder="Nhập tên dịch vụ cần thêm"
-                />
-              </div>
-            </label>
-
-            {canEditCharges && (
-              <div className="performed-service-results">
-                {filteredServices.length ? (
-                  filteredServices.map((service) => (
-                    <button
-                      className="button small secondary"
-                      key={service._id}
-                      type="button"
-                      onClick={() => {
-                        onToggleService(service, true, parseDefaultAmount(service.price));
-                        setServiceSearch("");
-                      }}
-                    >
-                      Thêm {service.name}
-                    </button>
-                  ))
-                ) : (
-                  <span className="mini">{serviceSearch ? "Không tìm thấy dịch vụ phù hợp." : "Nhập tên để tìm dịch vụ."}</span>
-                )}
-              </div>
-            )}
+          <div className="flex flex-col gap-4 mb-6">
+            <Form.Item label="Thêm dịch vụ">
+              <Select
+                showSearch
+                disabled={!canEditCharges}
+                placeholder="Nhập tên dịch vụ cần thêm"
+                size="large"
+                value={null}
+                onChange={(serviceId) => {
+                  const service = services.find((s) => s._id === serviceId);
+                  if (service) {
+                    onToggleService(service, true, parseDefaultAmount(service.price));
+                  }
+                }}
+                filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                options={services
+                  .filter((service) => !selectedServices[service._id]?.selected)
+                  .map((service) => ({
+                    value: service._id,
+                    label: service.name
+                  }))
+                }
+              />
+            </Form.Item>
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="performed-service-table">
-            <div className="performed-service-table-head">
-              <span>Dịch vụ</span>
-              <span>Số tiền</span>
-              <span></span>
-            </div>
-            {selectedRows.length ? (
-              selectedRows.map((item) => (
-                <div className="performed-service-table-row" key={item.serviceId}>
-                  <strong>{item.name}</strong>
-                  <input
-                    disabled={!canEditCharges}
-                    min="0"
-                    step="1000"
-                    type="number"
-                    value={item.amount ?? 0}
-                    onChange={(event) => onToggleService({ _id: item.serviceId, name: item.name }, true, event.target.value)}
-                  />
-                  <button
-                    aria-label={`Xóa ${item.name}`}
-                    className="button icon danger"
-                    disabled={!canEditCharges}
-                    type="button"
-                    onClick={() => onToggleService({ _id: item.serviceId, name: item.name }, false)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="performed-service-table-empty">Chưa chọn dịch vụ. Có thể xác nhận hoàn tất nếu không phát sinh dịch vụ.</div>
-            )}
+          <div className="mb-6">
+            <Table
+              dataSource={selectedRows}
+              columns={serviceColumns}
+              rowKey="serviceId"
+              pagination={false}
+              bordered
+              locale={{ emptyText: 'Chưa chọn dịch vụ. Có thể xác nhận hoàn tất nếu không phát sinh dịch vụ.' }}
+            />
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="stack">
+          <div className="space-y-4 mb-6">
             {extraCosts.map((item, index) => (
-              <div className="form-grid" key={`extra-${index}`}>
-                <label className="field">
-                  <span>Chi phí khác</span>
-                  <input
-                    disabled={!canEditCharges}
-                    value={item.name}
-                    onChange={(event) => onExtraCostChange(index, "name", event.target.value)}
-                  />
-                </label>
-                <label className="field">
-                  <span>Số tiền</span>
-                  <input
-                    disabled={!canEditCharges}
-                    min="0"
-                    step="1000"
-                    type="number"
-                    value={item.amount}
-                    onChange={(event) => onExtraCostChange(index, "amount", event.target.value)}
-                  />
-                </label>
-                <button className="button small danger" disabled={!canEditCharges} type="button" onClick={() => onRemoveExtraCost(index)}>
-                  Xóa
-                </button>
-              </div>
+              <Row gutter={16} key={`extra-${index}`} align="bottom">
+                <Col flex="auto">
+                  <Form.Item label="Chi phí khác" style={{ marginBottom: 0 }}>
+                    <Input
+                      disabled={!canEditCharges}
+                      value={item.name}
+                      onChange={(event) => onExtraCostChange(index, "name", event.target.value)}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col flex="200px">
+                  <Form.Item label="Số tiền" style={{ marginBottom: 0 }}>
+                    <InputNumber
+                      className="w-full"
+                      disabled={!canEditCharges}
+                      min={0}
+                      step={1000}
+                      value={item.amount}
+                      onChange={(value) => onExtraCostChange(index, "amount", value)}
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col flex="60px">
+                  <Button 
+                    danger 
+                    disabled={!canEditCharges} 
+                    onClick={() => onRemoveExtraCost(index)}
+                  >
+                    Xóa
+                  </Button>
+                </Col>
+              </Row>
             ))}
-            <button className="button small ghost" disabled={!canEditCharges} type="button" onClick={onAddExtraCost}>
+            <Button 
+              type="dashed" 
+              icon={<Plus size={16} />} 
+              disabled={!canEditCharges} 
+              onClick={onAddExtraCost}
+              block
+            >
               Thêm chi phí khác
-            </button>
+            </Button>
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="clinical-selected-card">
-            <strong>Tổng tiền: {formatMoney(total)}</strong>
+          <div className="bg-primary-50 p-4 rounded-xl border border-primary-100 flex justify-end mb-6">
+            <strong className="text-xl text-primary-800">Tổng tiền: {formatMoney(total)}</strong>
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="row-actions clinical-treatment-actions">
-            <button className="button primary" disabled={!canEditCharges}>
+          <div>
+            <Button type="primary" htmlType="submit" size="large" block disabled={!canEditCharges}>
               Xác nhận hoàn tất
-            </button>
+            </Button>
           </div>
         )}
-      </form>
-    </section>
+      </Form>
+    </Card>
   );
 }
 

@@ -1,24 +1,12 @@
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Input } from "antd";
 
-export default function PasswordField({ value, onChange, ...props }) {
-  const [visible, setVisible] = useState(false);
+export default function PasswordField({ value, onChange, className = "", ...props }) {
   return (
-    <div className="password-field">
-      <input
-        {...props}
-        type={visible ? "text" : "password"}
-        value={value}
-        onChange={onChange}
-      />
-      <button
-        aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-        className="password-toggle"
-        onClick={() => setVisible((current) => !current)}
-        type="button"
-      >
-        {visible ? <EyeOff size={17} /> : <Eye size={17} />}
-      </button>
-    </div>
+    <Input.Password
+      {...props}
+      value={value}
+      onChange={onChange}
+      className={`h-[42px] rounded-xl border-slate-200 hover:border-primary-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all ${className}`}
+    />
   );
 }

@@ -1,5 +1,6 @@
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { DoorOpen } from "lucide-react";
-import EmptyState from "../EmptyState.jsx";
+import { Button, Card, Input, Modal, Select, Space, Table } from "antd";
 
 export default function ClinicRoomManagement({
   dentistUsers,
@@ -16,108 +17,117 @@ export default function ClinicRoomManagement({
   roomForm,
   rooms
 }) {
+  const columns = [
+    {
+      title: "Tên phòng",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <span className="font-bold text-slate-800">{text}</span>
+    },
+    {
+      title: "Bác sĩ phụ trách",
+      key: "assignedDentist",
+      render: (_, record) => record.assignedDentist?.fullName || "Chưa gán bác sĩ"
+    },
+    {
+      title: "Y tá phụ trách",
+      key: "assignedNurse",
+      render: (_, record) => record.assignedNurse?.fullName || "Không gán y tá"
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      align: "right",
+      render: (_, record) => (
+        <Space>
+          <Button type="text" icon={<EditOutlined />} onClick={() => onEditRoom(record)} title="Cập nhật" />
+          <Button type="text" danger icon={<DeleteOutlined />} onClick={() => onDeleteRoom(record)} title="Xóa" />
+        </Space>
+      )
+    }
+  ];
+
   return (
-    <>
-      <section className="panel">
-        <div className="section-title">
-          <DoorOpen size={20} />
-          <h2>Tạo phòng khám</h2>
-        </div>
-        <form className="form-grid" onSubmit={onCreateRoom}>
-          <label className="field">
-            <span>Tên phòng</span>
-            <input value={roomForm.name} onChange={(event) => onRoomFormChange({ name: event.target.value })} required />
-          </label>
-          <label className="field">
-            <span>Bác sĩ phụ trách</span>
-            <select value={roomForm.assignedDentist} onChange={(event) => onRoomFormChange({ assignedDentist: event.target.value })} required>
-              <option value="">Chưa gán</option>
+    <div className="space-y-6">
+      <Card title={<><DoorOpen size={20} className="inline text-primary-600 mr-2" /> Tạo phòng khám</>} className="shadow-sm">
+        <form className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end" onSubmit={onCreateRoom}>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Tên phòng</span>
+            <Input value={roomForm.name} onChange={(event) => onRoomFormChange({ name: event.target.value })} required />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Bác sĩ phụ trách</span>
+            <Select value={roomForm.assignedDentist} onChange={(value) => onRoomFormChange({ assignedDentist: value })}>
+              <Select.Option value="">Chưa gán</Select.Option>
               {dentistUsers.map((dentist) => (
-                <option key={dentist._id} value={dentist._id}>{dentist.fullName}</option>
+                <Select.Option key={dentist._id} value={dentist._id}>{dentist.fullName}</Select.Option>
               ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Y tá phụ trách</span>
-            <select value={roomForm.assignedNurse} onChange={(event) => onRoomFormChange({ assignedNurse: event.target.value })}>
-              <option value="">Không gán</option>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">Y tá phụ trách</span>
+            <Select value={roomForm.assignedNurse} onChange={(value) => onRoomFormChange({ assignedNurse: value })}>
+              <Select.Option value="">Không gán</Select.Option>
               {nurseUsers.map((nurse) => (
-                <option key={nurse._id} value={nurse._id}>{nurse.fullName}</option>
+                <Select.Option key={nurse._id} value={nurse._id}>{nurse.fullName}</Select.Option>
               ))}
-            </select>
-          </label>
-          <button className="button primary">Thêm phòng</button>
+            </Select>
+          </div>
+          <div className="md:col-span-3 pt-2">
+            <Button type="primary" htmlType="submit" className="w-full md:w-auto">Thêm phòng</Button>
+          </div>
         </form>
-      </section>
+      </Card>
 
-      <section className="panel">
-        <div className="section-title">
-          <DoorOpen size={20} />
-          <h2>Phòng khám</h2>
-        </div>
-        <div className="mini-list">
-          {loading ? (
-            <EmptyState title="Đang tải phòng khám" text="Hệ thống đang lấy dữ liệu mới nhất." />
-          ) : rooms.length ? rooms.map((room) => (
-            <div className="mini-row room-admin-row" key={room._id}>
-              <span>{room.name}</span>
-              <span>{room.assignedDentist?.fullName || "Chưa gán bác sĩ"}</span>
-              <span>{room.assignedNurse?.fullName || "Không gán y tá"}</span>
-              <div className="row-actions">
-                <button className="button small secondary" type="button" onClick={() => onEditRoom(room)}>
-                  Cập nhật
-                </button>
-                <button className="button small danger" type="button" onClick={() => onDeleteRoom(room)}>
-                  Xóa
-                </button>
-              </div>
-            </div>
-          )) : (
-            <EmptyState />
-          )}
-        </div>
-      </section>
+      <Card title={<><DoorOpen size={20} className="inline text-primary-600 mr-2" /> Phòng khám</>} className="shadow-sm">
+        <Table
+          dataSource={rooms}
+          columns={columns}
+          rowKey="_id"
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+          scroll={{ x: 600 }}
+        />
+      </Card>
 
-      {editingRoom && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" onMouseDown={(event) => event.currentTarget === event.target && onCancelEditRoom()}>
-          <form className="account-modal panel" onSubmit={onUpdateRoom}>
-            <div className="section-title">
-              <DoorOpen size={20} />
-              <h2>Cập nhật phòng khám</h2>
+      <Modal
+        title="Cập nhật phòng khám"
+        open={!!editingRoom}
+        onCancel={onCancelEditRoom}
+        footer={null}
+        destroyOnClose
+      >
+        {editingRoom && (
+          <form className="flex flex-col gap-4 mt-4" onSubmit={onUpdateRoom}>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Tên phòng</span>
+              <Input value={editingRoom.name} onChange={(event) => onEditingRoomChange({ name: event.target.value })} required />
             </div>
-            <div className="form-grid account-form-grid">
-              <label className="field">
-                <span>Tên phòng</span>
-                <input value={editingRoom.name} onChange={(event) => onEditingRoomChange({ name: event.target.value })} required />
-              </label>
-              <label className="field">
-                <span>Bác sĩ phụ trách</span>
-                <select value={editingRoom.assignedDentist} onChange={(event) => onEditingRoomChange({ assignedDentist: event.target.value })} required>
-                  <option value="">Chưa gán</option>
-                  {dentistUsers.map((dentist) => (
-                    <option key={dentist._id} value={dentist._id}>{dentist.fullName}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Y tá phụ trách</span>
-                <select value={editingRoom.assignedNurse} onChange={(event) => onEditingRoomChange({ assignedNurse: event.target.value })}>
-                  <option value="">Không gán</option>
-                  {nurseUsers.map((nurse) => (
-                    <option key={nurse._id} value={nurse._id}>{nurse.fullName}</option>
-                  ))}
-                </select>
-              </label>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Bác sĩ phụ trách</span>
+              <Select value={editingRoom.assignedDentist} onChange={(value) => onEditingRoomChange({ assignedDentist: value })}>
+                <Select.Option value="">Chưa gán</Select.Option>
+                {dentistUsers.map((dentist) => (
+                  <Select.Option key={dentist._id} value={dentist._id}>{dentist.fullName}</Select.Option>
+                ))}
+              </Select>
             </div>
-            <div className="row-actions">
-              <button className="button primary">Lưu cập nhật</button>
-              <button className="button ghost" type="button" onClick={onCancelEditRoom}>
-                Hủy
-              </button>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Y tá phụ trách</span>
+              <Select value={editingRoom.assignedNurse} onChange={(value) => onEditingRoomChange({ assignedNurse: value })}>
+                <Select.Option value="">Không gán</Select.Option>
+                {nurseUsers.map((nurse) => (
+                  <Select.Option key={nurse._id} value={nurse._id}>{nurse.fullName}</Select.Option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4">
+              <Button onClick={onCancelEditRoom}>Hủy</Button>
+              <Button type="primary" htmlType="submit">Lưu cập nhật</Button>
             </div>
           </form>
-        </div>
-      )}
-    </>
+        )}
+      </Modal>
+    </div>
   );
 }
