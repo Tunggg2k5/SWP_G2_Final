@@ -24,6 +24,13 @@
     }
   ],
   "env": {
-    "MONGODB_URI": "mongodb+srv://tunggg:ibSVlJRBTvY6EspR@cluster0.7wmobmh.mongodb.net/das?retryWrites=true&w=majority&appName=Cluster0"
+    "MONGODB_URI": "mongodb+srv://tunggg:ibSVlJRBTvY6EspR@cluster0.7wmobmh.mongodb.net/das?retryWrites=true&w=majority&appName=Cluster0",
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "kieutrunghieu104@gmail.com",
+    "SMTP_PASS": "fvvuooihubaxtvjw",
+    "SMTP_FROM": "\"SmileCare <kieutrunghieu104@gmail.com>\"",
+    "SMTP_SECURE": "false",
+    "PASSWORD_RESET_OTP_TTL_MINUTES": "10"
   }
 }
