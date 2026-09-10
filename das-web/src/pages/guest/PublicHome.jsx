@@ -169,7 +169,7 @@ export default function PublicHome() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div className="rounded-2xl overflow-hidden aspect-video lg:aspect-square bg-slate-200 shadow-inner">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRazgHjrZSwfGVLIdmVD_YV5WAuor-NRqzsb53jMC05rQ&s=10" alt="Tư vấn nha khoa" className="w-full h-full object-cover" />
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKre1IbLbuHbPNX5Wb2w80ZWBLHmbiMH-GSTeDEhXXvQ&s=10" alt="Tư vấn nha khoa" className="w-full h-full object-cover" />
               </div>
               <div className="space-y-4">
                 <Collapse
