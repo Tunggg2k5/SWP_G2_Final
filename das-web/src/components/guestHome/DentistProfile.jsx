@@ -40,7 +40,7 @@ export default function DentistProfile({ dentistSlides }) {
             <Carousel autoplay>
               {Array.from({ length: totalPages }).map((_, pageIndex) => (
                 <div key={pageIndex}>
-                  <Row gutter={[24, 24]} style={{ padding: "16px 0" }}>
+                  <Row gutter={[24, 24]} style={{ padding: "16px 0", display :"flex" , justifyContent : "center" }}>
                     {dentists.slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage).map((dentist) => (
                       <Col xs={24} sm={12} lg={6} key={dentist._id}>
                         <DentistCard dentist={dentist} />
