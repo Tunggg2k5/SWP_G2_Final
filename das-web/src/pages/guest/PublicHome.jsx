@@ -106,49 +106,45 @@ export default function PublicHome() {
       </header>
 
       <main>
-        <section className="min-h-[85vh] bg-gradient-to-br from-primary-800 via-primary-700 to-teal-600 relative overflow-hidden flex items-center" id="home">
-          {/* Decorative shapes */}
-          <div className="absolute top-20 right-20 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-teal-400 opacity-10 rounded-full blur-3xl"></div>
-
-          <div className="container mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10 py-20">
-            <div className="space-y-8 text-white">
-              <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+        <section className="bg-white relative overflow-hidden flex items-center border-b border-slate-100" id="home" style={{ minHeight: "85vh" }}>
+          <div className="container mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-20">
+            <div className="space-y-6">
+              <span className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold">
                 <ShieldCheck size={16} />
                 Nha khoa uy tín hàng đầu
               </span>
-              <Title level={1} className="font-extrabold leading-tight text-white mb-6" style={{ fontSize: '3.5rem', color: 'white' }}>
+              <Title level={1} className="font-extrabold leading-tight text-slate-900" style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>
                 <span className="block">Nụ Cười Rạng Rỡ,</span>
-                <span className="block text-teal-200">Tự Tin Tỏa Sáng</span>
+                <span className="block text-primary-600">Tự Tin Tỏa Sáng</span>
               </Title>
-              <p className="text-lg md:text-xl text-primary-100 max-w-lg leading-relaxed">
+              <Paragraph className="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed">
                 SmileCare mang đến giải pháp chăm sóc răng miệng toàn diện với công nghệ hiện đại và đội ngũ bác sĩ giàu kinh nghiệm.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <a className="btn-gradient text-white px-8 py-3 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary-500/30 transition-all text-center" href="#consultation">
-                  Đặt lịch ngay
-                  <ChevronRight size={18} />
+              </Paragraph>
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                <a className="inline-flex justify-center items-center gap-2 bg-primary-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-primary-700 transition-colors shadow-sm" href="#consultation">
+                  Đăng ký tư vấn miễn phí <ChevronRight size={18} />
                 </a>
-                <a className="px-8 py-3 rounded-xl flex items-center justify-center gap-2 border-2 border-white text-white hover:bg-white hover:text-primary-700 font-semibold transition-all text-center" href="#services">
-                  Tư vấn miễn phí
-                  <ChevronRight size={18} />
+                <a className="inline-flex justify-center items-center gap-2 bg-white text-slate-700 border border-slate-200 font-medium px-8 py-3.5 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" href="#services">
+                  Khám phá dịch vụ <ChevronRight size={18} />
                 </a>
               </div>
             </div>
 
-            <div className="hidden lg:flex justify-center relative" aria-label="Hình ảnh phòng khám SmileCare">
-              <div className="w-full max-w-md aspect-square rounded-full bg-gradient-to-tr from-white/10 to-white/30 backdrop-blur-md p-4 relative">
-                <div className="w-full h-full rounded-full bg-primary-900/40 border-4 border-white/20 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80')] bg-cover bg-center mix-blend-overlay"></div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary-100 rounded-3xl transform translate-x-4 translate-y-4 -z-10"></div>
+              <img
+                src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Phòng khám nha khoa hiện đại"
+                className="w-full h-auto rounded-3xl shadow-xl object-cover"
+                style={{ aspectRatio: "4/3" }}
+              />
+              <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                  <CheckCircle2 size={24} />
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-white text-slate-800 p-4 rounded-2xl shadow-xl flex items-center gap-3 animate-bounce">
-                  <div className="bg-emerald-100 text-emerald-600 p-2 rounded-full">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <div>
-                    <p className="font-bold">Thăm khám nhẹ nhàng</p>
-                    <p className="text-sm text-slate-500">100% không đau</p>
-                  </div>
+                <div>
+                  <div className="font-bold text-slate-900">100%</div>
+                  <div className="text-sm text-slate-500">Bác sĩ chuyên khoa</div>
                 </div>
               </div>
             </div>
@@ -176,8 +172,8 @@ export default function PublicHome() {
                 <img src="https://images.unsplash.com/photo-1598256989800-fea5ce5146f2?auto=format&fit=crop&q=80" alt="Tư vấn nha khoa" className="w-full h-full object-cover" />
               </div>
               <div className="space-y-4">
-                <Collapse 
-                  accordion 
+                <Collapse
+                  accordion
                   ghost
                   expandIconPosition="end"
                   items={faqs.map((item, index) => ({
