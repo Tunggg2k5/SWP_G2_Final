@@ -9,7 +9,7 @@ export function usePublicBootstrap() {
 
   useEffect(() => {
     let isMounted = true;
-
+//cmt
     api
       .get("/bootstrap")
       .then((res) => {
