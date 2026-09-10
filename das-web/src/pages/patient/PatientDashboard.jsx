@@ -168,7 +168,6 @@ export default function PatientDashboard() {
       setError(getErrorMessage(err));
     }
   }
-
   async function cancelAppointment(appointment, reason) {
     if (!canModifyAppointment(appointment)) {
       setError("Lịch hẹn này không còn trong trạng thái được hủy hoặc đổi lịch.");
