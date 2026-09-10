@@ -25,7 +25,7 @@ export default function ClinicInformation({ address, dentistCount, roomCount }) 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
               <MapPin size={32} className="text-blue-600" />
