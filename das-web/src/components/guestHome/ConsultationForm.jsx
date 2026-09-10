@@ -54,8 +54,8 @@ export default function ConsultationForm({ onError, onMessage, services }) {
             <CalendarDays size={16} />
             Đặt lịch tư vấn
           </span>
-          <Title level={2} className="text-white mb-4">Đăng Ký Nhận Tư Vấn Miễn Phí Từ Chuyên Gia</Title>
-          <Text className="text-primary-100 text-lg block">Để lại thông tin, đội ngũ bác sĩ SmileCare sẽ liên hệ tư vấn trong vòng 24h.</Text>
+          <Title level={2} className="!text-white mb-4">Đăng Ký Nhận Tư Vấn Miễn Phí Từ Chuyên Gia</Title>
+          <Text className="!text-blue-100 text-lg block">Để lại thông tin, đội ngũ bác sĩ SmileCare sẽ liên hệ tư vấn trong vòng 24h.</Text>
         </div>
 
         <Form 

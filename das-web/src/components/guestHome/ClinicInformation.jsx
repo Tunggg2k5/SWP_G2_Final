@@ -16,7 +16,7 @@ export default function ClinicInformation({ address, dentistCount, roomCount }) 
             <CheckCircle2 size={16} />
             Về SmileCare
           </span>
-          <Title level={2} className="text-white mb-6">Không gian điều trị hiện đại, lịch hẹn rõ ràng</Title>
+          <Title level={2} className="!text-white mb-6">Không gian điều trị hiện đại, lịch hẹn rõ ràng</Title>
           <div className="flex flex-wrap justify-center gap-8 text-primary-100">
             <span className="flex items-center gap-2">
               <Clock size={20} className="text-teal-300" />
@@ -25,44 +25,44 @@ export default function ClinicInformation({ address, dentistCount, roomCount }) 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <Card className="bg-white/10 border-none text-center h-full rounded-2xl" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="p-4 bg-primary-600/50 rounded-full mb-4">
-              <MapPin size={32} className="text-teal-300" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+              <MapPin size={32} className="text-blue-600" />
             </div>
             <div>
-              <strong className="block text-xl font-bold text-white mb-2">Vị trí trung tâm</strong>
-              <span className="text-sm text-primary-200 block">{address || "Địa chỉ phòng khám đang được cập nhật."}</span>
+              <strong className="block text-xl font-bold text-slate-800 mb-2">Vị trí trung tâm</strong>
+              <span className="text-sm text-slate-500 block">{address || "Địa chỉ phòng khám đang được cập nhật."}</span>
             </div>
           </Card>
 
-          <Card className="bg-white/10 border-none text-center h-full rounded-2xl" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="p-4 bg-primary-600/50 rounded-full mb-4">
-              <CalendarDays size={32} className="text-teal-300" />
+          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+              <CalendarDays size={32} className="text-blue-600" />
             </div>
             <div>
-              <strong className="block text-xl font-bold text-white mb-2">{roomCount ? `${roomCount} phòng` : "Chưa có"} điều trị</strong>
-              <span className="text-sm text-primary-200 block">Trang thiết bị hiện đại, vô trùng.</span>
+              <strong className="block text-xl font-bold text-slate-800 mb-2">{roomCount ? `${roomCount} phòng` : "Chưa có"} điều trị</strong>
+              <span className="text-sm text-slate-500 block">Trang thiết bị hiện đại, vô trùng.</span>
             </div>
           </Card>
 
-          <Card className="bg-white/10 border-none text-center h-full rounded-2xl" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="p-4 bg-primary-600/50 rounded-full mb-4">
-              <UsersRound size={32} className="text-teal-300" />
+          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+              <UsersRound size={32} className="text-blue-600" />
             </div>
             <div>
-              <strong className="block text-xl font-bold text-white mb-2">{dentistCount}+ Bác sĩ</strong>
-              <span className="text-sm text-primary-200 block">Giàu kinh nghiệm, tận tâm.</span>
+              <strong className="block text-xl font-bold text-slate-800 mb-2">{dentistCount}+ Bác sĩ</strong>
+              <span className="text-sm text-slate-500 block">Giàu kinh nghiệm, tận tâm.</span>
             </div>
           </Card>
 
-          <Card className="bg-white/10 border-none text-center h-full rounded-2xl" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="p-4 bg-primary-600/50 rounded-full mb-4">
-              <ThumbsUp size={32} className="text-teal-300" />
+          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+              <ThumbsUp size={32} className="text-blue-600" />
             </div>
             <div>
-              <strong className="block text-xl font-bold text-white mb-2">10,000+ Khách hàng</strong>
-              <span className="text-sm text-primary-200 block">Hài lòng với nụ cười mới.</span>
+              <strong className="block text-xl font-bold text-slate-800 mb-2">10,000+ Khách hàng</strong>
+              <span className="text-sm text-slate-500 block">Hài lòng với nụ cười mới.</span>
             </div>
           </Card>
         </div>
