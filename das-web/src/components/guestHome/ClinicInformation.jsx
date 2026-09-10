@@ -51,18 +51,8 @@ export default function ClinicInformation({ address, dentistCount, roomCount }) 
               <UsersRound size={32} className="text-blue-600" />
             </div>
             <div>
-              <strong className="block text-xl font-bold text-slate-800 mb-2">{dentistCount}+ Bác sĩ</strong>
+              <strong className="block text-xl font-bold text-slate-800 mb-2">{dentistCount} Bác sĩ</strong>
               <span className="text-sm text-slate-500 block">Giàu kinh nghiệm, tận tâm.</span>
-            </div>
-          </Card>
-
-          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-              <ThumbsUp size={32} className="text-blue-600" />
-            </div>
-            <div>
-              <strong className="block text-xl font-bold text-slate-800 mb-2">10,000+ Khách hàng</strong>
-              <span className="text-sm text-slate-500 block">Hài lòng với nụ cười mới.</span>
             </div>
           </Card>
         </div>
