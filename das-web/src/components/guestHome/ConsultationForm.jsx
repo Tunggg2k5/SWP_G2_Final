@@ -58,46 +58,48 @@ export default function ConsultationForm({ onError, onMessage, services }) {
           <Text className="!text-blue-100 text-lg block">Để lại thông tin, đội ngũ bác sĩ SmileCare sẽ liên hệ tư vấn trong vòng 24h.</Text>
         </div>
 
-        <Form 
-          form={form}
-          className="card-base max-w-lg mx-auto p-8 rounded-2xl shadow-xl bg-white" 
-          onFinish={submitConsultation}
-          layout="vertical"
-          initialValues={{ gender: "male" }}
-        >
-          <Form.Item name="gender" className="mb-6">
-            <Radio.Group className="flex w-full gap-2 bg-slate-100 p-1 rounded-xl" optionType="button" buttonStyle="solid">
-              {salutationOptions.map(opt => (
-                <Radio.Button key={opt.value} value={opt.value} className="flex-1 text-center rounded-lg border-none shadow-none text-slate-500 bg-transparent before:hidden">
-                  {opt.label}
-                </Radio.Button>
-              ))}
-            </Radio.Group>
-          </Form.Item>
+        <div className="max-w-lg mx-auto">
+          <Form
+            form={form}
+            className="card-base p-8 rounded-2xl shadow-xl bg-white"
+            onFinish={submitConsultation}
+            layout="vertical"
+            initialValues={{ gender: "male" }}
+          >
+            <Form.Item name="gender" className="mb-6">
+              <Radio.Group className="flex w-full gap-2 bg-slate-100 p-1 rounded-xl" optionType="button" buttonStyle="solid">
+                {salutationOptions.map(opt => (
+                  <Radio.Button key={opt.value} value={opt.value} className="flex-1 text-center rounded-lg border-none shadow-none text-slate-500 bg-transparent before:hidden">
+                    {opt.label}
+                  </Radio.Button>
+                ))}
+              </Radio.Group>
+            </Form.Item>
 
-          <Form.Item label={<span className="font-semibold text-slate-700">Họ và tên *</span>} name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}>
-            <Input size="large" placeholder="Nguyễn Văn A" maxLength={120} />
-          </Form.Item>
+            <Form.Item label={<span className="font-semibold text-slate-700">Họ và tên *</span>} name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}>
+              <Input size="large" placeholder="Nguyễn Văn A" maxLength={120} />
+            </Form.Item>
 
-          <Form.Item label={<span className="font-semibold text-slate-700">Số điện thoại *</span>} name="phone" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
-            <Input size="large" type="tel" placeholder="0912 345 678" maxLength={13} />
-          </Form.Item>
+            <Form.Item label={<span className="font-semibold text-slate-700">Số điện thoại *</span>} name="phone" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
+              <Input size="large" type="tel" placeholder="0912 345 678" maxLength={13} />
+            </Form.Item>
 
-          <Form.Item label={<span className="font-semibold text-slate-700">Dịch vụ quan tâm</span>} name="service">
-            <Select size="large" placeholder="-- Chọn dịch vụ --">
-              <Option value="">-- Chọn dịch vụ --</Option>
-              {services.map((service) => (
-                <Option value={service._id} key={service._id}>
-                  {service.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+            <Form.Item label={<span className="font-semibold text-slate-700">Dịch vụ quan tâm</span>} name="service">
+              <Select size="large" placeholder="-- Chọn dịch vụ --">
+                <Option value="">-- Chọn dịch vụ --</Option>
+                {services.map((service) => (
+                  <Option value={service._id} key={service._id}>
+                    {service.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Button type="primary" htmlType="submit" size="large" className="w-full h-12 rounded-xl flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-primary-600 to-teal-500 border-none hover:shadow-lg" loading={loading} icon={<Send size={20} />}>
+            <Button type="primary" htmlType="submit" size="large" className="w-full h-12 rounded-xl flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-primary-600 to-teal-500 border-none hover:shadow-lg" loading={loading} icon={<Send size={20} />}>
             Gửi đăng ký tư vấn miễn phí
-          </Button>
-        </Form>
+            </Button>
+          </Form>
+        </div>
       </div>
     </section>
   );
