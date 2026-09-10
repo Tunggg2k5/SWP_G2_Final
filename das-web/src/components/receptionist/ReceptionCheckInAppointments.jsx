@@ -1,10 +1,12 @@
 import { ReceiptText, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Select, Input, Table, Radio, Button, Card } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Select, Input, Table, Radio, Button, Card, Flex, Space, Typography, Row, Col } from "antd";
+import { SearchOutlined, CheckCircleFilled } from "@ant-design/icons";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
 import { formatDateTime, formatMoney } from "../../utils/format.js";
+
+const { Title, Text } = Typography;
 
 const paymentMethodLabels = {
   cash: "Tiền mặt",
@@ -78,42 +80,48 @@ export default function ReceptionCheckInAppointments({
   }, [checkInAppointments, invoiceFilter, invoiceSearch]);
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-center gap-2 mb-2">
-        <ReceiptText size={20} className="text-primary-600" />
-        <h2 className="text-lg font-bold text-slate-800">Hóa đơn và thanh toán</h2>
-      </div>
-      <p className="text-sm text-slate-500">Các lịch đã hoàn tất sẽ xuất hiện ở đây để lễ tân tạo hóa đơn và ghi nhận thanh toán.</p>
+    <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
+      <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Flex align="center" gap="small">
+          <ReceiptText size={20} color="#1890ff" />
+          <Title level={4} style={{ margin: 0 }}>Hóa đơn và thanh toán</Title>
+        </Flex>
+        <Text type="secondary">Các lịch đã hoàn tất sẽ xuất hiện ở đây để lễ tân tạo hóa đơn và ghi nhận thanh toán.</Text>
+      </Space>
 
-      <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">Trạng thái thanh toán</span>
-          <Select
-            value={invoiceFilter}
-            onChange={setInvoiceFilter}
-            options={[
-              { value: "unpaid", label: "Chưa trả" },
-              { value: "partial", label: "Đang trả theo tháng" },
-              { value: "paid", label: "Đã trả đủ" },
-              { value: "all", label: "Tất cả" }
-            ]}
-          />
-        </div>
-        <div className="flex items-center gap-2 grow max-w-md">
-          <span className="text-sm font-medium text-slate-700">Tìm bệnh nhân</span>
-          <Input
-            prefix={<SearchOutlined className="text-slate-400" />}
-            value={invoiceSearch}
-            onChange={(e) => setInvoiceSearch(e.target.value)}
-            placeholder="Tên hoặc SĐT"
-          />
-        </div>
+      <div style={{ backgroundColor: '#fafafa', padding: 16, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+        <Flex wrap="wrap" align="center" gap="middle">
+          <Flex align="center" gap="small">
+            <Text strong>Trạng thái thanh toán</Text>
+            <Select
+              value={invoiceFilter}
+              onChange={setInvoiceFilter}
+              options={[
+                { value: "unpaid", label: "Chưa trả" },
+                { value: "partial", label: "Đang trả theo tháng" },
+                { value: "paid", label: "Đã trả đủ" },
+                { value: "all", label: "Tất cả" }
+              ]}
+              style={{ width: 150 }}
+            />
+          </Flex>
+          <Flex align="center" gap="small" style={{ flexGrow: 1, maxWidth: 448 }}>
+            <Text strong>Tìm bệnh nhân</Text>
+            <Input
+              prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+              value={invoiceSearch}
+              onChange={(e) => setInvoiceSearch(e.target.value)}
+              placeholder="Tên hoặc SĐT"
+              style={{ width: '100%' }}
+            />
+          </Flex>
+        </Flex>
       </div>
 
       {loading ? (
         <EmptyState title="Đang tải hóa đơn" text="Hệ thống đang lấy dữ liệu mới nhất." />
       ) : filteredAppointments.length ? (
-        <div className="space-y-6">
+        <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
           {filteredAppointments.map((appointment) => {
             const invoice = appointment.invoice;
             const invoicePlan = getInvoicePlan(invoicePlans, appointment._id);
@@ -130,13 +138,17 @@ export default function ReceptionCheckInAppointments({
             const canDeleteEmptyInvoice = !invoice && total <= 0 && !hasServiceItems;
             
             return (
-              <Card className="shadow-sm relative overflow-hidden" styles={{ body: { padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' } }} key={appointment._id}>
+              <Card 
+                key={appointment._id}
+                style={{ overflow: 'hidden', position: 'relative' }}
+                styles={{ body: { padding: 24 } }}
+              >
                 {canDeleteEmptyInvoice && (
                   <Button
                     type="text"
                     danger
                     icon={<Trash2 size={16} />}
-                    className="absolute top-4 right-4"
+                    style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}
                     onClick={() => onDeleteEmptyInvoice(appointment)}
                     title="Xóa dòng chưa có dịch vụ phát sinh"
                   >
@@ -144,201 +156,209 @@ export default function ReceptionCheckInAppointments({
                   </Button>
                 )}
 
-                <div className="flex flex-col md:flex-row gap-6 justify-between">
-                  <div className="space-y-4 flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <Row gutter={[24, 24]}>
+                  <Col span={24}>
+                    <Flex justify="space-between" align="flex-start" wrap="wrap" gap="small">
                       <div>
-                        <h4 className="font-bold text-slate-800 text-lg">{appointment.patient?.fullName || "Bệnh nhân"}</h4>
-                        <p className="text-slate-500 text-sm">{appointment.patient?.phone || "Chưa có SĐT"}</p>
+                        <Title level={5} style={{ margin: 0, paddingRight: 60 }}>{appointment.patient?.fullName || "Bệnh nhân"}</Title>
+                        <Text type="secondary">{appointment.patient?.phone || "Chưa có SĐT"}</Text>
                       </div>
                       <StatusBadge value={appointment.status} />
-                    </div>
+                    </Flex>
+                  </Col>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div>
-                        <strong className="block text-slate-800 mb-1">Thông tin dịch vụ</strong>
-                        <div className="text-sm text-slate-600 space-y-1">
-                          <p>{appointment.service?.name || "Dịch vụ"}</p>
-                          <p>Bác sĩ: {appointment.dentist?.fullName || "-"}</p>
-                          <p>Tạo hóa đơn: {invoice ? formatDateTime(invoice.invoiceDate || invoice.createdAt) : "Chưa tạo"}</p>
-                        </div>
+                  <Col span={24}>
+                    <div style={{ backgroundColor: '#fafafa', padding: 16, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+                      <Row gutter={[16, 16]}>
+                        <Col xs={24} sm={12}>
+                          <Text strong style={{ display: 'block', marginBottom: 8 }}>Thông tin dịch vụ</Text>
+                          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                            <Text type="secondary">{appointment.service?.name || "Dịch vụ"}</Text>
+                            <Text type="secondary">Bác sĩ: {appointment.dentist?.fullName || "-"}</Text>
+                            <Text type="secondary">Tạo hóa đơn: {invoice ? formatDateTime(invoice.invoiceDate || invoice.createdAt) : "Chưa tạo"}</Text>
+                          </Space>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Text strong style={{ display: 'block', marginBottom: 8 }}>Tiến độ thanh toán</Text>
+                          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                            <Flex align="center" gap="small">
+                              <Text type="secondary">Đã trả:</Text>
+                              <Text strong style={{ color: '#52c41a' }}>{formatMoney(paidAmount)}</Text>
+                            </Flex>
+                            <Flex align="center" gap="small">
+                              <Text type="secondary">Tổng cộng:</Text>
+                              <Text strong>{formatMoney(total)}</Text>
+                            </Flex>
+                            {invoice && <StatusBadge value={invoice.status} />}
+                          </Space>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Col>
+
+                  <Col span={24}>
+                    <div style={{ borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+                      <Table 
+                        dataSource={items}
+                        pagination={false}
+                        rowKey={(record, index) => `${appointment._id}-item-${index}`}
+                        columns={[
+                          { title: 'Chi tiết dịch vụ / Phát sinh', dataIndex: 'name', key: 'name' },
+                          { 
+                            title: 'Thành tiền', 
+                            key: 'amount', 
+                            align: 'right',
+                            render: (_, item) => <Text strong>{formatMoney(Number(item.amount || item.price || 0))}</Text>
+                          }
+                        ]}
+                        locale={{ emptyText: <Text type="secondary" italic>Chưa có dịch vụ phát sinh</Text> }}
+                      />
+                    </div>
+                  </Col>
+
+                  {invoice?.payments?.length ? (
+                    <Col span={24}>
+                      <div style={{ backgroundColor: '#f6ffed', padding: 16, borderRadius: 8, border: '1px solid #b7eb8f' }}>
+                        <Text strong style={{ color: '#389e0d', display: 'block', marginBottom: 8 }}>Lịch sử thanh toán</Text>
+                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                          {invoice.payments.map((payment, index) => (
+                            <Flex justify="space-between" align="center" key={payment._id || `${invoice._id}-payment-${index}`}>
+                              <Text style={{ color: '#389e0d' }}>Lần {payment.installmentNumber || index + 1}: {formatDateTime(payment.paymentDate || payment.createdAt)} ({paymentMethodLabels[payment.paymentMethod] || payment.paymentMethod})</Text>
+                              <Text strong style={{ color: '#389e0d' }}>+{formatMoney(Number(payment.amount || 0))}</Text>
+                            </Flex>
+                          ))}
+                        </Space>
                       </div>
-                      <div>
-                        <strong className="block text-slate-800 mb-1">Tiến độ thanh toán</strong>
-                        <div className="text-sm space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-600">Đã trả:</span>
-                            <span className="font-bold text-emerald-600">{formatMoney(paidAmount)}</span>
+                    </Col>
+                  ) : null}
+
+                  <Col span={24}>
+                    <div style={{ backgroundColor: '#fafafa', padding: 20, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+                      {!invoice ? (
+                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                          <div>
+                            <Text strong style={{ display: 'block', marginBottom: 8 }}>Giảm giá</Text>
+                            <Select 
+                              value={invoicePlan.discountPercent}
+                              onChange={(val) => updateInvoicePlan(appointment._id, { discountPercent: val })}
+                              options={discountOptions.map(p => ({ value: p, label: `${p}%` }))}
+                              style={{ width: 120 }}
+                            />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-600">Tổng cộng:</span>
-                            <span className="font-bold text-slate-800">{formatMoney(total)}</span>
-                          </div>
-                          {invoice && <StatusBadge value={invoice.status} />}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
-                  <Table 
-                    dataSource={items}
-                    pagination={false}
-                    rowKey={(record, index) => `${appointment._id}-item-${index}`}
-                    columns={[
-                      { title: 'Chi tiết dịch vụ / Phát sinh', dataIndex: 'name', key: 'name' },
-                      { 
-                        title: 'Thành tiền', 
-                        key: 'amount', 
-                        align: 'right',
-                        render: (_, item) => <span className="font-medium text-slate-700">{formatMoney(Number(item.amount || item.price || 0))}</span> 
-                      }
-                    ]}
-                    locale={{ emptyText: <span className="italic text-slate-500">Chưa có dịch vụ phát sinh</span> }}
-                  />
-                </div>
-
-                {invoice?.payments?.length ? (
-                  <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                    <h5 className="font-semibold text-emerald-800 mb-2 text-sm">Lịch sử thanh toán</h5>
-                    <div className="space-y-2">
-                      {invoice.payments.map((payment, index) => (
-                        <div className="flex justify-between items-center text-sm" key={payment._id || `${invoice._id}-payment-${index}`}>
-                          <span className="text-emerald-700">Lần {payment.installmentNumber || index + 1}: {formatDateTime(payment.paymentDate || payment.createdAt)} ({paymentMethodLabels[payment.paymentMethod] || payment.paymentMethod})</span>
-                          <span className="font-bold text-emerald-700">+{formatMoney(Number(payment.amount || 0))}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-6">
-                  {!invoice ? (
-                    <>
-                      <div className="space-y-4">
-                        <div>
-                          <span className="block text-sm font-semibold text-slate-700 mb-2">Giảm giá</span>
-                          <Select 
-                            value={invoicePlan.discountPercent}
-                            onChange={(val) => updateInvoicePlan(appointment._id, { discountPercent: val })}
-                            options={discountOptions.map(p => ({ value: p, label: `${p}%` }))}
-                            className="w-32"
-                          />
-                        </div>
-
-                        <div>
-                          <span className="block text-sm font-semibold text-slate-700 mb-2">Hình thức thanh toán</span>
-                          <Radio.Group 
-                            value={selectedPaymentPlan}
-                            onChange={(e) => updateInvoicePlan(appointment._id, { paymentPlan: e.target.value })}
-                            className="flex flex-col sm:flex-row gap-3 w-full"
-                          >
-                            <Radio.Button value="one_time" className="h-auto p-4 flex-1 text-center">
-                              <span className="block font-semibold text-slate-800">Trả một lần</span>
-                              <span className="text-sm text-slate-500 block">Thanh toán toàn bộ {formatMoney(total)}</span>
-                            </Radio.Button>
-                            {canUseMonthlyPlan && (
-                              <Radio.Button value="monthly" className="h-auto p-4 flex-1 text-center">
-                                <span className="block font-semibold text-slate-800">Trả góp theo tháng</span>
-                                <span className="text-sm text-slate-500 block">Áp dụng cho hóa đơn từ 5tr</span>
-                              </Radio.Button>
-                            )}
-                          </Radio.Group>
-                        </div>
-
-                        {selectedPaymentPlan === "monthly" && (
-                          <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2">
-                            <span className="block text-sm font-semibold text-slate-700 mb-3">Kỳ hạn trả góp</span>
+                          <div>
+                            <Text strong style={{ display: 'block', marginBottom: 8 }}>Hình thức thanh toán</Text>
                             <Radio.Group 
-                              value={invoicePlan.installmentMonths}
-                              onChange={(e) => updateInvoicePlan(appointment._id, { installmentMonths: e.target.value })}
-                              className="w-full flex gap-3"
+                              value={selectedPaymentPlan}
+                              onChange={(e) => updateInvoicePlan(appointment._id, { paymentPlan: e.target.value })}
+                              style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}
                             >
-                              {installmentOptions.map(month => (
-                                <Radio.Button value={month} key={month} className="flex-1 text-center">
-                                  {month} tháng
+                              <Radio.Button value="one_time" style={{ height: 'auto', padding: 16, flex: 1, textAlign: 'center' }}>
+                                <Text strong style={{ display: 'block' }}>Trả một lần</Text>
+                                <Text type="secondary" style={{ fontSize: 12 }}>Thanh toán toàn bộ {formatMoney(total)}</Text>
+                              </Radio.Button>
+                              {canUseMonthlyPlan && (
+                                <Radio.Button value="monthly" style={{ height: 'auto', padding: 16, flex: 1, textAlign: 'center' }}>
+                                  <Text strong style={{ display: 'block' }}>Trả góp theo tháng</Text>
+                                  <Text type="secondary" style={{ fontSize: 12 }}>Áp dụng cho hóa đơn từ 5tr</Text>
                                 </Radio.Button>
-                              ))}
+                              )}
                             </Radio.Group>
-                            <div className="mt-3 bg-primary-50 text-primary-700 p-3 rounded-lg text-sm flex items-center justify-between">
-                              <span>Thanh toán mỗi kỳ:</span>
-                              <strong className="text-base">{formatMoney(plannedInstallmentAmount)}/tháng</strong>
+                          </div>
+
+                          {selectedPaymentPlan === "monthly" && (
+                            <div style={{ backgroundColor: '#fff', padding: 16, borderRadius: 8, border: '1px solid #f0f0f0', marginTop: 12 }}>
+                              <Text strong style={{ display: 'block', marginBottom: 12 }}>Kỳ hạn trả góp</Text>
+                              <Radio.Group 
+                                value={invoicePlan.installmentMonths}
+                                onChange={(e) => updateInvoicePlan(appointment._id, { installmentMonths: e.target.value })}
+                                style={{ display: 'flex', gap: 12, width: '100%' }}
+                              >
+                                {installmentOptions.map(month => (
+                                  <Radio.Button value={month} key={month} style={{ flex: 1, textAlign: 'center' }}>
+                                    {month} tháng
+                                  </Radio.Button>
+                                ))}
+                              </Radio.Group>
+                              <div style={{ marginTop: 16, backgroundColor: '#e6f4ff', padding: 12, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Text style={{ color: '#1677ff' }}>Thanh toán mỗi kỳ:</Text>
+                                <Text strong style={{ color: '#1677ff', fontSize: 16 }}>{formatMoney(plannedInstallmentAmount)}/tháng</Text>
+                              </div>
+                            </div>
+                          )}
+
+                          {total > 0 ? (
+                            <Button
+                              type="primary"
+                              size="large"
+                              style={{ width: '100%', marginTop: 8 }}
+                              onClick={() => generateInvoice(appointment)}
+                            >
+                              Tạo hóa đơn {formatMoney(total)}
+                            </Button>
+                          ) : (
+                            <div style={{ backgroundColor: '#fffbe6', color: '#d48806', padding: 16, borderRadius: 8, textAlign: 'center', fontWeight: 'bold', border: '1px solid #ffe58f' }}>
+                              Chưa có dịch vụ phát sinh để tạo hóa đơn
+                            </div>
+                          )}
+                        </Space>
+                      ) : remaining > 0 ? (
+                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                          <div style={{ backgroundColor: '#e6f4ff', padding: 16, borderRadius: 8, border: '1px solid #91caff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <Text style={{ color: '#1677ff', display: 'block', marginBottom: 4 }}>Cần thu lần {nextPayment.installmentNumber}</Text>
+                              <Title level={3} style={{ margin: 0, color: '#0958d9' }}>{formatMoney(nextPayment.amount)}</Title>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <Text style={{ color: '#1677ff', fontSize: 12, display: 'block', marginBottom: 4 }}>Còn lại sau khi thu</Text>
+                              <Text strong>{formatMoney(remaining - nextPayment.amount)}</Text>
                             </div>
                           </div>
-                        )}
-                      </div>
 
-                      {total > 0 ? (
-                        <Button
-                          type="primary"
-                          size="large"
-                          className="w-full bg-primary-600 hover:bg-primary-500"
-                          onClick={() => generateInvoice(appointment)}
-                        >
-                          Tạo hóa đơn {formatMoney(total)}
-                        </Button>
+                          <div>
+                            <Text strong style={{ display: 'block', marginBottom: 8 }}>Phương thức thanh toán</Text>
+                            <Radio.Group 
+                              value={paymentMethods[appointment._id] || "cash"}
+                              onChange={(e) => setPaymentMethods((current) => ({ ...current, [appointment._id]: e.target.value }))}
+                              style={{ display: 'flex', gap: 12, width: '100%', flexWrap: 'wrap' }}
+                            >
+                              <Radio.Button value="cash" style={{ flex: 1, height: 'auto', padding: 12, textAlign: 'center', borderRadius: 8 }}>
+                                <Text strong>Tiền mặt</Text>
+                              </Radio.Button>
+                              <Radio.Button value="bank_transfer" style={{ flex: 1, height: 'auto', padding: 12, textAlign: 'center', borderRadius: 8 }}>
+                                <Text strong>Chuyển khoản</Text>
+                              </Radio.Button>
+                              <Radio.Button value="card" style={{ flex: 1, height: 'auto', padding: 12, textAlign: 'center', borderRadius: 8 }}>
+                                <Text strong>Thẻ</Text>
+                              </Radio.Button>
+                            </Radio.Group>
+                          </div>
+
+                          <Button
+                            type="primary"
+                            size="large"
+                            style={{ width: '100%' }}
+                            onClick={() => processPayment(appointment)}
+                          >
+                            Ghi nhận thanh toán {formatMoney(nextPayment.amount)}
+                          </Button>
+                        </Space>
                       ) : (
-                        <div className="bg-amber-50 text-amber-700 p-4 rounded-xl text-center font-medium border border-amber-100">
-                          Chưa có dịch vụ phát sinh để tạo hóa đơn
+                        <div style={{ backgroundColor: '#f6ffed', color: '#389e0d', padding: 16, borderRadius: 8, textAlign: 'center', fontWeight: 'bold', border: '1px solid #b7eb8f', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                          <CheckCircleFilled />
+                          Đã thanh toán đủ
                         </div>
                       )}
-                    </>
-                  ) : remaining > 0 ? (
-                    <div className="space-y-4">
-                      <div className="bg-primary-50 text-primary-800 p-4 rounded-xl border border-primary-100 flex items-center justify-between">
-                        <div>
-                          <span className="block text-sm text-primary-600 mb-1">Cần thu lần {nextPayment.installmentNumber}</span>
-                          <strong className="text-2xl">{formatMoney(nextPayment.amount)}</strong>
-                        </div>
-                        <div className="text-right">
-                          <span className="block text-xs text-primary-600 mb-1">Còn lại sau khi thu</span>
-                          <span className="font-semibold">{formatMoney(remaining - nextPayment.amount)}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <span className="block text-sm font-semibold text-slate-700 mb-2">Phương thức thanh toán</span>
-                        <Radio.Group 
-                          value={paymentMethods[appointment._id] || "cash"}
-                          onChange={(e) => setPaymentMethods((current) => ({ ...current, [appointment._id]: e.target.value }))}
-                          className="flex flex-wrap sm:flex-nowrap gap-3 w-full"
-                        >
-                          <Radio.Button value="cash" className="flex-1 h-auto py-3 text-center rounded-lg">
-                            <span className="font-semibold block">Tiền mặt</span>
-                          </Radio.Button>
-                          <Radio.Button value="bank_transfer" className="flex-1 h-auto py-3 text-center rounded-lg">
-                            <span className="font-semibold block">Chuyển khoản</span>
-                          </Radio.Button>
-                          <Radio.Button value="card" className="flex-1 h-auto py-3 text-center rounded-lg">
-                            <span className="font-semibold block">Thẻ</span>
-                          </Radio.Button>
-                        </Radio.Group>
-                      </div>
-
-                      <Button
-                        type="primary"
-                        size="large"
-                        className="w-full bg-primary-600 hover:bg-primary-500 shadow-md hover:shadow-lg"
-                        onClick={() => processPayment(appointment)}
-                      >
-                        Ghi nhận thanh toán {formatMoney(nextPayment.amount)}
-                      </Button>
                     </div>
-                  ) : (
-                    <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center font-bold border border-emerald-200 text-lg flex items-center justify-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center">✓</div>
-                      Đã thanh toán đủ
-                    </div>
-                  )}
-                </div>
+                  </Col>
+                </Row>
               </Card>
             );
           })}
-        </div>
+        </Space>
       ) : (
         <EmptyState title="Chưa có hóa đơn phù hợp" text="Mặc định màn này hiển thị các hóa đơn chưa trả." />
       )}
-    </section>
+    </Space>
   );
 }

@@ -407,7 +407,7 @@ export default function AdminDashboard() {
   const tabItems = [
     {
       key: "stats",
-      label: <span className="flex items-center gap-2"><BarChart3 size={16} /> Thống kê</span>,
+      label: <span style={{ display: "flex", alignItems: "center", gap: 8 }}><BarChart3 size={16} /> Thống kê</span>,
       children: (
         <AdminReportPanel
           onLoadPatientStatistics={loadPatientStatistics}
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
     },
     {
       key: "users",
-      label: <span className="flex items-center gap-2"><UsersRound size={16} /> Tài khoản</span>,
+      label: <span style={{ display: "flex", alignItems: "center", gap: 8 }}><UsersRound size={16} /> Tài khoản</span>,
       children: (
         <AccountManagement
           editingUser={editingUser}
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
     },
     {
       key: "services",
-      label: <span className="flex items-center gap-2"><Settings2 size={16} /> Dịch vụ</span>,
+      label: <span style={{ display: "flex", alignItems: "center", gap: 8 }}><Settings2 size={16} /> Dịch vụ</span>,
       children: (
         <DentalServiceManagement
           editingService={editingService}
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
     },
     {
       key: "rooms",
-      label: <span className="flex items-center gap-2"><DoorOpen size={16} /> Phòng khám</span>,
+      label: <span style={{ display: "flex", alignItems: "center", gap: 8 }}><DoorOpen size={16} /> Phòng khám</span>,
       children: (
         <ClinicRoomManagement
           dentistUsers={dentistUsers}
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
     },
     {
       key: "reviews",
-      label: <span className="flex items-center gap-2"><Star size={16} /> Đánh giá</span>,
+      label: <span style={{ display: "flex", alignItems: "center", gap: 8 }}><Star size={16} /> Đánh giá</span>,
       children: (
         <AdminReviewList loading={loading} onToggleVisibility={toggleReviewVisibility} reviews={reviews} />
       )
@@ -490,15 +490,16 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-      <Feedback error={error} message={message} />
-      <Tabs
-        activeKey={activeFeature}
-        onChange={handleTabChange}
-        items={tabItems}
-        renderTabBar={() => null}
-        className="bg-white p-4 rounded-xl shadow-sm"
-      />
+    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 16px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <Feedback error={error} message={message} />
+        <Tabs
+          activeKey={activeFeature}
+          onChange={handleTabChange}
+          items={tabItems}
+          style={{ backgroundColor: "#ffffff", padding: 16, borderRadius: 12, boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+        />
+      </div>
     </div>
   );
 }

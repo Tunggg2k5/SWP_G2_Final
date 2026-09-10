@@ -1,8 +1,10 @@
 import { KeyOutlined, EditOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Modal, Select, Space, Table, Tag } from "antd";
+import { Button, Card, Input, Modal, Select, Space, Table, Tag, Typography, Row, Col, Flex } from "antd";
 import { useMemo, useState } from "react";
 import StatusBadge from "../StatusBadge.jsx";
 import { roleLabels } from "../../utils/roles.js";
+
+const { Text } = Typography;
 
 export default function AccountManagement({
   editingUser,
@@ -34,8 +36,7 @@ export default function AccountManagement({
       title: "Tên",
       dataIndex: "fullName",
       key: "fullName",
-      fontWeight: "bold",
-      render: (text) => <span className="font-medium text-slate-900">{text}</span>
+      render: (text) => <span style={{ fontWeight: 500, color: "#0f172a" }}>{text}</span>
     },
     {
       title: "Email",
@@ -83,54 +84,82 @@ export default function AccountManagement({
   ];
 
   return (
-    <div className="space-y-6">
-      <Card title={<><UserOutlined className="text-primary-600 mr-2" /> Tạo tài khoản</>} className="shadow-sm">
-        <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" onSubmit={onCreateUser}>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">Họ tên</span>
-            <Input value={userForm.fullName} onChange={(event) => onUserFormChange({ fullName: event.target.value })} required />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">Email</span>
-            <Input type="email" value={userForm.email || ""} onChange={(event) => onUserFormChange({ email: event.target.value })} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
-            <Input value={userForm.phone} onChange={(event) => onUserFormChange({ phone: event.target.value })} />
-          </div>
-          <div className="flex flex-col gap-1.5 md:col-span-2">
-            <span className="text-sm font-medium text-slate-700">Địa chỉ</span>
-            <Input value={userForm.address || ""} onChange={(event) => onUserFormChange({ address: event.target.value })} maxLength={255} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">Vai trò</span>
-            <Select value={userForm.role} onChange={(value) => onUserFormChange({ role: value })}>
-              <Select.Option value="patient">Bệnh nhân</Select.Option>
-              <Select.Option value="receptionist">Lễ tân</Select.Option>
-              <Select.Option value="dentist">Bác sĩ</Select.Option>
-              <Select.Option value="nurse">Y tá</Select.Option>
-              <Select.Option value="admin">Quản trị viên</Select.Option>
-            </Select>
-          </div>
-          <div className="md:col-span-full pt-2">
-            <Button type="primary" htmlType="submit" className="w-full md:w-auto">Tạo tài khoản</Button>
-          </div>
+    <Space direction="vertical" size="large" style={{ display: "flex" }}>
+      <Card 
+        title={
+          <Space>
+            <UserOutlined style={{ color: "#2563eb" }} /> 
+            <span>Tạo tài khoản</span>
+          </Space>
+        } 
+        style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+      >
+        <form onSubmit={onCreateUser}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12} lg={8}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Họ tên</Text>
+                <Input value={userForm.fullName} onChange={(event) => onUserFormChange({ fullName: event.target.value })} required />
+              </Space>
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Email</Text>
+                <Input type="email" value={userForm.email || ""} onChange={(event) => onUserFormChange({ email: event.target.value })} />
+              </Space>
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Số điện thoại</Text>
+                <Input value={userForm.phone} onChange={(event) => onUserFormChange({ phone: event.target.value })} />
+              </Space>
+            </Col>
+            <Col xs={24} md={12} lg={16}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Địa chỉ</Text>
+                <Input value={userForm.address || ""} onChange={(event) => onUserFormChange({ address: event.target.value })} maxLength={255} />
+              </Space>
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Vai trò</Text>
+                <Select style={{ width: "100%" }} value={userForm.role} onChange={(value) => onUserFormChange({ role: value })}>
+                  <Select.Option value="patient">Bệnh nhân</Select.Option>
+                  <Select.Option value="receptionist">Lễ tân</Select.Option>
+                  <Select.Option value="dentist">Bác sĩ</Select.Option>
+                  <Select.Option value="nurse">Y tá</Select.Option>
+                  <Select.Option value="admin">Quản trị viên</Select.Option>
+                </Select>
+              </Space>
+            </Col>
+            <Col span={24}>
+              <Button type="primary" htmlType="submit">Tạo tài khoản</Button>
+            </Col>
+          </Row>
         </form>
       </Card>
 
-      <Card title={<><UserOutlined className="text-primary-600 mr-2" /> Tài khoản hệ thống</>} className="shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4 items-center mb-6">
+      <Card 
+        title={
+          <Space>
+            <UserOutlined style={{ color: "#2563eb" }} /> 
+            <span>Tài khoản hệ thống</span>
+          </Space>
+        } 
+        style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+      >
+        <Flex gap="middle" align="center" style={{ marginBottom: 24 }} wrap="wrap">
           <Input
-            prefix={<SearchOutlined className="text-slate-400" />}
+            prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
             placeholder="Tìm theo tên..."
             value={filters.name}
             onChange={(event) => setFilters((current) => ({ ...current, name: event.target.value }))}
-            className="w-full md:w-64"
+            style={{ width: "100%", maxWidth: 256 }}
           />
           <Select
             value={filters.role}
             onChange={(value) => setFilters((current) => ({ ...current, role: value }))}
-            className="w-full md:w-auto min-w-[120px]"
+            style={{ width: "100%", maxWidth: 160 }}
             options={[
               { value: "all", label: "Tất cả" },
               { value: "patient", label: "Bệnh nhân" },
@@ -140,7 +169,7 @@ export default function AccountManagement({
               { value: "admin", label: "Quản trị viên" }
             ]}
           />
-        </div>
+        </Flex>
 
         <Table
           dataSource={visibleUsers}
@@ -160,40 +189,42 @@ export default function AccountManagement({
         destroyOnClose
       >
         {editingUser && (
-          <form className="flex flex-col gap-4 mt-4" onSubmit={onSubmitEditUser}>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Họ tên</span>
-              <Input value={editingUser.fullName || ""} onChange={(event) => onEditingUserChange({ fullName: event.target.value })} required />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Email</span>
-              <Input type="email" value={editingUser.email || ""} onChange={(event) => onEditingUserChange({ email: event.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
-              <Input value={editingUser.phone || ""} onChange={(event) => onEditingUserChange({ phone: event.target.value })} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Địa chỉ</span>
-              <Input value={editingUser.address || ""} onChange={(event) => onEditingUserChange({ address: event.target.value })} maxLength={255} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Vai trò</span>
-              <Select value={editingUser.role || "patient"} onChange={(value) => onEditingUserChange({ role: value })}>
-                <Select.Option value="patient">Bệnh nhân</Select.Option>
-                <Select.Option value="receptionist">Lễ tân</Select.Option>
-                <Select.Option value="dentist">Bác sĩ</Select.Option>
-                <Select.Option value="nurse">Y tá</Select.Option>
-                <Select.Option value="admin">Quản trị viên</Select.Option>
-              </Select>
-            </div>
-            <div className="flex items-center justify-end gap-3 pt-4">
-              <Button onClick={onCancelEditUser}>Hủy</Button>
-              <Button type="primary" htmlType="submit">Lưu cập nhật</Button>
-            </div>
+          <form onSubmit={onSubmitEditUser}>
+            <Space direction="vertical" size="middle" style={{ width: "100%", marginTop: 16 }}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Họ tên</Text>
+                <Input value={editingUser.fullName || ""} onChange={(event) => onEditingUserChange({ fullName: event.target.value })} required />
+              </Space>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Email</Text>
+                <Input type="email" value={editingUser.email || ""} onChange={(event) => onEditingUserChange({ email: event.target.value })} />
+              </Space>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Số điện thoại</Text>
+                <Input value={editingUser.phone || ""} onChange={(event) => onEditingUserChange({ phone: event.target.value })} />
+              </Space>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Địa chỉ</Text>
+                <Input value={editingUser.address || ""} onChange={(event) => onEditingUserChange({ address: event.target.value })} maxLength={255} />
+              </Space>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Text strong style={{ color: "#334155" }}>Vai trò</Text>
+                <Select style={{ width: "100%" }} value={editingUser.role || "patient"} onChange={(value) => onEditingUserChange({ role: value })}>
+                  <Select.Option value="patient">Bệnh nhân</Select.Option>
+                  <Select.Option value="receptionist">Lễ tân</Select.Option>
+                  <Select.Option value="dentist">Bác sĩ</Select.Option>
+                  <Select.Option value="nurse">Y tá</Select.Option>
+                  <Select.Option value="admin">Quản trị viên</Select.Option>
+                </Select>
+              </Space>
+              <Flex justify="flex-end" gap="small" style={{ marginTop: 16 }}>
+                <Button onClick={onCancelEditUser}>Hủy</Button>
+                <Button type="primary" htmlType="submit">Lưu cập nhật</Button>
+              </Flex>
+            </Space>
           </form>
         )}
       </Modal>
-    </div>
+    </Space>
   );
 }

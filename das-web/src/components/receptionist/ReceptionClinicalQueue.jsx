@@ -1,11 +1,13 @@
 import { CalendarDays, DoorOpen } from "lucide-react";
 import { useState } from "react";
-import { Card, Button, DatePicker, Select, Popconfirm, Tag } from "antd";
+import { Card, Button, DatePicker, Select, Popconfirm, Flex, Space, Typography, Row, Col, Input } from "antd";
 import dayjs from "dayjs";
 import EmptyState from "../EmptyState.jsx";
 import StatusBadge from "../StatusBadge.jsx";
 import { clinicDateInput, filterOpenSlotsForDate, formatTime, getAppointmentSlot, todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
+
+const { Title, Text } = Typography;
 
 export default function ReceptionClinicalQueue({
   allSlotOptions = [],
@@ -29,43 +31,45 @@ export default function ReceptionClinicalQueue({
   const [editingAppointmentId, setEditingAppointmentId] = useState("");
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <CalendarDays size={20} className="text-primary-600" />
-        <h2 className="text-lg font-bold text-slate-800">Lịch khám theo thứ tự có mặt</h2>
-      </div>
+    <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
+      <Flex align="center" gap="small">
+        <CalendarDays size={20} color="#1890ff" />
+        <Title level={4} style={{ margin: 0 }}>Lịch khám theo thứ tự có mặt</Title>
+      </Flex>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <Row gutter={[16, 16]}>
         {rooms.map((room) => (
-          <Card key={room._id} className="shadow-sm" styles={{ body: { padding: '16px' } }}>
-            <div className="flex items-start gap-3">
-              <DoorOpen size={24} className="text-primary-500 shrink-0 mt-1" />
-              <div className="flex-1">
-                <strong className="block text-slate-800">{room.name}</strong>
-                <span className="text-sm text-slate-500 block mb-2">{room.assignedDentist?.fullName || "Chưa có bác sĩ phụ trách"}</span>
-                <StatusBadge value={room.status} />
-              </div>
-            </div>
-          </Card>
+          <Col xs={24} sm={12} lg={8} xl={6} key={room._id}>
+            <Card styles={{ body: { padding: 16 } }}>
+              <Flex align="flex-start" gap="small">
+                <DoorOpen size={24} color="#1890ff" style={{ marginTop: 4, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ display: 'block' }}>{room.name}</Text>
+                  <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 13 }}>{room.assignedDentist?.fullName || "Chưa có bác sĩ phụ trách"}</Text>
+                  <StatusBadge value={room.status} />
+                </div>
+              </Flex>
+            </Card>
+          </Col>
         ))}
-      </div>
+      </Row>
 
-      <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">Ngày</span>
+      <div style={{ backgroundColor: '#fafafa', padding: 16, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+        <Flex align="center" gap="small">
+          <Text strong>Ngày</Text>
           <DatePicker
             value={date ? dayjs(date) : null}
             onChange={(d, dateString) => setDate(dateString)}
             format="YYYY-MM-DD"
             allowClear={false}
           />
-        </div>
+        </Flex>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <Flex wrap="wrap" gap="small">
         {allSlotOptions.map((slot) => (
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm" key={slot._id || slot.slotId}>
-            <span className="text-sm font-medium text-slate-700">{slot.label}</span>
+          <Flex align="center" gap="small" style={{ backgroundColor: '#fff', padding: '6px 12px', borderRadius: 8, border: '1px solid #f0f0f0' }} key={slot._id || slot.slotId}>
+            <Text strong>{slot.label}</Text>
             <StatusBadge value={slot.isClosed ? "closed" : "active"} />
             <Popconfirm
               title={slot.isClosed ? `Mở lại ${slot.label} trong ngày ${date}?` : `Đóng ${slot.label} trong ngày ${date}?`}
@@ -73,46 +77,46 @@ export default function ReceptionClinicalQueue({
               okText="Đồng ý"
               cancelText="Hủy"
             >
-              <Button size="small" type={slot.isClosed ? "default" : "dashed"} danger={!slot.isClosed} className={slot.isClosed ? "text-emerald-600 border-emerald-300 bg-emerald-50 hover:bg-emerald-100" : ""}>
+              <Button size="small" type={slot.isClosed ? "default" : "dashed"} danger={!slot.isClosed} style={slot.isClosed ? { color: '#52c41a', borderColor: '#b7eb8f', backgroundColor: '#f6ffed' } : {}}>
                 {slot.isClosed ? "Mở giờ" : "Đóng giờ"}
               </Button>
             </Popconfirm>
-          </div>
+          </Flex>
         ))}
-      </div>
+      </Flex>
 
       {loading ? (
         <EmptyState title="Đang tải lịch khám" text="Hệ thống đang lấy dữ liệu mới nhất." />
       ) : dentistColumns.length ? (
-        <div className="overflow-x-auto pb-4">
-          <div className="min-w-max border border-slate-200 rounded-xl bg-white overflow-hidden">
-            <div
-              className="grid border-b border-slate-200 bg-slate-50"
-              style={{ gridTemplateColumns: `130px repeat(${dentistColumns.length}, minmax(300px, 1fr))` }}
-            >
-              <div className="p-4 font-semibold text-slate-700 border-r border-slate-200 flex items-center justify-center">Khung giờ</div>
+        <div style={{ overflowX: 'auto', paddingBottom: 16 }}>
+          <div style={{ minWidth: 'max-content', border: '1px solid #f0f0f0', borderRadius: 12, backgroundColor: '#fff', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `130px repeat(${dentistColumns.length}, minmax(300px, 1fr))`, borderBottom: '1px solid #f0f0f0', backgroundColor: '#fafafa' }}>
+              <Flex align="center" justify="center" style={{ padding: 16, borderRight: '1px solid #f0f0f0' }}>
+                <Text strong>Khung giờ</Text>
+              </Flex>
               {dentistColumns.map((dentist) => (
-                <div className="p-4 text-center border-r border-slate-200 last:border-0" key={dentist._id}>
-                  <strong className="block text-slate-800">{dentist.fullName}</strong>
-                  <span className="text-sm text-slate-500">{dentist.roomName || "Chưa gán phòng"}</span>
+                <div style={{ padding: 16, textAlign: 'center', borderRight: '1px solid #f0f0f0' }} key={dentist._id}>
+                  <Text strong style={{ display: 'block' }}>{dentist.fullName}</Text>
+                  <Text type="secondary">{dentist.roomName || "Chưa gán phòng"}</Text>
                 </div>
               ))}
             </div>
 
             {queueSlots.map(({ slot, dentistQueues }) => (
               <div
-                className="grid border-b border-slate-200 last:border-0"
-                style={{ gridTemplateColumns: `130px repeat(${dentistColumns.length}, minmax(300px, 1fr))` }}
+                style={{ display: 'grid', gridTemplateColumns: `130px repeat(${dentistColumns.length}, minmax(300px, 1fr))`, borderBottom: '1px solid #f0f0f0' }}
                 key={slot.slotId}
               >
-                <div className="p-4 border-r border-slate-200 flex flex-col items-center justify-center bg-slate-50/50">
-                  <strong className="text-primary-700 bg-primary-50 px-3 py-1 rounded-lg block text-center mb-1">{slot.slotName}</strong>
-                  <span className="text-xs text-slate-500">{slot.timeLabel}</span>
-                </div>
+                <Flex vertical align="center" justify="center" style={{ padding: 16, borderRight: '1px solid #f0f0f0', backgroundColor: 'rgba(250, 250, 250, 0.5)' }}>
+                  <div style={{ color: '#0958d9', backgroundColor: '#e6f4ff', padding: '4px 12px', borderRadius: 8, textAlign: 'center', marginBottom: 4, fontWeight: 'bold' }}>
+                    {slot.slotName}
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{slot.timeLabel}</Text>
+                </Flex>
                 {dentistQueues.map(({ dentist, appointments }) => (
-                  <div className="p-3 border-r border-slate-200 last:border-0 bg-slate-50/30" key={`${slot.slotId}-${dentist._id}`}>
+                  <div style={{ padding: 12, borderRight: '1px solid #f0f0f0', backgroundColor: 'rgba(250, 250, 250, 0.3)' }} key={`${slot.slotId}-${dentist._id}`}>
                     {appointments.length ? (
-                      <div className="space-y-3">
+                      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                         {appointments.map((appointment) => {
                           const locked = isLockedScheduleAppointment(appointment);
                           const appointmentDate = clinicDateInput(appointment.startAt);
@@ -132,68 +136,72 @@ export default function ReceptionClinicalQueue({
                           const arrivalTime = isArrivalTimeInsideSlot(manualForm.arrivalTime, selectedSlot) ? manualForm.arrivalTime : selectedSlot?.value || "";
 
                           return (
-                            <Card className={`shadow-sm ${locked ? "opacity-60 bg-slate-50" : ""}`} styles={{ body: { padding: '12px' } }} key={appointment._id}>
-                              <div className="mb-3">
-                                <div className="flex items-start gap-2 mb-2">
-                                  {queueNumber && <span className="w-8 h-8 rounded-full bg-primary-600 text-white font-bold flex items-center justify-center shrink-0 text-sm">STT {queueNumber}</span>}
-                                  <strong className="text-slate-800 text-sm">{[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
+                            <Card style={{ opacity: locked ? 0.6 : 1, backgroundColor: locked ? '#fafafa' : '#fff' }} styles={{ body: { padding: 12 } }} key={appointment._id}>
+                              <div style={{ marginBottom: 12 }}>
+                                <Flex align="flex-start" gap="small" style={{ marginBottom: 8 }}>
+                                  {queueNumber && <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1677ff', color: '#fff', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12 }}>STT {queueNumber}</div>}
+                                  <Text strong style={{ fontSize: 13 }}>{[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")}</Text>
+                                </Flex>
+                                <Space direction="vertical" size={2} style={{ marginBottom: 8 }}>
+                                  <Text type="secondary" style={{ fontSize: 12 }}>{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng"}</Text>
+                                  <Text type="secondary" style={{ fontSize: 12 }}>Giờ khám: {formatTime(appointment.startAt)}</Text>
+                                  {appointment.checkedInAt && <Text type="secondary" style={{ fontSize: 12 }}>Có mặt: {formatTime(appointment.checkedInAt)}</Text>}
+                                </Space>
+                                <div style={{ marginBottom: 4 }}>
+                                  <StatusBadge value={appointment.status} />
                                 </div>
-                                <div className="text-xs text-slate-600 space-y-1 mb-2">
-                                  <div>{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng"}</div>
-                                  <div>Giờ khám: {formatTime(appointment.startAt)}</div>
-                                  {appointment.checkedInAt && <div>Có mặt: {formatTime(appointment.checkedInAt)}</div>}
-                                </div>
-                                <StatusBadge value={appointment.status} />
-                                {locked && <p className="text-xs text-rose-500 mt-2">Lịch đã hủy hoặc bị từ chối, không thể đổi trạng thái.</p>}
+                                {locked && <Text type="danger" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>Lịch đã hủy hoặc bị từ chối, không thể đổi trạng thái.</Text>}
                                 {isFutureAppointment && ["scheduled", "confirmed"].includes(appointment.status) && (
-                                  <p className="text-xs text-amber-600 mt-2">Chỉ ghi nhận có mặt trong ngày diễn ra lịch khám.</p>
+                                  <Text style={{ color: '#d48806', fontSize: 12, marginTop: 8, display: 'block' }}>Chỉ ghi nhận có mặt trong ngày diễn ra lịch khám.</Text>
                                 )}
                                 {isPastAppointment && ["scheduled", "confirmed"].includes(appointment.status) && (
-                                  <p className="text-xs text-rose-500 mt-2">Lịch khám đã qua ngày nên không thể cập nhật có mặt hoặc vắng mặt.</p>
+                                  <Text type="danger" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>Lịch khám đã qua ngày nên không thể cập nhật có mặt hoặc vắng mặt.</Text>
                                 )}
                               </div>
 
-                              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-                                {canEditSchedule && (
-                                  <Button
-                                    size="small"
-                                    className="w-full"
-                                    onClick={() => setEditingAppointmentId(isEditingSchedule ? "" : appointment._id)}
-                                  >
-                                    {isEditingSchedule ? "Đóng đổi lịch" : "Đổi lịch"}
-                                  </Button>
-                                )}
-                                <div className="flex w-full gap-2">
-                                  <Popconfirm
-                                    title="Xác nhận bệnh nhân đã có mặt tại quầy?"
-                                    onConfirm={() => onCheckInAppointment(appointment)}
-                                    disabled={!canCheckIn}
-                                    okText="Đồng ý"
-                                    cancelText="Hủy"
-                                  >
-                                    <Button size="small" type="primary" disabled={!canCheckIn} className="flex-1 bg-emerald-600 hover:bg-emerald-500">
-                                      Có mặt
+                              <div style={{ paddingTop: 8, borderTop: '1px solid #f0f0f0' }}>
+                                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                                  {canEditSchedule && (
+                                    <Button
+                                      size="small"
+                                      style={{ width: '100%' }}
+                                      onClick={() => setEditingAppointmentId(isEditingSchedule ? "" : appointment._id)}
+                                    >
+                                      {isEditingSchedule ? "Đóng đổi lịch" : "Đổi lịch"}
                                     </Button>
-                                  </Popconfirm>
-                                  <Popconfirm
-                                    title="Xác nhận bệnh nhân vắng mặt trong lịch khám này?"
-                                    onConfirm={() => onMarkNoShow(appointment)}
-                                    disabled={!canMarkNoShow}
-                                    okText="Đồng ý"
-                                    cancelText="Hủy"
-                                  >
-                                    <Button size="small" danger disabled={!canMarkNoShow} className="flex-1">
-                                      Vắng mặt
-                                    </Button>
-                                  </Popconfirm>
-                                </div>
+                                  )}
+                                  <Flex gap="small">
+                                    <Popconfirm
+                                      title="Xác nhận bệnh nhân đã có mặt tại quầy?"
+                                      onConfirm={() => onCheckInAppointment(appointment)}
+                                      disabled={!canCheckIn}
+                                      okText="Đồng ý"
+                                      cancelText="Hủy"
+                                    >
+                                      <Button size="small" type="primary" disabled={!canCheckIn} style={{ flex: 1, backgroundColor: canCheckIn ? '#52c41a' : undefined }}>
+                                        Có mặt
+                                      </Button>
+                                    </Popconfirm>
+                                    <Popconfirm
+                                      title="Xác nhận bệnh nhân vắng mặt trong lịch khám này?"
+                                      onConfirm={() => onMarkNoShow(appointment)}
+                                      disabled={!canMarkNoShow}
+                                      okText="Đồng ý"
+                                      cancelText="Hủy"
+                                    >
+                                      <Button size="small" danger disabled={!canMarkNoShow} style={{ flex: 1 }}>
+                                        Vắng mặt
+                                      </Button>
+                                    </Popconfirm>
+                                  </Flex>
+                                </Space>
                               </div>
 
                               {canEditSchedule && isEditingSchedule && (
-                                <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
-                                  <div className="grid grid-cols-1 gap-2">
-                                    <div className="space-y-1">
-                                      <span className="text-xs font-medium text-slate-700">Ngày khám</span>
+                                <div style={{ marginTop: 12, padding: 12, backgroundColor: '#fafafa', borderRadius: 8, border: '1px solid #f0f0f0' }}>
+                                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                                    <div>
+                                      <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Ngày khám</Text>
                                       <DatePicker
                                         value={manualForm.date ? dayjs(manualForm.date) : null}
                                         onChange={(d, dateString) => {
@@ -210,23 +218,23 @@ export default function ReceptionClinicalQueue({
                                         minDate={dayjs(todayInput())}
                                         maxDate={dayjs(maxBookingDate())}
                                         allowClear={false}
-                                        className="w-full text-xs"
+                                        style={{ width: '100%', fontSize: 12 }}
                                         size="small"
                                       />
                                     </div>
-                                    <div className="space-y-1">
-                                      <span className="text-xs font-medium text-slate-700">Dịch vụ</span>
+                                    <div>
+                                      <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Dịch vụ</Text>
                                       <Select
                                         value={manualForm.serviceId}
                                         onChange={(val) => updateManualSchedule?.(appointment, { serviceId: val })}
-                                        className="w-full text-xs"
+                                        style={{ width: '100%', fontSize: 12 }}
                                         size="small"
                                         options={services.map(s => ({ value: s._id, label: s.name }))}
                                       />
                                     </div>
-                                    <div className="flex gap-2">
-                                      <div className="space-y-1 flex-1">
-                                        <span className="text-xs font-medium text-slate-700">Slot</span>
+                                    <Flex gap="small">
+                                      <div style={{ flex: 1 }}>
+                                        <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Slot</Text>
                                         <Select
                                           value={manualTime}
                                           onChange={(val) => {
@@ -236,59 +244,59 @@ export default function ReceptionClinicalQueue({
                                               arrivalTime: nextSlot?.value || ""
                                             });
                                           }}
-                                          className="w-full text-xs"
+                                          style={{ width: '100%', fontSize: 12 }}
                                           size="small"
                                           options={rowSlotOptions.length ? rowSlotOptions.map(s => ({ value: s.value, label: s.label })) : [{ value: "", label: "Đã đóng" }]}
                                         />
                                       </div>
-                                      <div className="space-y-1 flex-1">
-                                        <span className="text-xs font-medium text-slate-700">Giờ đến</span>
-                                        <input
+                                      <div style={{ flex: 1 }}>
+                                        <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Giờ đến</Text>
+                                        <Input
                                           type="time"
                                           step="60"
                                           min={selectedSlot?.value || ""}
                                           max={selectedSlot?.endTime ? previousMinuteTime(selectedSlot.endTime) : ""}
                                           value={arrivalTime}
-                                          className="input-base px-2 py-0 text-xs w-full h-[24px]"
                                           onChange={(event) => updateManualSchedule?.(appointment, { arrivalTime: event.target.value })}
                                           disabled={!selectedSlot}
+                                          style={{ width: '100%', height: 24, fontSize: 12 }}
                                         />
                                       </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <span className="text-xs font-medium text-slate-700">Bác sĩ</span>
+                                    </Flex>
+                                    <div>
+                                      <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Bác sĩ</Text>
                                       <Select
                                         value={manualForm.roomId}
                                         onChange={(val) => updateManualSchedule?.(appointment, { roomId: val })}
-                                        className="w-full text-xs"
+                                        style={{ width: '100%', fontSize: 12 }}
                                         size="small"
                                         options={rooms.filter(r => r.assignedDentist?._id).map(r => ({ value: r._id, label: r.assignedDentist.fullName }))}
                                       />
                                     </div>
-                                  </div>
-                                  <Popconfirm
-                                    title="Xác nhận đổi lịch?"
-                                    onConfirm={() => {
-                                      scheduleReceptionAppointment?.(appointment);
-                                      setEditingAppointmentId("");
-                                    }}
-                                    okText="Đồng ý"
-                                    cancelText="Hủy"
-                                  >
-                                    <Button type="primary" size="small" className="w-full mt-2 bg-primary-600 hover:bg-primary-500">
-                                      Cập nhật lịch
-                                    </Button>
-                                  </Popconfirm>
+                                    <Popconfirm
+                                      title="Xác nhận đổi lịch?"
+                                      onConfirm={() => {
+                                        scheduleReceptionAppointment?.(appointment);
+                                        setEditingAppointmentId("");
+                                      }}
+                                      okText="Đồng ý"
+                                      cancelText="Hủy"
+                                    >
+                                      <Button type="primary" size="small" style={{ width: '100%', marginTop: 8 }}>
+                                        Cập nhật lịch
+                                      </Button>
+                                    </Popconfirm>
+                                  </Space>
                                 </div>
                               )}
                             </Card>
                           );
                         })}
-                      </div>
+                      </Space>
                     ) : (
-                      <div className="h-full min-h-[60px] flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg">
-                        <span className="text-sm text-slate-400">Trống</span>
-                      </div>
+                      <Flex align="center" justify="center" style={{ height: '100%', minHeight: 60, border: '2px dashed #f0f0f0', borderRadius: 8 }}>
+                        <Text type="secondary" style={{ fontSize: 14 }}>Trống</Text>
+                      </Flex>
                     )}
                   </div>
                 ))}
@@ -299,7 +307,7 @@ export default function ReceptionClinicalQueue({
       ) : (
         <EmptyState title="Chưa có bác sĩ trong hàng đợi" text="Bảng này sẽ hiển thị khi có bác sĩ hoặc phòng khám được gán trong dữ liệu hệ thống." />
       )}
-    </section>
+    </Space>
   );
 }
 

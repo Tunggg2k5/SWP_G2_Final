@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Select } from "antd";
+import { Modal, Form, Input, Select, Flex } from "antd";
 
 const genderOptions = [
   { value: "unknown", label: "Chưa chọn" },
@@ -22,7 +22,7 @@ export default function EditUserProfile({ form, onCancel, onChange, onSubmit }) 
       }}
       okText="Lưu"
       cancelText="Hủy"
-      okButtonProps={{ className: "bg-primary-500 hover:bg-primary-600 border-none" }}
+      okButtonProps={{ style: { backgroundColor: '#10b981', border: 'none' } }}
       destroyOnClose
     >
       <Form
@@ -30,7 +30,7 @@ export default function EditUserProfile({ form, onCancel, onChange, onSubmit }) 
         layout="vertical"
         initialValues={form}
         onValuesChange={(_, allValues) => onChange({ ...form, ...allValues })}
-        className="mt-4"
+        style={{ marginTop: 16 }}
       >
         <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
           <Input />
@@ -42,17 +42,17 @@ export default function EditUserProfile({ form, onCancel, onChange, onSubmit }) 
           <Input type="email" />
         </Form.Item>
 
-        <div className="flex gap-4">
-          <Form.Item label="Giới tính" name="gender" className="flex-1">
+        <Flex gap={16}>
+          <Form.Item label="Giới tính" name="gender" style={{ flex: 1 }}>
             <Select options={genderOptions} />
           </Form.Item>
-          <Form.Item label="Địa chỉ" name="address" className="flex-1">
+          <Form.Item label="Địa chỉ" name="address" style={{ flex: 1 }}>
             <Input maxLength={255} />
           </Form.Item>
-        </div>
+        </Flex>
 
         <Form.Item label="Ghi chú hồ sơ" name="bio">
-          <Input.TextArea rows={3} maxLength={1000} className="resize-none" />
+          <Input.TextArea rows={3} maxLength={1000} style={{ resize: 'none' }} />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,6 +1,8 @@
-import { DatePicker, Input } from "antd";
+import { DatePicker, Input, Flex, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+
+const { Text } = Typography;
 
 export default function ReceptionAppointmentFilters({
   appointmentSearch,
@@ -10,28 +12,28 @@ export default function ReceptionAppointmentFilters({
   showDate = true
 }) {
   return (
-    <div className="flex flex-wrap gap-4 items-center">
+    <Flex wrap="wrap" gap="middle" align="center">
       {showDate && (
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">Ngày</span>
+        <Flex align="center" gap="small">
+          <Text strong>Ngày</Text>
           <DatePicker
             value={date ? dayjs(date) : null}
             onChange={(d, dateString) => setDate(dateString)}
             format="YYYY-MM-DD"
             allowClear={false}
           />
-        </div>
+        </Flex>
       )}
-      <div className="flex items-center gap-2 grow max-w-md">
-        <span className="text-sm font-medium text-slate-700">Tìm nhanh</span>
+      <Flex align="center" gap="small" style={{ flexGrow: 1, maxWidth: 448 }}>
+        <Text strong>Tìm nhanh</Text>
         <Input
-          prefix={<SearchOutlined className="text-slate-400" />}
+          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
           value={appointmentSearch}
           onChange={(e) => setAppointmentSearch(e.target.value)}
           placeholder="Tên, SĐT, dịch vụ hoặc bác sĩ"
-          className="w-full"
+          style={{ width: '100%' }}
         />
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 }

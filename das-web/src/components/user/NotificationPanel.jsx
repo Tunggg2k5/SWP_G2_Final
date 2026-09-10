@@ -1,83 +1,56 @@
 import { Trash2, X } from "lucide-react";
-import { Empty } from "antd";
+import { Empty, Button, Typography, Flex, Avatar } from "antd";
+
+const { Text } = Typography;
 
 export default function NotificationPanel({ notifications, onClose, onDelete, onDeleteAll, onMarkRead, userInitial }) {
   return (
-    <div className="w-80 sm:w-96 flex flex-col bg-white rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-sm">
+    <div style={{ width: 384, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+      <Flex align="center" justify="space-between" style={{ padding: 16, borderBottom: '1px solid #f1f5f9', backgroundColor: 'rgba(248, 250, 252, 0.8)' }}>
         <div>
-          <p className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-0.5">Hoạt động mới</p>
-          <h3 className="text-base font-bold text-slate-800">Thông báo hệ thống</h3>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2, display: 'block' }}>Hoạt động mới</Text>
+          <Text strong style={{ fontSize: 16, color: '#1e293b' }}>Thông báo hệ thống</Text>
         </div>
-        <button
-          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors"
-          onClick={onClose}
-          title="Đóng"
-          type="button"
-        >
-          <X size={18} />
-        </button>
-      </div>
+        <Button type="text" shape="circle" icon={<X size={18} />} onClick={onClose} />
+      </Flex>
 
-      <div className="max-h-[24rem] overflow-y-auto overscroll-contain flex-1">
+      <div style={{ maxHeight: 384, overflowY: 'auto' }}>
         {notifications.length ? (
-          <div className="divide-y divide-slate-100/50">
+          <Flex vertical>
             {notifications.map((item) => (
-              <div
-                className={`group flex items-start gap-3 p-4 transition-colors ${
-                  item.isRead ? "bg-white" : "bg-primary-50/40"
-                } hover:bg-slate-50`}
+              <Flex
                 key={item._id}
+                style={{
+                  padding: 16,
+                  backgroundColor: item.isRead ? '#fff' : 'rgba(238, 242, 255, 0.4)',
+                  borderBottom: '1px solid rgba(241, 245, 249, 0.5)'
+                }}
               >
-                <button
-                  className="flex-1 flex items-start gap-3 text-left"
-                  onClick={() => onMarkRead(item)}
-                  type="button"
-                >
-                  <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold text-sm shadow-sm">
-                    {userInitial}
-                  </span>
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <p className={`text-sm ${item.isRead ? "font-medium text-slate-700" : "font-bold text-slate-900"} truncate`}>
-                      {item.title}
-                    </p>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2 leading-snug">
-                      {item.message}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-2 font-medium">
-                      {new Date(item.createdAt).toLocaleString("vi-VN")}
-                    </p>
+                <div style={{ flex: 1, display: 'flex', gap: 12, cursor: 'pointer', textAlign: 'left' }} onClick={() => onMarkRead(item)}>
+                  <Avatar style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontWeight: 'bold' }}>{userInitial}</Avatar>
+                  <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
+                    <Text strong={!item.isRead} style={{ color: item.isRead ? '#334155' : '#0f172a', display: 'block' }} ellipsis>{item.title}</Text>
+                    <Text style={{ color: '#64748b', fontSize: 14, marginTop: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.message}</Text>
+                    <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 8, fontWeight: 500, display: 'block' }}>{new Date(item.createdAt).toLocaleString("vi-VN")}</Text>
                   </div>
-                </button>
-                <button
-                  className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
-                  onClick={() => onDelete(item)}
-                  title="Xóa thông báo"
-                  type="button"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
+                </div>
+                <Button type="text" danger icon={<Trash2 size={16} />} onClick={() => onDelete(item)} style={{ flexShrink: 0 }} />
+              </Flex>
             ))}
-          </div>
+          </Flex>
         ) : (
-          <div className="p-8">
+          <div style={{ padding: 32 }}>
             <Empty description="Chưa có thông báo mới." />
           </div>
         )}
       </div>
 
       {notifications.length > 0 && (
-        <div className="p-3 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm flex justify-center">
-          <button
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-            onClick={onDeleteAll}
-            type="button"
-          >
-            <Trash2 size={15} />
+        <Flex justify="center" style={{ padding: 12, borderTop: '1px solid #f1f5f9', backgroundColor: 'rgba(248, 250, 252, 0.8)' }}>
+          <Button type="text" danger icon={<Trash2 size={15} />} onClick={onDeleteAll} style={{ fontWeight: 500 }}>
             Xóa tất cả
-          </button>
-        </div>
+          </Button>
+        </Flex>
       )}
     </div>
   );

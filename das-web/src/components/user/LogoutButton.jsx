@@ -1,14 +1,17 @@
 import { LogOut } from "lucide-react";
+import { Button } from "antd";
 
 export default function LogoutButton({ onLogout }) {
   return (
-    <button
+    <Button
       onClick={onLogout}
-      type="button"
-      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors group"
+      type="text"
+      danger
+      block
+      icon={<LogOut size={16} />}
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10px 12px', height: 'auto', fontWeight: 500 }}
     >
-      <LogOut size={19} className="group-hover:scale-110 transition-transform" />
-      <span>Đăng xuất</span>
-    </button>
+      Đăng xuất
+    </Button>
   );
 }

@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import EmptyState from "../EmptyState.jsx";
 import { formatDateTime } from "../../utils/format.js";
 
-import { Select, Tabs } from "antd";
+import { Select, Tabs, Card, Typography, Space, Flex, Row, Col, Tag } from "antd";
+
+const { Title, Text } = Typography;
 
 export default function PatientTreatmentRecords({ loading, records }) {
   const [recordId, setRecordId] = useState("");
@@ -30,116 +32,132 @@ export default function PatientTreatmentRecords({ loading, records }) {
   }));
 
   return (
-    <section className="space-y-4" id="records">
-      <div className="flex items-center gap-2 mb-4 text-slate-800">
-        <FileText className="text-primary-500" size={24} />
-        <h2 className="text-xl font-bold">Hồ sơ điều trị</h2>
-      </div>
+    <Space direction="vertical" size="large" style={{ width: "100%" }} id="records">
+      <Flex align="center" gap={8}>
+        <FileText style={{ color: "#10b981" }} size={24} />
+        <Title level={4} style={{ margin: 0 }}>Hồ sơ điều trị</Title>
+      </Flex>
 
       {loading ? (
-        <div className="card-base p-8">
+        <Card bordered={false} style={{ borderRadius: 16 }}>
           <EmptyState title="Đang tải hồ sơ" text="Hệ thống đang lấy dữ liệu mới nhất." />
-        </div>
+        </Card>
       ) : records.length ? (
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex flex-col sm:flex-row gap-3 items-center">
-            <div className="flex items-center gap-2 text-slate-500 w-full sm:w-auto">
-              <ClipboardList size={18} />
-              <span className="text-sm font-medium whitespace-nowrap">Chọn hồ sơ:</span>
-            </div>
-            <Select
-              className="w-full"
-              value={selectedRecord?._id || undefined}
-              onChange={chooseRecord}
-              options={records.map((record) => ({
-                value: record._id,
-                label: `${recordServiceName(record)} - ${formatDateOnly(record.treatmentDate || record.createdAt)}`
-              }))}
-            />
-          </div>
+        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Card bordered={false} style={{ borderRadius: 12, boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }} bodyStyle={{ padding: 12 }}>
+            <Flex align="center" gap={12} wrap="wrap">
+              <Flex align="center" gap={8} style={{ color: "#64748b" }}>
+                <ClipboardList size={18} />
+                <Text strong style={{ whiteSpace: "nowrap" }}>Chọn hồ sơ:</Text>
+              </Flex>
+              <Select
+                style={{ flex: 1, minWidth: 200 }}
+                value={selectedRecord?._id || undefined}
+                onChange={chooseRecord}
+                options={records.map((record) => ({
+                  value: record._id,
+                  label: `${recordServiceName(record)} - ${formatDateOnly(record.treatmentDate || record.createdAt)}`
+                }))}
+              />
+            </Flex>
+          </Card>
 
           {visits.length ? (
-            <div className="card-base overflow-hidden">
-              <div className="px-4 pt-4 border-b border-slate-100 bg-slate-50/50">
+            <Card bordered={false} style={{ borderRadius: 16, overflow: "hidden" }} bodyStyle={{ padding: 0 }}>
+              <div style={{ backgroundColor: "#f8fafc", padding: "16px 16px 0 16px", borderBottom: "1px solid #f1f5f9" }}>
                 <Tabs 
                   activeKey={activeVisit} 
                   onChange={(key) => setActiveVisit(key)} 
                   items={visitItems}
-                  className="mb-0"
+                  style={{ marginBottom: 0 }}
                 />
               </div>
 
-              <div className="p-5 space-y-6">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">
+              <div style={{ padding: 20 }}>
+                <Flex justify="space-between" align="center" style={{ marginBottom: 24 }}>
+                  <Tag color="default" style={{ borderRadius: 16, padding: "4px 12px", fontSize: 13, border: "none", backgroundColor: "#f1f5f9", color: "#475569" }}>
                     Cập nhật: {formatDateOnly(visibleVisit?.updatedAt || selectedRecord.updatedAt)}
-                  </span>
-                </div>
+                  </Tag>
+                </Flex>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-slate-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      Sinh hiệu
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <ReadOnlyField label="Huyết áp" value={visibleVisit?.vitalSigns?.bloodPressure} />
-                      <ReadOnlyField label="Nhịp tim" value={visibleVisit?.vitalSigns?.heartRate} />
-                      <ReadOnlyField label="SpO2" value={visibleVisit?.vitalSigns?.spo2} />
-                      <ReadOnlyField label="Nhiệt độ" value={visibleVisit?.vitalSigns?.temperature} />
-                      <ReadOnlyField label="Nhịp thở" value={visibleVisit?.vitalSigns?.respiratoryRate} />
-                    </div>
-                  </div>
+                <Row gutter={[24, 24]}>
+                  <Col xs={24} md={12}>
+                    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                      <div style={{ paddingBottom: 8, borderBottom: "1px solid #f1f5f9" }}>
+                        <Flex align="center" gap={8}>
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981" }} />
+                          <Text strong style={{ textTransform: "uppercase", fontSize: 13, letterSpacing: 0.5 }}>Sinh hiệu</Text>
+                        </Flex>
+                      </div>
+                      <Row gutter={[16, 16]}>
+                        <Col span={12}><ReadOnlyField label="Huyết áp" value={visibleVisit?.vitalSigns?.bloodPressure} /></Col>
+                        <Col span={12}><ReadOnlyField label="Nhịp tim" value={visibleVisit?.vitalSigns?.heartRate} /></Col>
+                        <Col span={12}><ReadOnlyField label="SpO2" value={visibleVisit?.vitalSigns?.spo2} /></Col>
+                        <Col span={12}><ReadOnlyField label="Nhiệt độ" value={visibleVisit?.vitalSigns?.temperature} /></Col>
+                        <Col span={12}><ReadOnlyField label="Nhịp thở" value={visibleVisit?.vitalSigns?.respiratoryRate} /></Col>
+                      </Row>
+                    </Space>
+                  </Col>
 
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-slate-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-                      Chẩn đoán & Bệnh sử
-                    </h4>
-                    <div className="space-y-4">
-                      <ReadOnlyField label="Chẩn đoán" value={visibleVisit?.diagnosis} wide />
-                      <ReadOnlyField label="Tiền sử bệnh án" value={visibleVisit?.medicalHistory} wide />
-                    </div>
-                  </div>
-                </div>
+                  <Col xs={24} md={12}>
+                    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                      <div style={{ paddingBottom: 8, borderBottom: "1px solid #f1f5f9" }}>
+                        <Flex align="center" gap={8}>
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981" }} />
+                          <Text strong style={{ textTransform: "uppercase", fontSize: 13, letterSpacing: 0.5 }}>Chẩn đoán & Bệnh sử</Text>
+                        </Flex>
+                      </div>
+                      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                        <ReadOnlyField label="Chẩn đoán" value={visibleVisit?.diagnosis} wide />
+                        <ReadOnlyField label="Tiền sử bệnh án" value={visibleVisit?.medicalHistory} wide />
+                      </Space>
+                    </Space>
+                  </Col>
+                </Row>
 
-                <div className="space-y-4 pt-2">
-                  <h4 className="font-semibold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-slate-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    Tiến trình điều trị
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ReadOnlyField label="Điều trị đã thực hiện" value={visibleVisit?.treatmentResult} wide />
-                    <ReadOnlyField label="Đơn thuốc" value={visibleVisit?.prescription} wide />
-                    <ReadOnlyField label="Hướng dẫn sau điều trị" value={visibleVisit?.aftercareInstructions} wide />
-                    <ReadOnlyField label="Điều trị dự kiến" value={visibleVisit?.treatmentPlan} wide />
-                    <div className="md:col-span-2">
-                      <ReadOnlyField label="Ghi chú điều trị" value={visibleVisit?.treatmentNote} wide />
+                <div style={{ marginTop: 24 }}>
+                  <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                    <div style={{ paddingBottom: 8, borderBottom: "1px solid #f1f5f9" }}>
+                      <Flex align="center" gap={8}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#f59e0b" }} />
+                        <Text strong style={{ textTransform: "uppercase", fontSize: 13, letterSpacing: 0.5 }}>Tiến trình điều trị</Text>
+                      </Flex>
                     </div>
-                  </div>
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} md={12}><ReadOnlyField label="Điều trị đã thực hiện" value={visibleVisit?.treatmentResult} wide /></Col>
+                      <Col xs={24} md={12}><ReadOnlyField label="Đơn thuốc" value={visibleVisit?.prescription} wide /></Col>
+                      <Col xs={24} md={12}><ReadOnlyField label="Hướng dẫn sau điều trị" value={visibleVisit?.aftercareInstructions} wide /></Col>
+                      <Col xs={24} md={12}><ReadOnlyField label="Điều trị dự kiến" value={visibleVisit?.treatmentPlan} wide /></Col>
+                      <Col span={24}>
+                        <ReadOnlyField label="Ghi chú điều trị" value={visibleVisit?.treatmentNote} wide />
+                      </Col>
+                    </Row>
+                  </Space>
                 </div>
               </div>
-            </div>
+            </Card>
           ) : (
-            <div className="card-base p-8">
+            <Card bordered={false} style={{ borderRadius: 16 }}>
               <EmptyState title="Chưa có lần điều trị" text="Hồ sơ này chưa có nội dung lần điều trị." />
-            </div>
+            </Card>
           )}
-        </div>
+        </Space>
       ) : (
-        <div className="card-base p-8">
+        <Card bordered={false} style={{ borderRadius: 16 }}>
           <EmptyState title="Chưa có hồ sơ điều trị" text="Hồ sơ sẽ hiển thị sau khi bác sĩ hoặc y tá tạo và cập nhật điều trị." />
-        </div>
+        </Card>
       )}
-    </section>
+    </Space>
   );
 }
 
 function ReadOnlyField({ label, value, wide = false }) {
   return (
-    <div className={`bg-slate-50 p-3 rounded-lg border border-slate-100 ${wide ? "w-full" : ""}`}>
-      <div className="text-xs font-medium text-slate-500 mb-1">{label}</div>
-      <div className="text-sm font-medium text-slate-900 whitespace-pre-wrap">{value || <span className="text-slate-400 italic font-normal">Chưa cập nhật</span>}</div>
+    <div style={{ backgroundColor: "#f8fafc", padding: 12, borderRadius: 8, border: "1px solid #f1f5f9", width: wide ? "100%" : "auto" }}>
+      <div style={{ fontSize: 12, fontWeight: 500, color: "#64748b", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 14, fontWeight: 500, color: "#0f172a", whiteSpace: "pre-wrap" }}>
+        {value || <span style={{ color: "#94a3b8", fontStyle: "italic", fontWeight: 400 }}>Chưa cập nhật</span>}
+      </div>
     </div>
   );
 }

@@ -48,25 +48,25 @@ export default function ClinicalTreatmentForm({
   }
 
   return (
-    <Card className="shadow-sm">
-      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
-        <ClipboardPenLine size={20} />
-        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Hồ sơ điều trị</Title>
+    <Card style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, borderBottom: '1px solid #f1f5f9', paddingBottom: 16 }}>
+        <ClipboardPenLine size={20} color="#0369a1" />
+        <Title level={4} style={{ margin: 0, color: '#0369a1' }}>Hồ sơ điều trị</Title>
       </div>
 
       {isNurse ? (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <form
-            className="flex flex-col sm:flex-row gap-4 items-end"
+            style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}
             onSubmit={(event) => {
               event.preventDefault();
               onSearch(searchPhone);
             }}
           >
-            <div className="flex-1">
-              <Text strong className="block mb-1">Tìm theo SĐT</Text>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <Text strong style={{ display: 'block', marginBottom: 4 }}>Tìm theo SĐT</Text>
               <Input
-                prefix={<Search size={17} className="text-slate-400" />}
+                prefix={<Search size={17} color="#94a3b8" />}
                 value={searchPhone}
                 onChange={(event) => onSearchPhoneChange(event.target.value)}
                 placeholder="Nhập số điện thoại bệnh nhân"
@@ -91,7 +91,7 @@ export default function ClinicalTreatmentForm({
           </form>
 
           {showCreateForm && (
-            <Card className="bg-slate-50/50">
+            <Card style={{ backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
               <Form layout="vertical" onFinish={(values) => onCreateRecord({ preventDefault: () => {} })}>
                 <Row gutter={16}>
                   <Col xs={24} md={8}>
@@ -121,29 +121,29 @@ export default function ClinicalTreatmentForm({
           )}
 
           {searchedPatient && (
-            <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100">
-              <strong className="text-primary-800">{patientLabel(searchedPatient)}</strong>
-              <span className="text-sm text-primary-600">{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
+            <div style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 4, border: '1px solid #e0f2fe' }}>
+              <strong style={{ color: '#075985' }}>{patientLabel(searchedPatient)}</strong>
+              <span style={{ fontSize: 14, color: '#0284c7' }}>{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
             </div>
           )}
 
           {displayedSearchResults.length ? (
-            <div className="flex flex-col gap-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {displayedSearchResults.map((record) => {
                 const canDelete = canDeleteTreatmentRecord(record);
                 return (
                   <Card 
                     key={record._id} 
                     size="small" 
-                    className={`transition-colors ${selectedRecord?._id === record._id ? "border-primary-500 bg-primary-50" : "hover:border-primary-200"}`}
+                    style={{ transition: 'border-color 0.3s, background-color 0.3s', borderColor: selectedRecord?._id === record._id ? '#0ea5e9' : '#e2e8f0', backgroundColor: selectedRecord?._id === record._id ? '#f0f9ff' : '#ffffff' }}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex flex-col gap-1">
-                        <strong className="text-slate-800">{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
-                        <span className="text-slate-600 text-sm">{patientLabel(record.patient)}</span>
-                        <small className="text-slate-500">Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <strong style={{ color: '#1e293b' }}>{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
+                        <span style={{ color: '#475569', fontSize: 14 }}>{patientLabel(record.patient)}</span>
+                        <small style={{ color: '#64748b' }}>Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <StatusBadge value={record.status || "active"} />
                         <Button type="default" onClick={() => onSelectRecord(record)}>
                           Cập nhật
@@ -164,9 +164,9 @@ export default function ClinicalTreatmentForm({
               })}
             </div>
           ) : searchedPatient ? (
-            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
-              <strong className="text-slate-700">Không có hồ sơ điều trị</strong>
-              <span className="text-sm text-slate-500">Bệnh nhân này chưa có hồ sơ. Bấm tạo hồ sơ điều trị để bắt đầu lần 1.</span>
+            <div style={{ padding: 24, backgroundColor: '#f8fafc', border: '2px dashed #e2e8f0', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <strong style={{ color: '#334155' }}>Không có hồ sơ điều trị</strong>
+              <span style={{ fontSize: 14, color: '#64748b' }}>Bệnh nhân này chưa có hồ sơ. Bấm tạo hồ sơ điều trị để bắt đầu lần 1.</span>
             </div>
           ) : null}
 
@@ -183,25 +183,25 @@ export default function ClinicalTreatmentForm({
               chooseVisit={chooseVisit}
             />
           ) : (
-            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
-              <strong className="text-slate-700">Chọn hồ sơ điều trị</strong>
-              <span className="text-sm text-slate-500">Tìm theo số điện thoại rồi bấm cập nhật ở hồ sơ cần chỉnh.</span>
+            <div style={{ padding: 24, backgroundColor: '#f8fafc', border: '2px dashed #e2e8f0', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <strong style={{ color: '#334155' }}>Chọn hồ sơ điều trị</strong>
+              <span style={{ fontSize: 14, color: '#64748b' }}>Tìm theo số điện thoại rồi bấm cập nhật ở hồ sơ cần chỉnh.</span>
             </div>
           )}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <form
-            className="flex flex-col sm:flex-row gap-4 items-end"
+            style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}
             onSubmit={(event) => {
               event.preventDefault();
               onSearch(searchPhone);
             }}
           >
-            <div className="flex-1">
-              <Text strong className="block mb-1">Tìm theo SĐT</Text>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <Text strong style={{ display: 'block', marginBottom: 4 }}>Tìm theo SĐT</Text>
               <Input
-                prefix={<Search size={17} className="text-slate-400" />}
+                prefix={<Search size={17} color="#94a3b8" />}
                 value={searchPhone}
                 onChange={(event) => onSearchPhoneChange(event.target.value)}
                 placeholder="Nhập số điện thoại bệnh nhân"
@@ -214,27 +214,27 @@ export default function ClinicalTreatmentForm({
           </form>
 
           {searchedPatient && (
-            <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100">
-              <strong className="text-primary-800">{patientLabel(searchedPatient)}</strong>
-              <span className="text-sm text-primary-600">{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
+            <div style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 4, border: '1px solid #e0f2fe' }}>
+              <strong style={{ color: '#075985' }}>{patientLabel(searchedPatient)}</strong>
+              <span style={{ fontSize: 14, color: '#0284c7' }}>{searchResults.length ? `${searchResults.length} hồ sơ điều trị` : "Chưa có hồ sơ điều trị"}</span>
             </div>
           )}
 
           {displayedSearchResults.length ? (
-            <div className="flex flex-col gap-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {displayedSearchResults.map((record) => (
                 <Card 
                   key={record._id} 
                   size="small" 
-                  className={`transition-colors ${selectedRecord?._id === record._id ? "border-primary-500 bg-primary-50" : "hover:border-primary-200"}`}
+                  style={{ transition: 'border-color 0.3s, background-color 0.3s', borderColor: selectedRecord?._id === record._id ? '#0ea5e9' : '#e2e8f0', backgroundColor: selectedRecord?._id === record._id ? '#f0f9ff' : '#ffffff' }}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex flex-col gap-1">
-                      <strong className="text-slate-800">{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
-                      <span className="text-slate-600 text-sm">{patientLabel(record.patient)}</span>
-                      <small className="text-slate-500">Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <strong style={{ color: '#1e293b' }}>{record.serviceSnapshot?.name || record.appointment?.service?.name || "Hồ sơ điều trị"}</strong>
+                      <span style={{ color: '#475569', fontSize: 14 }}>{patientLabel(record.patient)}</span>
+                      <small style={{ color: '#64748b' }}>Ngày bắt đầu điều trị: {formatDateOnly(record.treatmentDate || record.createdAt)}</small>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <StatusBadge value={record.status || "active"} />
                       <Button type="default" onClick={() => onSelectRecord(record)}>
                         Xem chi tiết
@@ -245,9 +245,9 @@ export default function ClinicalTreatmentForm({
               ))}
             </div>
           ) : searchedPatient ? (
-            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
-              <strong className="text-slate-700">Không có hồ sơ điều trị</strong>
-              <span className="text-sm text-slate-500">Không tìm thấy hồ sơ điều trị phù hợp với bệnh nhân này.</span>
+            <div style={{ padding: 24, backgroundColor: '#f8fafc', border: '2px dashed #e2e8f0', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <strong style={{ color: '#334155' }}>Không có hồ sơ điều trị</strong>
+              <span style={{ fontSize: 14, color: '#64748b' }}>Không tìm thấy hồ sơ điều trị phù hợp với bệnh nhân này.</span>
             </div>
           ) : null}
 
@@ -264,9 +264,9 @@ export default function ClinicalTreatmentForm({
               chooseVisit={chooseVisit}
             />
           ) : (
-            <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col gap-1">
-              <strong className="text-slate-700">Chọn hồ sơ điều trị</strong>
-              <span className="text-sm text-slate-500">Tìm theo số điện thoại rồi bấm xem chi tiết ở hồ sơ cần xem.</span>
+            <div style={{ padding: 24, backgroundColor: '#f8fafc', border: '2px dashed #e2e8f0', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <strong style={{ color: '#334155' }}>Chọn hồ sơ điều trị</strong>
+              <span style={{ fontSize: 14, color: '#64748b' }}>Tìm theo số điện thoại rồi bấm xem chi tiết ở hồ sơ cần xem.</span>
             </div>
           )}
         </div>
@@ -302,10 +302,10 @@ function TreatmentEditor({
   const renderField = (label, fieldKey, isTextArea = false) => {
     return (
       <Col xs={24} md={isTextArea ? 24 : 8}>
-        <div className="flex flex-col gap-1.5 mb-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
           <Text type="secondary">{label}</Text>
           {isReadOnly ? (
-            <div className="bg-slate-50 p-3 rounded-lg text-slate-700 min-h-[42px] border border-slate-100 whitespace-pre-wrap">
+            <div style={{ backgroundColor: '#f8fafc', padding: 12, borderRadius: 8, color: '#334155', minHeight: 42, border: '1px solid #f1f5f9', whiteSpace: 'pre-wrap' }}>
               {form[fieldKey] || <Text type="secondary" italic>Trống</Text>}
             </div>
           ) : isTextArea ? (
@@ -319,7 +319,7 @@ function TreatmentEditor({
   };
 
   return (
-    <Form layout="vertical" onFinish={onSubmit} className="pt-4">
+    <Form layout="vertical" onFinish={onSubmit} style={{ paddingTop: 16 }}>
       <Tabs 
         activeKey={form.visitNumber.toString()} 
         onChange={(key) => chooseVisit(Number(key))}
@@ -327,24 +327,24 @@ function TreatmentEditor({
         tabBarExtraContent={!isDentist ? <Button type="text" onClick={addVisitPage} icon={<Plus size={16} />} /> : null}
       />
 
-      <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-1 border border-primary-100 mb-4">
-        <strong className="text-primary-800">Lần {form.visitNumber}</strong>
-        <span className="text-sm text-primary-600">{activeVisit?.updatedAt ? `Cập nhật: ${formatDateOnly(activeVisit.updatedAt)}` : "Chưa cập nhật"}</span>
+      <div style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 4, border: '1px solid #e0f2fe', marginBottom: 16 }}>
+        <strong style={{ color: '#075985' }}>Lần {form.visitNumber}</strong>
+        <span style={{ fontSize: 14, color: '#0284c7' }}>{activeVisit?.updatedAt ? `Cập nhật: ${formatDateOnly(activeVisit.updatedAt)}` : "Chưa cập nhật"}</span>
       </div>
 
       {isLockedVisit && !isDentist && (
-        <div className="p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 flex flex-col gap-1 mb-4">
-          <strong className="font-semibold">Lần điều trị này đã được lưu</strong>
-          <span className="text-sm">Không thể cập nhật lại lần cũ. Hãy chọn lần kế tiếp để nhập thông tin mới.</span>
+        <div style={{ padding: 16, backgroundColor: '#fffbeb', color: '#92400e', borderRadius: 12, border: '1px solid #fde68a', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16 }}>
+          <strong style={{ fontWeight: 600 }}>Lần điều trị này đã được lưu</strong>
+          <span style={{ fontSize: 14 }}>Không thể cập nhật lại lần cũ. Hãy chọn lần kế tiếp để nhập thông tin mới.</span>
         </div>
       )}
 
       <Row gutter={16}>
         <Col xs={24} md={8}>
-          <div className="flex flex-col gap-1.5 mb-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
             <Text type="secondary">Ngày lần điều trị</Text>
             {isReadOnly ? (
-              <div className="bg-slate-50 p-3 rounded-lg text-slate-700 min-h-[42px] border border-slate-100">
+              <div style={{ backgroundColor: '#f8fafc', padding: 12, borderRadius: 8, color: '#334155', minHeight: 42, border: '1px solid #f1f5f9' }}>
                 {form.visitDate || <Text type="secondary" italic>Trống</Text>}
               </div>
             ) : (
@@ -369,7 +369,7 @@ function TreatmentEditor({
       </Row>
 
       {!isDentist && !isLockedVisit && (
-        <div className="flex justify-end pt-4">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 16 }}>
           <Button type="primary" htmlType="submit" size="large">Lưu hồ sơ điều trị</Button>
         </div>
       )}

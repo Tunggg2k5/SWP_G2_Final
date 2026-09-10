@@ -1,9 +1,11 @@
-import { Select, Input, Button, Card, DatePicker } from "antd";
+import { Select, Input, Button, Card, DatePicker, Flex, Space, Typography, Row, Col } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { CalendarPlus } from "lucide-react";
 import dayjs from "dayjs";
 import { todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
+
+const { Title, Text } = Typography;
 
 export default function BookAppointmentForPatientForm({
   booking,
@@ -27,134 +29,151 @@ export default function BookAppointmentForPatientForm({
   const canShowPatientInfo = hasAccount || needsNewAccount;
 
   return (
-    <Card className="max-w-2xl mx-auto shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+    <Card style={{ maxWidth: 672, margin: '0 auto' }}>
+      <Flex align="center" gap="middle" style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 16, marginBottom: 24 }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#e6f4ff', color: '#1677ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <CalendarPlus size={20} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Đặt lịch hộ bệnh nhân</h2>
-          <p className="text-sm text-slate-500">Nhập số điện thoại và kiểm tra tài khoản trước khi đặt lịch.</p>
+          <Title level={4} style={{ margin: 0 }}>Đặt lịch hộ bệnh nhân</Title>
+          <Text type="secondary">Nhập số điện thoại và kiểm tra tài khoản trước khi đặt lịch.</Text>
         </div>
-      </div>
+      </Flex>
 
-      <form className="space-y-6" onSubmit={onSubmit}>
-        <div className="flex gap-3 items-end">
-          <div className="flex-1 space-y-1.5">
-            <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
+      <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
+        <Flex gap="middle" align="flex-end">
+          <Space direction="vertical" style={{ flex: 1 }}>
+            <Text strong>Số điện thoại</Text>
             <Input
               type="tel"
-              prefix={<SearchOutlined className="text-slate-400" />}
+              prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
               value={patientSearch}
               onChange={(event) => onPatientSearchChange(event.target.value)}
               placeholder="Nhập số điện thoại bệnh nhân"
               size="large"
             />
-          </div>
+          </Space>
           <Button
             type="primary"
             size="large"
             onClick={onCheckPatient}
-            className="bg-primary-600 hover:bg-primary-500"
           >
             Kiểm tra tài khoản
           </Button>
-        </div>
+        </Flex>
 
         {canShowPatientInfo && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-            <div className="space-y-1.5">
-              <span className="text-sm font-medium text-slate-700">Họ tên</span>
-              <Input
-                value={hasAccount ? checkedPatient.fullName || "" : newPatient.fullName}
-                onChange={(event) => onNewPatientChange({ fullName: event.target.value })}
-                readOnly={hasAccount}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
-              <Input
-                type="tel"
-                value={hasAccount ? checkedPatient.phone || "" : newPatient.phone}
-                readOnly
-                required
-                className="bg-slate-100"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-sm font-medium text-slate-700">Email</span>
-              <Input
-                type="email"
-                value={hasAccount ? checkedPatient.email || "" : newPatient.email || ""}
-                onChange={(event) => onNewPatientChange({ email: event.target.value })}
-                readOnly={hasAccount}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-sm font-medium text-slate-700">Giới tính</span>
-              <Select
-                value={hasAccount ? checkedPatient.gender || "unknown" : newPatient.gender}
-                onChange={(val) => onNewPatientChange({ gender: val })}
-                disabled={hasAccount}
-                options={genderOptions}
-                className="w-full"
-              />
-            </div>
+          <div style={{ backgroundColor: '#fafafa', padding: 16, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={12}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Text strong>Họ tên</Text>
+                  <Input
+                    value={hasAccount ? checkedPatient.fullName || "" : newPatient.fullName}
+                    onChange={(event) => onNewPatientChange({ fullName: event.target.value })}
+                    readOnly={hasAccount}
+                    required
+                  />
+                </Space>
+              </Col>
+              <Col xs={24} md={12}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Text strong>Số điện thoại</Text>
+                  <Input
+                    type="tel"
+                    value={hasAccount ? checkedPatient.phone || "" : newPatient.phone}
+                    readOnly
+                    required
+                    style={hasAccount ? { backgroundColor: '#f5f5f5' } : undefined}
+                  />
+                </Space>
+              </Col>
+              <Col xs={24} md={12}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Text strong>Email</Text>
+                  <Input
+                    type="email"
+                    value={hasAccount ? checkedPatient.email || "" : newPatient.email || ""}
+                    onChange={(event) => onNewPatientChange({ email: event.target.value })}
+                    readOnly={hasAccount}
+                  />
+                </Space>
+              </Col>
+              <Col xs={24} md={12}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Text strong>Giới tính</Text>
+                  <Select
+                    value={hasAccount ? checkedPatient.gender || "unknown" : newPatient.gender}
+                    onChange={(val) => onNewPatientChange({ gender: val })}
+                    disabled={hasAccount}
+                    options={genderOptions}
+                    style={{ width: '100%' }}
+                  />
+                </Space>
+              </Col>
+            </Row>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <span className="text-sm font-medium text-slate-700">Dịch vụ</span>
-            <Select
-              value={booking.serviceId}
-              onChange={(val) => onBookingChange({ serviceId: val })}
-              options={services.map(s => ({ value: s._id, label: s.name }))}
-              className="w-full"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-sm font-medium text-slate-700">Ngày</span>
-            <DatePicker
-              value={date ? dayjs(date) : null}
-              onChange={(d, ds) => onDateChange(ds)}
-              format="YYYY-MM-DD"
-              minDate={dayjs(todayInput())}
-              maxDate={dayjs(maxBookingDate())}
-              className="w-full"
-              allowClear={false}
-            />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <span className="text-sm font-medium text-slate-700">Khung giờ khám</span>
-            <Select
-              value={booking.time}
-              onChange={(val) => onBookingChange({ time: val })}
-              options={slotOptions.length ? slotOptions : [{ value: "", label: "Chưa có khung giờ đang mở" }]}
-              className="w-full"
-            />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <span className="text-sm font-medium text-slate-700">Ghi chú</span>
-            <Input
-              value={booking.note}
-              onChange={(event) => onBookingChange({ note: event.target.value })}
-              maxLength={1000}
-            />
-          </div>
-        </div>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Text strong>Dịch vụ</Text>
+              <Select
+                value={booking.serviceId}
+                onChange={(val) => onBookingChange({ serviceId: val })}
+                options={services.map(s => ({ value: s._id, label: s.name }))}
+                style={{ width: '100%' }}
+              />
+            </Space>
+          </Col>
+          <Col xs={24} md={12}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Text strong>Ngày</Text>
+              <DatePicker
+                value={date ? dayjs(date) : null}
+                onChange={(d, ds) => onDateChange(ds)}
+                format="YYYY-MM-DD"
+                minDate={dayjs(todayInput())}
+                maxDate={dayjs(maxBookingDate())}
+                style={{ width: '100%' }}
+                allowClear={false}
+              />
+            </Space>
+          </Col>
+          <Col xs={24}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Text strong>Khung giờ khám</Text>
+              <Select
+                value={booking.time}
+                onChange={(val) => onBookingChange({ time: val })}
+                options={slotOptions.length ? slotOptions : [{ value: "", label: "Chưa có khung giờ đang mở" }]}
+                style={{ width: '100%' }}
+              />
+            </Space>
+          </Col>
+          <Col xs={24}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Text strong>Ghi chú</Text>
+              <Input
+                value={booking.note}
+                onChange={(event) => onBookingChange({ note: event.target.value })}
+                maxLength={1000}
+              />
+            </Space>
+          </Col>
+        </Row>
 
         <Button
           type="primary"
-          htmlType="submit"
+          onClick={onSubmit}
           size="large"
-          className="w-full mt-4 bg-primary-600 hover:bg-primary-500"
+          style={{ width: '100%', marginTop: 16 }}
           disabled={!slotOptions.length}
         >
           Đặt lịch hộ
         </Button>
-      </form>
+      </Space>
     </Card>
   );
 }

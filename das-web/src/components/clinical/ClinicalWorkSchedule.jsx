@@ -25,13 +25,13 @@ export default function ClinicalWorkSchedule({
   const visibleRooms = rooms || [];
 
   return (
-    <Card className="shadow-sm">
-      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
-        <Stethoscope size={20} />
-        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Lịch khám trong ngày</Title>
+    <Card style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, borderBottom: '1px solid #f1f5f9', paddingBottom: 16 }}>
+        <Stethoscope size={20} color="#0369a1" />
+        <Title level={4} style={{ margin: 0, color: '#0369a1' }}>Lịch khám trong ngày</Title>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
         <Space wrap>
           {visibleRooms.length ? (
             visibleRooms.map((room) => {
@@ -43,7 +43,7 @@ export default function ClinicalWorkSchedule({
                 <Tag
                   key={room._id}
                   color={roomInUse ? "warning" : room.status === "available" ? "success" : "default"}
-                  className="px-3 py-1 text-sm flex items-center gap-2"
+                  style={{ padding: '4px 12px', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   <Text>{room.name} / {room.assignedDentist?.fullName || "Chưa gán bác sĩ"}</Text>
                   <StatusBadge value={roomInUse ? "in_use" : room.status} />
@@ -51,7 +51,7 @@ export default function ClinicalWorkSchedule({
                     <Button
                       size="small"
                       type="default"
-                      className="ml-2"
+                      style={{ marginLeft: 8 }}
                       disabled={roomInUse}
                       title={roomInUse ? "Phòng đang có bệnh nhân đang khám nên không thể đổi trạng thái." : undefined}
                       onClick={() => onSetRoomStatus(room._id, room.status === "available" ? "unavailable" : "available")}
@@ -84,12 +84,12 @@ export default function ClinicalWorkSchedule({
         <Row gutter={[16, 16]}>
           {clinicalQueues.map(({ column, appointments: columnAppointments }) => (
             <Col xs={24} md={12} lg={8} key={column._id}>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
-                <Text strong className="block">{column.fullName}</Text>
+              <div style={{ backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+                <Text strong style={{ display: 'block' }}>{column.fullName}</Text>
                 <Text type="secondary">{column.roomName || "Đang trực"}</Text>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {columnAppointments.length ? (
                   columnAppointments.map((appointment) => {
                     const isTodayAppointment = clinicDateInput(appointment.startAt) === todayInput();
@@ -100,18 +100,18 @@ export default function ClinicalWorkSchedule({
                       <Card 
                         key={appointment._id} 
                         size="small" 
-                        className={`shadow-sm ${isLockedAppointment(appointment) ? "opacity-60" : ""}`}
+                        style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', opacity: isLockedAppointment(appointment) ? 0.6 : 1 }}
                       >
-                        <div className="mb-2">
-                          <div className="flex items-center gap-3 mb-2">
-                            {queueNumber && <Tag color="blue" className="text-lg py-1">STT {queueNumber}</Tag>}
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                            {queueNumber && <Tag color="blue" style={{ fontSize: 18, padding: '4px 8px' }}>STT {queueNumber}</Tag>}
                             <Text strong>{[appointment.patient?.fullName || "Bệnh nhân", appointment.patient?.phone].filter(Boolean).join(" - ")}</Text>
                           </div>
-                          <Text type="secondary" className="block text-sm">{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng khám"}</Text>
-                          <Text type="secondary" className="block text-sm">Giờ khám: {formatDateTime(appointment.startAt)}</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 14 }}>{appointment.service?.name || "Dịch vụ"} / {appointment.room?.name || "Phòng khám"}</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 14 }}>Giờ khám: {formatDateTime(appointment.startAt)}</Text>
                         </div>
 
-                        <div className="mb-3">
+                        <div style={{ marginBottom: 12 }}>
                           <StatusBadge value={appointment.status} />
                         </div>
 
@@ -144,7 +144,7 @@ export default function ClinicalWorkSchedule({
                                   okText="Có"
                                   cancelText="Không"
                                 >
-                                  <Button type="primary" success="true" className="bg-emerald-500">
+                                  <Button type="primary" style={{ backgroundColor: '#10b981' }}>
                                     Hoàn tất
                                   </Button>
                                 </Popconfirm>
@@ -159,7 +159,7 @@ export default function ClinicalWorkSchedule({
                     );
                   })
                 ) : (
-                  <div className="text-center p-6 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">Chưa có bệnh nhân</div>
+                  <div style={{ textAlign: 'center', padding: 24, color: '#94a3b8', fontSize: 14, border: '2px dashed #e2e8f0', borderRadius: 12 }}>Chưa có bệnh nhân</div>
                 )}
               </div>
             </Col>

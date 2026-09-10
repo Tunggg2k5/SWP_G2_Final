@@ -322,125 +322,142 @@ export default function PatientDashboard() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 md:py-8 space-y-6">
+    <div style={{ maxWidth: 1152, margin: "0 auto", padding: "24px 16px" }}>
       <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
 
-      <main className="w-full">
+      <main style={{ width: "100%", marginTop: 24 }}>
         <Tabs
           activeKey={activeFeature}
           onChange={openPatientFeature}
           items={tabItems}
           type="card"
           renderTabBar={() => null}
-          className="patient-dashboard-tabs"
         />
       </main>
     </div>
   );
 }
 
+import { Row, Col, Card, Typography, Flex, Button } from "antd";
+const { Title, Text, Paragraph } = Typography;
+
 function PatientHome({ onNavigate, onServices }) {
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl" id="home">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-teal-900 opacity-90"></div>
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-
-      <div className="relative p-8 md:p-12 max-w-3xl">
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
-          Chăm sóc nụ cười của bạn với <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-200">SmileCare</span>
-        </h1>
-        <p className="text-primary-100 text-lg mb-8 max-w-2xl leading-relaxed">
+    <Card
+      bordered={false}
+      style={{ position: "relative", overflow: "hidden", borderRadius: 24, backgroundColor: "#0f172a", color: "#fff", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
+      bodyStyle={{ padding: 0 }}
+      id="home"
+    >
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom right, #134e4a, #065f46, #115e59)", opacity: 0.9 }}></div>
+      
+      <div style={{ position: "relative", padding: "48px 32px", maxWidth: 768 }}>
+        <Title style={{ color: "#fff", fontSize: 40, fontWeight: 800, marginBottom: 16 }}>
+          Chăm sóc nụ cười của bạn với <span style={{ color: "#6ee7b7" }}>SmileCare</span>
+        </Title>
+        <Paragraph style={{ color: "#d1fae5", fontSize: 18, marginBottom: 32, maxWidth: 672 }}>
           Quản lý lịch khám, theo dõi hồ sơ điều trị và thanh toán dễ dàng tại một nơi duy nhất.
-        </p>
+        </Paragraph>
 
-        <div className="flex flex-wrap gap-4">
-          <button
-            className="bg-white text-primary-800 hover:bg-slate-50 font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2"
-            type="button"
+        <Flex wrap gap={16}>
+          <Button 
+            type="primary" 
+            size="large" 
+            icon={<Calendar size={20} />} 
             onClick={() => onNavigate("booking")}
+            style={{ backgroundColor: "#fff", color: "#065f46", fontWeight: 700, borderRadius: 12, height: 48, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
           >
-            <Calendar size={20} />
             Đặt lịch ngay
-          </button>
-          <button
-            className="glass hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2"
-            type="button"
+          </Button>
+          <Button 
+            ghost 
+            size="large" 
+            icon={<Clock size={20} />} 
             onClick={() => onNavigate("appointments")}
+            style={{ fontWeight: 600, borderRadius: 12, height: 48, borderColor: "rgba(255,255,255,0.4)" }}
           >
-            <Clock size={20} />
             Lịch hẹn của tôi
-          </button>
-          <button
-            className="text-primary-200 hover:text-white font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-1"
-            type="button"
+          </Button>
+          <Button 
+            type="text" 
+            size="large" 
             onClick={onServices}
+            style={{ color: "#a7f3d0", fontWeight: 500 }}
           >
-            Xem dịch vụ <ChevronRight size={16} />
-          </button>
-        </div>
+            Xem dịch vụ <ChevronRight size={16} style={{ marginLeft: 4 }} />
+          </Button>
+        </Flex>
       </div>
 
-      <div className="relative border-t border-white/10 bg-black/10 backdrop-blur-sm p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <div className="text-3xl font-bold text-white mb-1">100%</div>
-            <div className="text-primary-200 text-sm font-medium">Bác sĩ chuyên khoa</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-white mb-1">4.9/5</div>
-            <div className="text-primary-200 text-sm font-medium">Đánh giá hài lòng</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-white mb-1">24/7</div>
-            <div className="text-primary-200 text-sm font-medium">Hỗ trợ khách hàng</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-white mb-1">5K+</div>
-            <div className="text-primary-200 text-sm font-medium">Nụ cười rạng rỡ</div>
-          </div>
-        </div>
+      <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(0,0,0,0.1)", backdropFilter: "blur(4px)", padding: 24 }}>
+        <Row gutter={[24, 24]} style={{ textAlign: "center" }}>
+          <Col xs={12} md={6}>
+            <Title level={2} style={{ color: "#fff", margin: 0 }}>100%</Title>
+            <Text style={{ color: "#a7f3d0", fontWeight: 500 }}>Bác sĩ chuyên khoa</Text>
+          </Col>
+          <Col xs={12} md={6}>
+            <Title level={2} style={{ color: "#fff", margin: 0 }}>4.9/5</Title>
+            <Text style={{ color: "#a7f3d0", fontWeight: 500 }}>Đánh giá hài lòng</Text>
+          </Col>
+          <Col xs={12} md={6}>
+            <Title level={2} style={{ color: "#fff", margin: 0 }}>24/7</Title>
+            <Text style={{ color: "#a7f3d0", fontWeight: 500 }}>Hỗ trợ khách hàng</Text>
+          </Col>
+          <Col xs={12} md={6}>
+            <Title level={2} style={{ color: "#fff", margin: 0 }}>5K+</Title>
+            <Text style={{ color: "#a7f3d0", fontWeight: 500 }}>Nụ cười rạng rỡ</Text>
+          </Col>
+        </Row>
       </div>
-    </section>
+    </Card>
   );
 }
 
 function PatientServices({ services }) {
   const tones = [
-    "from-blue-500 to-cyan-500",
-    "from-emerald-500 to-teal-500",
-    "from-violet-500 to-purple-500",
-    "from-rose-500 to-pink-500",
-    "from-amber-500 to-orange-500"
+    "linear-gradient(to right, #3b82f6, #06b6d4)",
+    "linear-gradient(to right, #10b981, #14b8a6)",
+    "linear-gradient(to right, #8b5cf6, #a855f7)",
+    "linear-gradient(to right, #f43f5e, #ec4899)",
+    "linear-gradient(to right, #f59e0b, #f97316)"
   ];
 
   return (
-    <section className="space-y-8" id="services">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <h2 className="text-3xl font-bold text-slate-900">Dịch vụ SmileCare</h2>
-        <div className="w-16 h-1.5 bg-primary-500 rounded-full"></div>
-      </div>
+    <div style={{ marginTop: 48 }} id="services">
+      <Flex vertical align="center" gap={16} style={{ marginBottom: 32 }}>
+        <Title level={2} style={{ margin: 0 }}>Dịch vụ SmileCare</Title>
+        <div style={{ width: 64, height: 6, backgroundColor: "#10b981", borderRadius: 4 }}></div>
+      </Flex>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Row gutter={[24, 24]}>
         {services.map((service, index) => (
-          <article className="card-base card-hover overflow-hidden group flex flex-col" key={service._id}>
-            <div className={`h-2 w-full bg-gradient-to-r ${tones[index % tones.length]}`}></div>
-            <div className="p-6 flex flex-col flex-grow">
-              <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-4 group-hover:bg-primary-50 group-hover:text-primary-500 transition-colors">
-                <Stethoscope size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">{service.name}</h3>
-              <div className="text-lg font-bold text-emerald-600 mb-3">{formatPriceText(service.price)}</div>
-              <p className="text-slate-600 text-sm leading-relaxed flex-grow">{service.description || "Thông tin dịch vụ đang được cập nhật."}</p>
-            </div>
-          </article>
+          <Col xs={24} md={12} lg={8} key={service._id}>
+            <Card 
+              bordered={false} 
+              style={{ height: "100%", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}
+              bodyStyle={{ padding: 0, display: "flex", flexDirection: "column", height: "100%" }}
+            >
+              <div style={{ height: 8, width: "100%", background: tones[index % tones.length] }}></div>
+              <Flex vertical style={{ padding: 24, flexGrow: 1 }}>
+                <Flex align="center" justify="center" style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: "#f8fafc", color: "#94a3b8", marginBottom: 16 }}>
+                  <Stethoscope size={24} />
+                </Flex>
+                <Title level={4} style={{ marginBottom: 8 }}>{service.name}</Title>
+                <Text strong style={{ color: "#059669", fontSize: 18, marginBottom: 12 }}>{formatPriceText(service.price)}</Text>
+                <Text type="secondary" style={{ flexGrow: 1 }}>{service.description || "Thông tin dịch vụ đang được cập nhật."}</Text>
+              </Flex>
+            </Card>
+          </Col>
         ))}
         {!services.length && (
-          <div className="col-span-full py-12 text-center text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            Chưa có dịch vụ đang hoạt động.
-          </div>
+          <Col span={24}>
+            <div style={{ padding: 48, textAlign: "center", color: "#64748b", backgroundColor: "#f8fafc", borderRadius: 16, border: "1px dashed #e2e8f0" }}>
+              Chưa có dịch vụ đang hoạt động.
+            </div>
+          </Col>
         )}
-      </div>
-    </section>
+      </Row>
+    </div>
   );
 }
 

@@ -1,7 +1,9 @@
-import { Modal, Select, Radio, DatePicker } from "antd";
+import { Modal, Select, Radio, DatePicker, Flex, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import { todayInput } from "../../utils/format.js";
 import { maxBookingDate } from "../../pages/BookingPage.jsx";
+
+const { Text } = Typography;
 
 export default function RescheduleAppointmentModal({
   dentistOptions,
@@ -21,9 +23,9 @@ export default function RescheduleAppointmentModal({
       cancelText="Đóng"
       okButtonProps={{ disabled: !slotOptions.length }}
     >
-      <div className="space-y-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">Ngày khám mới</span>
+      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        <Flex vertical gap={6}>
+          <Text strong>Ngày khám mới</Text>
           <DatePicker
             value={form.date ? dayjs(form.date) : null}
             onChange={(date, dateString) => onChange({ date: dateString })}
@@ -32,11 +34,12 @@ export default function RescheduleAppointmentModal({
             }}
             format="YYYY-MM-DD"
             allowClear={false}
+            style={{ width: "100%" }}
           />
-        </label>
+        </Flex>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">Bác sĩ</span>
+        <Flex vertical gap={6}>
+          <Text strong>Bác sĩ</Text>
           <Select
             value={form.dentistId}
             onChange={(value) => onChange({ dentistId: value })}
@@ -44,36 +47,37 @@ export default function RescheduleAppointmentModal({
               { value: "reception", label: "Lễ tân sắp xếp" },
               ...dentistOptions.map((dentist) => ({ value: dentist._id, label: dentist.fullName }))
             ]}
+            style={{ width: "100%" }}
           />
-        </label>
+        </Flex>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">Khung giờ</span>
-          <div className="mt-1">
+        <Flex vertical gap={6}>
+          <Text strong>Khung giờ</Text>
+          <div style={{ marginTop: 4 }}>
             {slotOptions.length ? (
               <Radio.Group 
                 value={form.time} 
                 onChange={(e) => onChange({ time: e.target.value })}
-                className="grid grid-cols-3 gap-2"
+                style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}
               >
                 {slotOptions.map((option) => (
                   <Radio.Button 
                     key={option.value} 
                     value={option.value}
-                    className="text-center rounded-lg"
+                    style={{ textAlign: "center", borderRadius: 8 }}
                   >
                     {option.label}
                   </Radio.Button>
                 ))}
               </Radio.Group>
             ) : (
-              <div className="text-center py-3 text-sm text-slate-500 bg-slate-50 rounded-lg">
+              <div style={{ textAlign: "center", padding: "12px 0", color: "#6b7280", backgroundColor: "#f9fafb", borderRadius: 8 }}>
                 Chưa có khung giờ đang mở
               </div>
             )}
           </div>
-        </label>
-      </div>
+        </Flex>
+      </Space>
     </Modal>
   );
 }

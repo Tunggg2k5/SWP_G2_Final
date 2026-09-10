@@ -1,8 +1,10 @@
 import { StarOutlined } from "@ant-design/icons";
-import { Card, List, Rate, Select, Switch, Space, Tag } from "antd";
+import { Card, List, Rate, Select, Switch, Space, Typography, Flex } from "antd";
 import { useMemo, useState } from "react";
 import StatusBadge from "../StatusBadge.jsx";
 import { formatDateTime } from "../../utils/format.js";
+
+const { Text } = Typography;
 
 const reviewStatusFilters = [
   { value: "all", label: "Tất cả" },
@@ -20,8 +22,13 @@ export default function AdminReviewList({ loading, onToggleVisibility, reviews }
 
   return (
     <Card 
-      title={<><StarOutlined className="text-amber-500 mr-2" /> Đánh giá & xếp hạng</>} 
-      className="shadow-sm"
+      title={
+        <Space>
+          <StarOutlined style={{ color: "#f59e0b" }} /> 
+          <span>Đánh giá & xếp hạng</span>
+        </Space>
+      } 
+      style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
       extra={
         <Select
           value={statusFilter}
@@ -39,12 +46,11 @@ export default function AdminReviewList({ loading, onToggleVisibility, reviews }
         renderItem={(review) => (
           <List.Item
             key={review._id}
-            className="hover:bg-slate-50 transition-colors"
             extra={
               <Space direction="vertical" align="end">
                 <StatusBadge value={review.isHidden ? "hidden" : "visible"} />
                 <Space>
-                  <span className="text-sm text-slate-500">Hiển thị</span>
+                  <Text type="secondary" style={{ fontSize: 14 }}>Hiển thị</Text>
                   <Switch 
                     checked={!review.isHidden} 
                     onChange={(checked) => onToggleVisibility(review, !checked)} 
@@ -55,14 +61,14 @@ export default function AdminReviewList({ loading, onToggleVisibility, reviews }
           >
             <List.Item.Meta
               title={<Rate disabled defaultValue={Number(review.rating || review.ratingService || 5)} style={{ fontSize: 16 }} />}
-              description={<span className="text-slate-700 italic">"{review.comment || "Không có nhận xét chi tiết."}"</span>}
+              description={<Text italic style={{ color: "#334155" }}>"{review.comment || "Không có nhận xét chi tiết."}"</Text>}
             />
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 mt-2">
-              <span><strong className="text-slate-700">Bệnh nhân:</strong> {review.patient?.fullName || "Bệnh nhân"}</span>
-              <span><strong className="text-slate-700">Dịch vụ:</strong> {review.service?.name || "Chưa có dịch vụ"}</span>
-              <span><strong className="text-slate-700">Bác sĩ:</strong> {review.dentist?.fullName || "Chưa có bác sĩ"}</span>
-              <span><strong className="text-slate-700">Ngày:</strong> {formatDateTime(review.updatedAt)}</span>
-            </div>
+            <Flex wrap="wrap" gap="middle" style={{ marginTop: 8 }}>
+              <Text type="secondary" style={{ fontSize: 14 }}><strong style={{ color: "#334155" }}>Bệnh nhân:</strong> {review.patient?.fullName || "Bệnh nhân"}</Text>
+              <Text type="secondary" style={{ fontSize: 14 }}><strong style={{ color: "#334155" }}>Dịch vụ:</strong> {review.service?.name || "Chưa có dịch vụ"}</Text>
+              <Text type="secondary" style={{ fontSize: 14 }}><strong style={{ color: "#334155" }}>Bác sĩ:</strong> {review.dentist?.fullName || "Chưa có bác sĩ"}</Text>
+              <Text type="secondary" style={{ fontSize: 14 }}><strong style={{ color: "#334155" }}>Ngày:</strong> {formatDateTime(review.updatedAt)}</Text>
+            </Flex>
           </List.Item>
         )}
       />

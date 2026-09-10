@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Card, Flex, Space, Typography, Row, Col, Button, Select, Input } from "antd";
 import StatusBadge from "../StatusBadge.jsx";
 import { clinicDateInput, filterOpenSlotsForDate, formatDateTime, formatSlotWithDate, getAppointmentSlot, todayInput } from "../../utils/format.js";
 import RescheduleAppointmentModal from "./RescheduleAppointmentModal.jsx";
 import { Calendar, Clock, User, FileText } from "lucide-react";
+
+const { Title, Text } = Typography;
 
 const cancelReasons = [
   "Bận việc cá nhân",
@@ -63,98 +66,124 @@ export default function PatientAppointmentCard({
   }
 
   return (
-    <article className="card-base card-hover p-5 space-y-4" key={appointment._id}>
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 border-b border-slate-100 pb-4">
+    <Card 
+      bordered={false} 
+      style={{ borderRadius: 16, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", height: "100%" }}
+      bodyStyle={{ display: "flex", flexDirection: "column", gap: 16 }}
+      key={appointment._id}
+    >
+      <Flex justify="space-between" align="flex-start" wrap="wrap" gap={12} style={{ paddingBottom: 16, borderBottom: "1px solid #f1f5f9" }}>
         <div>
-          <h4 className="font-bold text-lg text-slate-900">{appointment.service?.name}</h4>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-primary-600 mt-1">
+          <Title level={5} style={{ margin: 0 }}>{appointment.service?.name}</Title>
+          <Flex align="center" gap={6} style={{ marginTop: 4, color: "#10b981" }}>
             {isArranged ? <Clock size={16} /> : <Calendar size={16} />}
-            <span>{scheduleText}</span>
-          </div>
+            <Text strong style={{ fontSize: 13, color: "#10b981" }}>{scheduleText}</Text>
+          </Flex>
         </div>
         <StatusBadge value={appointment.status} />
+      </Flex>
+
+      <div style={{ backgroundColor: "#f8fafc", padding: 16, borderRadius: 12 }}>
+        <Row gutter={[12, 12]}>
+          <Col xs={24} sm={12}>
+            <Flex gap={8} align="flex-start">
+              <User size={16} style={{ color: "#94a3b8", marginTop: 2 }} />
+              <Flex vertical>
+                <Text type="secondary" style={{ fontSize: 12 }}>Bác sĩ phụ trách</Text>
+                <Text strong style={{ fontSize: 13 }}>{appointment.dentist?.fullName || "Lễ tân sắp xếp"}</Text>
+              </Flex>
+            </Flex>
+          </Col>
+
+          {appointment.patientNote && (
+            <Col xs={24} sm={12}>
+              <Flex gap={8} align="flex-start">
+                <FileText size={16} style={{ color: "#94a3b8", marginTop: 2 }} />
+                <Flex vertical>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Ghi chú của bạn</Text>
+                  <Text strong style={{ fontSize: 13 }}>{appointment.patientNote}</Text>
+                </Flex>
+              </Flex>
+            </Col>
+          )}
+
+          {appointment.status === "cancelled" && appointment.cancellationReason && (
+            <Col span={24}>
+              <Flex gap={8} align="flex-start">
+                <FileText size={16} style={{ color: "#fb7185", marginTop: 2 }} />
+                <Flex vertical>
+                  <Text strong style={{ fontSize: 12, color: "#f43f5e" }}>Lý do hủy</Text>
+                  <Text style={{ fontSize: 13, color: "#1e293b" }}>{appointment.cancellationReason}</Text>
+                </Flex>
+              </Flex>
+            </Col>
+          )}
+        </Row>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm bg-slate-50 p-4 rounded-lg">
-        <div className="flex gap-2">
-          <User size={16} className="text-slate-400 shrink-0 mt-0.5" />
-          <div className="flex flex-col">
-            <span className="text-slate-500 text-xs">Bác sĩ phụ trách</span>
-            <span className="font-medium text-slate-800">{appointment.dentist?.fullName || "Lễ tân sắp xếp"}</span>
-          </div>
-        </div>
-
-        {appointment.patientNote && (
-          <div className="flex gap-2">
-            <FileText size={16} className="text-slate-400 shrink-0 mt-0.5" />
-            <div className="flex flex-col">
-              <span className="text-slate-500 text-xs">Ghi chú của bạn</span>
-              <span className="font-medium text-slate-800">{appointment.patientNote}</span>
-            </div>
-          </div>
-        )}
-
-        {appointment.status === "cancelled" && appointment.cancellationReason && (
-          <div className="flex gap-2 sm:col-span-2">
-            <FileText size={16} className="text-rose-400 shrink-0 mt-0.5" />
-            <div className="flex flex-col">
-              <span className="text-rose-500 text-xs font-medium">Lý do hủy</span>
-              <span className="text-slate-800">{appointment.cancellationReason}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="pt-2 flex flex-col items-end">
+      <Flex vertical align="flex-end" style={{ paddingTop: 8 }}>
         {canModify ? (
-          <div className="flex flex-wrap gap-2 justify-end w-full">
-            <button
-              className="px-4 py-2 rounded-xl text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
-              onClick={() => {
-                setCancelOpen((value) => !value);
-                setRescheduleOpen(false);
-              }}
-            >
-              Hủy lịch
-            </button>
-            {!rescheduleOpen && (
-              <button className="btn-gradient px-4 py-2 text-sm" type="button" onClick={openRescheduleForm}>
-                Đổi lịch
-              </button>
-            )}
+          <Flex vertical style={{ width: "100%" }} align="flex-end">
+            <Space wrap>
+              <Button 
+                danger 
+                type="text" 
+                style={{ backgroundColor: "#fff1f2", color: "#e11d48", fontWeight: 500, borderRadius: 12 }}
+                onClick={() => {
+                  setCancelOpen((value) => !value);
+                  setRescheduleOpen(false);
+                }}
+              >
+                Hủy lịch
+              </Button>
+              {!rescheduleOpen && (
+                <Button 
+                  type="primary" 
+                  style={{ borderRadius: 12 }}
+                  onClick={openRescheduleForm}
+                >
+                  Đổi lịch
+                </Button>
+              )}
+            </Space>
 
             {cancelOpen && (
-              <div className="w-full mt-3 p-4 bg-rose-50/50 rounded-xl border border-rose-100 space-y-3 animate-fade-in-up">
-                <h5 className="font-semibold text-rose-900 text-sm">Xác nhận hủy lịch</h5>
-                <select className="input-base bg-white w-full" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)}>
-                  {cancelReasons.map((reason) => (
-                    <option key={reason} value={reason}>{reason}</option>
-                  ))}
-                </select>
-                {cancelReason === "Lý do khác" && (
-                  <input
-                    className="input-base bg-white w-full"
-                    value={customCancelReason}
-                    onChange={(event) => setCustomCancelReason(event.target.value)}
-                    placeholder="Nhập lý do hủy"
-                    maxLength={1000}
+              <div style={{ width: "100%", marginTop: 12, padding: 16, backgroundColor: "#fff1f2", border: "1px solid #ffe4e6", borderRadius: 12 }}>
+                <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                  <Text strong style={{ fontSize: 13, color: "#881337" }}>Xác nhận hủy lịch</Text>
+                  <Select 
+                    style={{ width: "100%" }} 
+                    value={cancelReason} 
+                    onChange={setCancelReason}
+                    options={cancelReasons.map(r => ({ value: r, label: r }))}
                   />
-                )}
-                <div className="flex justify-end gap-2 pt-2">
-                  <button className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" type="button" onClick={() => setCancelOpen(false)}>
-                    Đóng
-                  </button>
-                  <button className="px-3 py-1.5 text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 shadow-sm rounded-lg transition-colors" type="button" onClick={submitCancel}>
-                    Xác nhận hủy
-                  </button>
-                </div>
+                  {cancelReason === "Lý do khác" && (
+                    <Input
+                      style={{ width: "100%" }}
+                      value={customCancelReason}
+                      onChange={(event) => setCustomCancelReason(event.target.value)}
+                      placeholder="Nhập lý do hủy"
+                      maxLength={1000}
+                    />
+                  )}
+                  <Flex justify="flex-end" gap={8} style={{ paddingTop: 8 }}>
+                    <Button type="text" onClick={() => setCancelOpen(false)} style={{ color: "#475569" }}>
+                      Đóng
+                    </Button>
+                    <Button danger type="primary" onClick={submitCancel}>
+                      Xác nhận hủy
+                    </Button>
+                  </Flex>
+                </Space>
               </div>
             )}
-          </div>
+          </Flex>
         ) : (
-          <span className="text-xs text-slate-400 italic bg-slate-50 px-3 py-1.5 rounded-full">Lịch này không thể thay đổi thêm.</span>
+          <Text style={{ fontSize: 12, color: "#94a3b8", fontStyle: "italic", backgroundColor: "#f8fafc", padding: "6px 12px", borderRadius: 16 }}>
+            Lịch này không thể thay đổi thêm.
+          </Text>
         )}
-      </div>
+      </Flex>
 
       {rescheduleOpen && (
         <RescheduleAppointmentModal
@@ -166,6 +195,6 @@ export default function PatientAppointmentCard({
           slotOptions={currentSlotOptions}
         />
       )}
-    </article>
+    </Card>
   );
 }

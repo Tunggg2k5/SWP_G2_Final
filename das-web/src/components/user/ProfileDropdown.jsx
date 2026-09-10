@@ -1,6 +1,9 @@
 import { Camera, LockKeyhole, UserPen } from "lucide-react";
 import { roleLabels } from "../../utils/roles.js";
 import LogoutButton from "./LogoutButton.jsx";
+import { Button, Typography, Avatar, Flex } from "antd";
+
+const { Text } = Typography;
 
 export default function ProfileDropdown({
   fileInputRef,
@@ -12,51 +15,38 @@ export default function ProfileDropdown({
   userInitial
 }) {
   return (
-    <div className="w-64 bg-white rounded-xl shadow-lg overflow-hidden border border-slate-100">
-      <div className="p-5 border-b border-slate-100 bg-slate-50/80 backdrop-blur-sm flex flex-col items-center text-center">
-        <span className="w-16 h-16 rounded-full overflow-hidden bg-primary-100 text-primary-700 flex items-center justify-center text-xl font-bold shadow-md mb-3 ring-4 ring-white">
-          {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.fullName || "Avatar"} className="w-full h-full object-cover" />
-          ) : (
-            userInitial
-          )}
-        </span>
-        <strong className="text-base font-bold text-slate-800 truncate w-full">{user.fullName}</strong>
-        <span className="inline-block mt-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold tracking-wide">
+    <div style={{ width: 256, backgroundColor: '#fff', borderRadius: 12, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
+      <Flex vertical align="center" style={{ padding: 20, backgroundColor: 'rgba(248, 250, 252, 0.8)', borderBottom: '1px solid #f1f5f9' }}>
+        <Avatar
+          src={user.avatarUrl}
+          size={64}
+          style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: 24, fontWeight: 'bold', marginBottom: 12, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+        >
+          {!user.avatarUrl && userInitial}
+        </Avatar>
+        <Text strong style={{ fontSize: 16, width: '100%', textAlign: 'center' }} ellipsis>{user.fullName}</Text>
+        <Text
+          style={{ display: 'inline-block', marginTop: 6, padding: '4px 12px', borderRadius: 9999, backgroundColor: '#eef2ff', color: '#4338ca', fontSize: 12, fontWeight: 600 }}
+        >
           {roleLabels[user.role] || user.role}
-        </span>
-      </div>
+        </Text>
+      </Flex>
 
-      <div className="p-2 space-y-0.5">
-        <button
-          onClick={onEditProfile}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors group"
-        >
-          <UserPen size={18} className="text-slate-400 group-hover:text-primary-500 transition-colors" />
-          <span className="flex-1 text-left">Thay đổi thông tin cá nhân</span>
-        </button>
+      <Flex vertical style={{ padding: 8, gap: 2 }}>
+        <Button type="text" block onClick={onEditProfile} icon={<UserPen size={18} style={{ color: '#94a3b8' }} />} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10px 12px', height: 'auto', fontWeight: 500, color: '#334155' }}>
+          Thay đổi thông tin cá nhân
+        </Button>
 
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors group"
-        >
-          <Camera size={18} className="text-slate-400 group-hover:text-primary-500 transition-colors" />
-          <span className="flex-1 text-left">Đổi avatar từ thư viện</span>
-        </button>
+        <Button type="text" block onClick={() => fileInputRef.current?.click()} icon={<Camera size={18} style={{ color: '#94a3b8' }} />} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10px 12px', height: 'auto', fontWeight: 500, color: '#334155' }}>
+          Đổi avatar từ thư viện
+        </Button>
 
-        <button
-          onClick={onChangePassword}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors group"
-        >
-          <LockKeyhole size={18} className="text-slate-400 group-hover:text-primary-500 transition-colors" />
-          <span className="flex-1 text-left">Đổi mật khẩu</span>
-        </button>
-      </div>
+        <Button type="text" block onClick={onChangePassword} icon={<LockKeyhole size={18} style={{ color: '#94a3b8' }} />} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '10px 12px', height: 'auto', fontWeight: 500, color: '#334155' }}>
+          Đổi mật khẩu
+        </Button>
+      </Flex>
 
-      <div className="p-2 border-t border-slate-100 bg-slate-50/50">
+      <div style={{ padding: 8, borderTop: '1px solid #f1f5f9', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
         <LogoutButton onLogout={onLogout} />
       </div>
 

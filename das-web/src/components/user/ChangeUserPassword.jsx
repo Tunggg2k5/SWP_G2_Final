@@ -16,7 +16,7 @@ export default function ChangeUserPassword({ form, onCancel, onChange, onSubmit 
       }}
       okText="Đổi mật khẩu"
       cancelText="Hủy"
-      okButtonProps={{ className: "bg-primary-500 hover:bg-primary-600 border-none" }}
+      okButtonProps={{ style: { backgroundColor: '#10b981', border: 'none' } }}
       destroyOnClose
     >
       <Form
@@ -24,7 +24,7 @@ export default function ChangeUserPassword({ form, onCancel, onChange, onSubmit 
         layout="vertical"
         initialValues={form}
         onValuesChange={(_, allValues) => onChange({ ...form, ...allValues })}
-        className="mt-4"
+        style={{ marginTop: 16 }}
       >
         <Form.Item label="Mật khẩu hiện tại" name="currentPassword" rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại' }]}>
           <PasswordField />

@@ -1,9 +1,11 @@
 import { CalendarClock, Filter, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { List } from "antd";
+import { List, Space, Flex, Typography, Card, Input, Button } from "antd";
 import EmptyState from "../EmptyState.jsx";
 import PatientAppointmentCard from "./PatientAppointmentCard.jsx";
 import { clinicDateInput, compareAppointmentsNewestFirst } from "../../utils/format.js";
+
+const { Title, Text } = Typography;
 
 export default function PatientAppointmentList({
   appointments,
@@ -28,41 +30,41 @@ export default function PatientAppointmentList({
   }, [source, filterDate]);
 
   return (
-    <section className="space-y-4" id="appointments">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2 text-slate-800">
-          <CalendarClock className="text-primary-500" size={24} />
-          <h2 className="text-xl font-bold">{historyOnly ? "Lịch sử lịch hẹn" : "Lịch hẹn của tôi"}</h2>
-        </div>
+    <Space direction="vertical" size="middle" style={{ width: "100%" }} id="appointments">
+      <Flex justify="space-between" align="center" wrap="wrap" gap={16} style={{ marginBottom: 24 }}>
+        <Flex align="center" gap={8}>
+          <CalendarClock style={{ color: "#10b981" }} size={24} />
+          <Title level={4} style={{ margin: 0 }}>{historyOnly ? "Lịch sử lịch hẹn" : "Lịch hẹn của tôi"}</Title>
+        </Flex>
 
-        <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 px-2 text-slate-500 border-r border-slate-100">
+        <Flex align="center" gap={8} style={{ backgroundColor: "#fff", padding: 6, borderRadius: 12, border: "1px solid #e2e8f0", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+          <Flex align="center" gap={8} style={{ padding: "0 8px", borderRight: "1px solid #f1f5f9", color: "#64748b" }}>
             <Filter size={16} />
-            <span className="text-sm font-medium hidden sm:inline">Lọc ngày</span>
-          </div>
+            <Text strong style={{ fontSize: 13, display: "none" }}>Lọc ngày</Text>
+          </Flex>
           <input
             type="date"
-            className="border-0 bg-transparent text-sm font-medium text-slate-700 focus:ring-0 cursor-pointer px-2"
+            style={{ border: "none", backgroundColor: "transparent", fontSize: 13, fontWeight: 500, color: "#334155", outline: "none", cursor: "pointer", padding: "0 8px" }}
             value={filterDate}
             onChange={(event) => setFilterDate(event.target.value)}
           />
           {filterDate && (
-            <button
-              className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-              type="button"
+            <Button
+              type="text"
+              size="small"
+              icon={<X size={16} />}
               onClick={() => setFilterDate("")}
+              style={{ color: "#94a3b8" }}
               title="Xóa bộ lọc"
-            >
-              <X size={16} />
-            </button>
+            />
           )}
-        </div>
-      </div>
+        </Flex>
+      </Flex>
 
       {loading ? (
-        <div className="card-base p-8">
+        <Card bordered={false} style={{ borderRadius: 16 }}>
           <EmptyState title="Đang tải lịch hẹn" text="Hệ thống đang lấy dữ liệu mới nhất." />
-        </div>
+        </Card>
       ) : visibleAppointments.length ? (
         <List
           grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 1, xl: 1, xxl: 1 }}
@@ -84,13 +86,13 @@ export default function PatientAppointmentList({
           )}
         />
       ) : (
-        <div className="card-base p-8">
+        <Card bordered={false} style={{ borderRadius: 16 }}>
           <EmptyState
             title={historyOnly ? "Chưa có lịch sử lịch hẹn" : "Chưa có lịch hẹn"}
             text={filterDate ? "Không có lịch hẹn trong ngày đang lọc." : historyOnly ? "Các lịch đã hoàn tất, bị từ chối, hủy hoặc vắng mặt sẽ hiển thị tại đây." : "Bạn có thể đặt lịch mới tại màn Đặt lịch."}
           />
-        </div>
+        </Card>
       )}
-    </section>
+    </Space>
   );
 }

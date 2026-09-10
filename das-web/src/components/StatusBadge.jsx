@@ -79,7 +79,7 @@ const tagColors = {
 export default function StatusBadge({ value }) {
   const color = tagColors[value] || "default";
   return (
-    <Tag color={color} className="font-semibold px-2.5 py-0.5 rounded-full m-0 border-0 shadow-sm">
+    <Tag color={color} style={{ fontWeight: 600, padding: '2px 10px', borderRadius: 9999, margin: 0, border: 0, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
       {labels[value] || value || "-"}
     </Tag>
   );

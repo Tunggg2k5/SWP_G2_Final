@@ -1,13 +1,15 @@
-import { Card, Statistic } from "antd";
+import { Card, Statistic, Typography } from "antd";
+
+const { Text } = Typography;
 
 export default function AdminMetric({ icon: Icon, label, value }) {
   return (
-    <Card className="shadow-sm h-full" bodyStyle={{ padding: "20px" }}>
+    <Card style={{ height: "100%", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }} bodyStyle={{ padding: "20px" }}>
       <Statistic
-        title={<span className="text-slate-500 font-medium">{label}</span>}
+        title={<Text style={{ color: "#64748b", fontWeight: 500 }}>{label}</Text>}
         value={value}
         prefix={
-          <div className="bg-primary-50 p-2 rounded-xl text-primary-600 mr-2">
+          <div style={{ backgroundColor: "#eff6ff", padding: "8px", borderRadius: "12px", color: "#2563eb", marginRight: "8px", display: "inline-flex" }}>
             <Icon size={20} />
           </div>
         }

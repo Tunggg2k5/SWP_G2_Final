@@ -1,8 +1,10 @@
 import { BarChartOutlined, DollarOutlined, UsergroupAddOutlined } from "@ant-design/icons";
-import { Button, Card, Col, DatePicker, Input, Row, Statistic, Table, Tag } from "antd";
+import { Button, Card, Col, DatePicker, Input, Row, Statistic, Table, Tag, Typography, Space, Flex } from "antd";
 import dayjs from "dayjs";
 import { formatDateTime, formatMoney } from "../../utils/format.js";
 import AdminMetric from "./AdminMetric.jsx";
+
+const { Text } = Typography;
 
 export default function AdminReportPanel({
   onLoadPatientStatistics,
@@ -40,7 +42,7 @@ export default function AdminReportPanel({
       dataIndex: "total",
       key: "total",
       align: "right",
-      render: (total) => <strong className="text-slate-900">{formatMoney(total || 0)}</strong>
+      render: (total) => <strong style={{ color: "#0f172a" }}>{formatMoney(total || 0)}</strong>
     }
   ];
 
@@ -51,7 +53,7 @@ export default function AdminReportPanel({
   ];
 
   return (
-    <div className="space-y-6">
+    <Space direction="vertical" size="large" style={{ display: "flex" }}>
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <AdminMetric icon={DollarOutlined} label="Doanh thu" value={formatMoney(stats?.revenue || 0)} />
@@ -64,38 +66,54 @@ export default function AdminReportPanel({
         </Col>
       </Row>
 
-      <Card title={<><BarChartOutlined className="text-primary-600 mr-2" /> Thống kê</>} className="shadow-sm">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-            <span className="text-sm font-medium text-slate-700">Từ ngày</span>
+      <Card 
+        title={
+          <Space>
+            <BarChartOutlined style={{ color: "#2563eb" }} /> 
+            <span>Thống kê</span>
+          </Space>
+        } 
+        style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+      >
+        <Flex wrap="wrap" gap="middle" align="flex-end">
+          <Space direction="vertical" style={{ flex: 1, minWidth: 200 }}>
+            <Text strong style={{ color: "#334155" }}>Từ ngày</Text>
             <Input type="date" value={reportFilters.startDate} onChange={(event) => onReportFiltersChange({ startDate: event.target.value })} />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-            <span className="text-sm font-medium text-slate-700">Đến ngày</span>
+          </Space>
+          <Space direction="vertical" style={{ flex: 1, minWidth: 200 }}>
+            <Text strong style={{ color: "#334155" }}>Đến ngày</Text>
             <Input type="date" value={reportFilters.endDate} onChange={(event) => onReportFiltersChange({ endDate: event.target.value })} />
-          </div>
-          <Button type="primary" onClick={loadAll} style={{ height: "42px" }}>
+          </Space>
+          <Button type="primary" onClick={loadAll} style={{ height: 32 }}>
             Xem thống kê
           </Button>
-        </div>
+        </Flex>
       </Card>
 
       {patientStatistics && (
-        <Card title={<><UsergroupAddOutlined className="text-primary-600 mr-2" /> Thống kê bệnh nhân</>} className="shadow-sm">
+        <Card 
+          title={
+            <Space>
+              <UsergroupAddOutlined style={{ color: "#2563eb" }} /> 
+              <span>Thống kê bệnh nhân</span>
+            </Space>
+          } 
+          style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+        >
           <Row gutter={[16, 16]}>
             <Col xs={12} md={6}>
-              <Card type="inner" className="bg-slate-50">
+              <Card type="inner" style={{ backgroundColor: "#f8fafc" }}>
                 <Statistic title="Bệnh nhân mới" value={patientStatistics.newPatients} />
               </Card>
             </Col>
             <Col xs={12} md={6}>
-              <Card type="inner" className="bg-slate-50">
+              <Card type="inner" style={{ backgroundColor: "#f8fafc" }}>
                 <Statistic title="Bệnh nhân quay lại" value={patientStatistics.returningPatients} />
               </Card>
             </Col>
             {(patientStatistics.appointmentCounts || []).map((item) => (
               <Col xs={12} md={6} key={item._id || "unknown"}>
-                <Card type="inner" className="bg-slate-50">
+                <Card type="inner" style={{ backgroundColor: "#f8fafc" }}>
                   <Statistic title={`Lịch hẹn ${item._id || "khác"}`} value={item.count} />
                 </Card>
               </Col>
@@ -105,7 +123,15 @@ export default function AdminReportPanel({
       )}
 
       {revenueReport && (
-        <Card title={<><DollarOutlined className="text-primary-600 mr-2" /> Hóa đơn trong kỳ</>} className="shadow-sm">
+        <Card 
+          title={
+            <Space>
+              <DollarOutlined style={{ color: "#2563eb" }} /> 
+              <span>Hóa đơn trong kỳ</span>
+            </Space>
+          } 
+          style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}
+        >
           <Table
             dataSource={invoices}
             columns={invoiceColumns}
@@ -115,6 +141,6 @@ export default function AdminReportPanel({
           />
         </Card>
       )}
-    </div>
+    </Space>
   );
 }

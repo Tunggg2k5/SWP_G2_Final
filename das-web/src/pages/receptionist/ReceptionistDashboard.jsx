@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Tabs } from "antd";
+import { Tabs, Space } from "antd";
 import Feedback from "../../components/Feedback.jsx";
 import BookAppointmentForPatientForm from "../../components/receptionist/BookAppointmentForPatientForm.jsx";
 import ConsultationRequestList from "../../components/receptionist/ConsultationRequestList.jsx";
@@ -663,18 +663,20 @@ export default function ReceptionistDashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-      <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
-      <Tabs
-        activeKey={activeFeature}
-        onChange={(key) => {
-          setActiveFeature(key);
-          navigate(`/dashboard?tab=${key}`, { replace: true });
-        }}
-        items={tabItems}
-        renderTabBar={() => null}
-        className="bg-white p-4 rounded-xl shadow-sm border border-slate-100"
-      />
+    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px' }}>
+      <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
+        <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
+        <div style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', border: '1px solid #f0f0f0' }}>
+          <Tabs
+            activeKey={activeFeature}
+            onChange={(key) => {
+              setActiveFeature(key);
+              navigate(`/dashboard?tab=${key}`, { replace: true });
+            }}
+            items={tabItems}
+          />
+        </div>
+      </Space>
     </div>
   );
 }

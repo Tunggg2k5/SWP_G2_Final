@@ -47,7 +47,7 @@ export default function ClinicalPerformedServices({
       width: 200,
       render: (amount, record) => (
         <InputNumber
-          className="w-full"
+          style={{ width: '100%' }}
           disabled={!canEditCharges}
           min={0}
           step={1000}
@@ -75,17 +75,17 @@ export default function ClinicalPerformedServices({
   ];
 
   return (
-    <Card className="shadow-sm">
-      <div className="flex items-center gap-3 text-primary-700 mb-6 border-b border-slate-100 pb-4">
-        <ReceiptText size={20} />
-        <Title level={4} style={{ margin: 0 }} className="text-primary-700">Dịch vụ đã thực hiện</Title>
+    <Card style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, borderBottom: '1px solid #f1f5f9', paddingBottom: 16 }}>
+        <ReceiptText size={20} color="#0369a1" />
+        <Title level={4} style={{ margin: 0, color: '#0369a1' }}>Dịch vụ đã thực hiện</Title>
       </div>
 
       <Form layout="vertical" onFinish={(e) => onSubmit({ preventDefault: () => {} })}>
         <Form.Item label="Lịch khám">
           <Select 
             showSearch
-            className="w-full" 
+            style={{ width: '100%' }}
             size="large"
             value={form.appointmentId || undefined} 
             onChange={(value) => onChange("appointmentId", value)}
@@ -100,9 +100,9 @@ export default function ClinicalPerformedServices({
         </Form.Item>
 
         {selectedAppointment ? (
-          <div className="bg-primary-50 p-4 rounded-xl flex flex-col gap-2 border border-primary-100 mb-6">
-            <strong className="text-primary-800 text-lg">{[selectedAppointment.patient?.fullName || "Bệnh nhân", selectedAppointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
-            <span className="text-primary-600 text-sm">{selectedAppointment.service?.name} / {selectedAppointment.room?.name}</span>
+          <div style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #e0f2fe', marginBottom: 24 }}>
+            <strong style={{ color: '#075985', fontSize: 18 }}>{[selectedAppointment.patient?.fullName || "Bệnh nhân", selectedAppointment.patient?.phone].filter(Boolean).join(" - ")}</strong>
+            <span style={{ color: '#0284c7', fontSize: 14 }}>{selectedAppointment.service?.name} / {selectedAppointment.room?.name}</span>
             <div><StatusBadge value={selectedAppointment.status} /></div>
           </div>
         ) : (
@@ -110,14 +110,14 @@ export default function ClinicalPerformedServices({
         )}
 
         {isLockedForCharges && (
-          <div className="p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 flex flex-col gap-1 mb-6">
-            <strong className="font-semibold">Chưa được chọn dịch vụ</strong>
-            <span className="text-sm">Y tá chỉ xác nhận dịch vụ khi lịch khám đang ở trạng thái Đang khám.</span>
+          <div style={{ padding: 16, backgroundColor: '#fffbeb', color: '#92400e', borderRadius: 12, border: '1px solid #fde68a', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 24 }}>
+            <strong style={{ fontWeight: 600 }}>Chưa được chọn dịch vụ</strong>
+            <span style={{ fontSize: 14 }}>Y tá chỉ xác nhận dịch vụ khi lịch khám đang ở trạng thái Đang khám.</span>
           </div>
         )}
 
         {selectedAppointment && (
-          <div className="flex flex-col gap-4 mb-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             <Form.Item label="Thêm dịch vụ">
               <Select
                 showSearch
@@ -145,7 +145,7 @@ export default function ClinicalPerformedServices({
         )}
 
         {selectedAppointment && (
-          <div className="mb-6">
+          <div style={{ marginBottom: 24 }}>
             <Table
               dataSource={selectedRows}
               columns={serviceColumns}
@@ -158,7 +158,7 @@ export default function ClinicalPerformedServices({
         )}
 
         {selectedAppointment && (
-          <div className="space-y-4 mb-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             {extraCosts.map((item, index) => (
               <Row gutter={16} key={`extra-${index}`} align="bottom">
                 <Col flex="auto">
@@ -173,7 +173,7 @@ export default function ClinicalPerformedServices({
                 <Col flex="200px">
                   <Form.Item label="Số tiền" style={{ marginBottom: 0 }}>
                     <InputNumber
-                      className="w-full"
+                      style={{ width: '100%' }}
                       disabled={!canEditCharges}
                       min={0}
                       step={1000}
@@ -208,8 +208,8 @@ export default function ClinicalPerformedServices({
         )}
 
         {selectedAppointment && (
-          <div className="bg-primary-50 p-4 rounded-xl border border-primary-100 flex justify-end mb-6">
-            <strong className="text-xl text-primary-800">Tổng tiền: {formatMoney(total)}</strong>
+          <div style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, border: '1px solid #e0f2fe', display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+            <strong style={{ fontSize: 20, color: '#075985' }}>Tổng tiền: {formatMoney(total)}</strong>
           </div>
         )}
 

@@ -551,7 +551,7 @@ export default function ClinicalDashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <Feedback error={error} message={message} />
       
       <Tabs
@@ -563,7 +563,7 @@ export default function ClinicalDashboard() {
           return {
             key: feature.id,
             label: (
-              <span className="flex items-center gap-2">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon size={16} />
                 {feature.label}
               </span>
