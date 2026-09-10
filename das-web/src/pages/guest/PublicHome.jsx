@@ -3,13 +3,15 @@ import {
   ChevronRight,
   PhoneCall,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Collapse, Typography } from "antd";
+import { Layout, Typography, Row, Col, Button, Collapse, Tag, Flex } from "antd";
 
-const { Title, Paragraph } = Typography;
+const { Header, Content, Footer } = Layout;
+const { Title, Paragraph, Text } = Typography;
 
 import Feedback from "../../components/Feedback.jsx";
 import ClinicInformation from "../../components/guestHome/ClinicInformation.jsx";
@@ -66,88 +68,127 @@ export default function PublicHome() {
   const reviewCards = useMemo(() => getReviewCards(reviews), [reviews]);
   const serviceCards = useMemo(() => getServiceCards(services), [services]);
   const roomCount = rooms.length;
-  const [openFaq, setOpenFaq] = useState(0);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <Layout style={{ minHeight: "100vh", background: "#f8fafc" }}>
       <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
 
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-sm py-3" : "bg-transparent py-5"}`}>
-        <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-          <a className="text-2xl font-bold text-gradient" href="#home" aria-label="SmileCare">
+      <Header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          background: "rgba(255, 255, 255, 0.9)",
+          backdropFilter: "blur(12px)",
+          height: 70,
+          padding: "0 40px",
+          borderBottom: "1px solid #f1f5f9",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}
+      >
+        <Flex align="center" gap={10}>
+          <div style={{
+            background: "linear-gradient(135deg, #0284c7, #0369a1)",
+            padding: 8,
+            borderRadius: 10,
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <Activity size={20} />
+          </div>
+          <a href="#home" style={{ textDecoration: "none", fontSize: 22, fontWeight: 800, color: "#0284c7" }}>
             SmileCare
           </a>
+        </Flex>
 
-          <nav className="hidden md:flex items-center gap-8 font-medium text-slate-700" aria-label="Điều hướng khách">
-            <a href="#home" className="hover:text-primary-600 transition-colors">Trang chủ</a>
-            <a href="#services" className="hover:text-primary-600 transition-colors">Dịch vụ</a>
-            <a href="#about" className="hover:text-primary-600 transition-colors">Giới thiệu</a>
-          </nav>
+        <nav style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          <a href="#home" style={{ textDecoration: "none", color: "#475569", fontWeight: 500, fontSize: 15 }}>Trang chủ</a>
+          <a href="#services" style={{ textDecoration: "none", color: "#475569", fontWeight: 500, fontSize: 15 }}>Dịch vụ</a>
+          <a href="#about" style={{ textDecoration: "none", color: "#475569", fontWeight: 500, fontSize: 15 }}>Giới thiệu</a>
+        </nav>
 
-          <div className="flex items-center gap-4">
-            <a className="hidden md:flex items-center gap-2 text-primary-700 font-semibold hover:text-primary-800 transition-colors" href={hotlineHref}>
+        <Flex align="center" gap={16}>
+          {hotline && (
+            <a href={hotlineHref} style={{ textDecoration: "none", color: "#0284c7", fontWeight: 600, display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
               <PhoneCall size={18} />
-              <span>{hotline || "Liên hệ lễ tân"}</span>
+              <span>{hotline}</span>
             </a>
-            <Link className="btn-gradient text-white px-5 py-2 rounded-xl" to="/login">
+          )}
+          <Link to="/login">
+            <Button type="primary" size="large" style={{ borderRadius: 8, fontWeight: 600, padding: "0 24px" }}>
               Đăng nhập
-            </Link>
-          </div>
-        </div>
-      </header>
+            </Button>
+          </Link>
+        </Flex>
+      </Header>
 
-      <main>
-        <section className="bg-white relative overflow-hidden flex items-center border-b border-slate-100" id="home" style={{ minHeight: "85vh" }}>
-          <div className="container mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-20">
-            <div className="space-y-6">
-              <span className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold">
-                <ShieldCheck size={16} />
-                Nha khoa uy tín hàng đầu
-              </span>
-              <Title level={1} className="font-extrabold leading-tight text-slate-900" style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>
-                <span className="block">Nụ Cười Rạng Rỡ,</span>
-                <span className="block text-primary-600">Tự Tin Tỏa Sáng</span>
-              </Title>
-              <Paragraph className="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed">
-                SmileCare mang đến giải pháp chăm sóc răng miệng toàn diện với công nghệ hiện đại và đội ngũ bác sĩ giàu kinh nghiệm.
-              </Paragraph>
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <a className="inline-flex justify-center items-center gap-2 bg-primary-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-primary-700 transition-colors shadow-sm" href="#consultation">
-                  Đăng ký tư vấn miễn phí <ChevronRight size={18} />
-                </a>
-                <a className="inline-flex justify-center items-center gap-2 bg-white text-slate-700 border border-slate-200 font-medium px-8 py-3.5 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" href="#services">
-                  Khám phá dịch vụ <ChevronRight size={18} />
-                </a>
-              </div>
-            </div>
+      <Content>
+        {/* Hero Section */}
+        <section style={{ background: "#fff", borderBottom: "1px solid #f1f5f9", padding: "80px 20px" }} id="home">
+          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <Row gutter={[48, 48]} align="middle">
+              <Col xs={24} lg={12}>
+                <Tag color="blue" style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
+                  <ShieldCheck size={16} />
+                  Nha khoa uy tín hàng đầu
+                </Tag>
+                <Title level={1} style={{ fontSize: "3.2rem", fontWeight: 800, lineHeight: 1.2, margin: "0 0 20px" }}>
+                  Nụ Cười Rạng Rỡ, <br />
+                  <span style={{ color: "#0284c7" }}>Tự Tin Tỏa Sáng</span>
+                </Title>
+                <Paragraph style={{ fontSize: 18, color: "#64748b", lineHeight: 1.7, marginBottom: 32 }}>
+                  SmileCare mang đến giải pháp chăm sóc răng miệng toàn diện với công nghệ hiện đại và đội ngũ bác sĩ giàu kinh nghiệm.
+                </Paragraph>
+                <Flex gap={16} wrap="wrap">
+                  <a href="#consultation">
+                    <Button type="primary" size="large" icon={<ChevronRight size={18} />} iconPosition="end" style={{ height: 48, borderRadius: 8, padding: "0 28px", fontWeight: 600 }}>
+                      Đăng ký tư vấn miễn phí
+                    </Button>
+                  </a>
+                  <a href="#services">
+                    <Button size="large" icon={<ChevronRight size={18} />} iconPosition="end" style={{ height: 48, borderRadius: 8, padding: "0 28px", fontWeight: 600 }}>
+                      Khám phá dịch vụ
+                    </Button>
+                  </a>
+                </Flex>
+              </Col>
 
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary-100 rounded-3xl transform translate-x-4 translate-y-4 -z-10"></div>
-              <img
-                src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Phòng khám nha khoa hiện đại"
-                className="w-full h-auto rounded-3xl shadow-xl object-cover"
-                style={{ aspectRatio: "4/3" }}
-              />
-              <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
-                  <CheckCircle2 size={24} />
+              <Col xs={24} lg={12}>
+                <div style={{ position: "relative" }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Phòng khám nha khoa hiện đại"
+                    style={{ width: "100%", borderRadius: 24, boxShadow: "0 20px 40px rgba(0,0,0,0.08)", aspectRatio: "4/3", objectCover: "cover" }}
+                  />
+                  <div style={{
+                    position: "absolute",
+                    bottom: -20,
+                    left: -20,
+                    background: "#fff",
+                    padding: "16px 24px",
+                    borderRadius: 16,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12
+                  }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f0fdf4", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <CheckCircle2 size={24} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, color: "#1e293b" }}>100%</div>
+                      <div style={{ fontSize: 13, color: "#64748b" }}>Bác sĩ chuyên khoa</div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-slate-900">100%</div>
-                  <div className="text-sm text-slate-500">Bác sĩ chuyên khoa</div>
-                </div>
-              </div>
-            </div>
+              </Col>
+            </Row>
           </div>
         </section>
 
@@ -157,84 +198,88 @@ export default function PublicHome() {
 
         <DentistProfile dentistSlides={dentistSlides} />
 
-        {faqs.length > 0 && <section className="py-20 bg-slate-50">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-flex items-center gap-2 text-amber-600 bg-amber-100 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                <Sparkles size={16} />
-                Tư vấn nhanh
-              </span>
-              <Title level={2} className="text-slate-900 m-0">Giải Đáp Thắc Mắc Về Sức Khỏe Răng Miệng</Title>
-            </div>
+        {faqs.length > 0 && (
+          <section style={{ padding: "80px 20px", background: "#f8fafc" }}>
+            <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+              <Flex vertical align="center" style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 48px" }}>
+                <Tag color="gold" style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+                  <Sparkles size={16} />
+                  Tư vấn nhanh
+                </Tag>
+                <Title level={2} style={{ margin: 0 }}>Giải Đáp Thắc Mắc Về Sức Khỏe Răng Miệng</Title>
+              </Flex>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-              <div className="rounded-2xl overflow-hidden aspect-video lg:aspect-square bg-slate-200 shadow-inner">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRazgHjrZSwfGVLIdmVD_YV5WAuor-NRqzsb53jMC05rQ&s=10" alt="Tư vấn nha khoa" className="w-full h-full object-cover" />
-              </div>
-              <div className="space-y-4">
-                <Collapse
-                  accordion
-                  ghost
-                  expandIconPosition="end"
-                  items={faqs.map((item, index) => ({
-                    key: index,
-                    label: <span className="text-lg font-semibold text-slate-800">{item.question}</span>,
-                    children: <p className="text-slate-600 leading-relaxed border-t border-slate-100 pt-4 m-0">{item.answer}</p>
-                  }))}
-                  className="bg-white rounded-2xl shadow-sm p-4 card-base"
-                />
-              </div>
+              <Row gutter={[48, 48]} align="middle">
+                <Col xs={24} lg={12}>
+                  <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRazgHjrZSwfGVLIdmVD_YV5WAuor-NRqzsb53jMC05rQ&s=10"
+                    alt="Tư vấn nha khoa"
+                    style={{ width: "100%", borderRadius: 20, objectCover: "cover", boxShadow: "0 10px 25px rgba(0,0,0,0.06)" }}
+                  />
+                </Col>
+                <Col xs={24} lg={12}>
+                  <Collapse
+                    accordion
+                    ghost
+                    expandIconPosition="end"
+                    items={faqs.map((item, index) => ({
+                      key: index,
+                      label: <span style={{ fontSize: 16, fontWeight: 600, color: "#1e293b" }}>{item.question}</span>,
+                      children: <Paragraph style={{ color: "#475569", lineHeight: 1.7, margin: 0, paddingTop: 8 }}>{item.answer}</Paragraph>
+                    }))}
+                    style={{ background: "#fff", borderRadius: 16, padding: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  />
+                </Col>
+              </Row>
             </div>
-          </div>
-        </section>}
+          </section>
+        )}
 
         <ReviewList reviews={reviewCards} />
+
         <ConsultationForm
           onError={setError}
           onMessage={setMessage}
           services={services}
         />
-      </main>
+      </Content>
 
-      <footer className="bg-slate-900 text-white py-16">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            <div className="lg:col-span-2 space-y-6">
-              <strong className="text-3xl font-bold tracking-tight">Smile<span className="text-teal-400">Care</span></strong>
-              <p className="text-slate-400 max-w-sm leading-relaxed">Nha khoa SmileCare - Đồng hành cùng nụ cười Việt với dịch vụ chăm sóc răng miệng chất lượng cao.</p>
-            </div>
+      <Footer style={{ background: "#0f172a", color: "#94a3b8", padding: "64px 40px 32px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <Row gutter={[48, 48]}>
+            <Col xs={24} md={12}>
+              <Title level={3} style={{ color: "#fff", marginBottom: 16 }}>Smile<span style={{ color: "#38bdf8" }}>Care</span></Title>
+              <Paragraph style={{ color: "#94a3b8", maxWidth: 400, lineHeight: 1.7 }}>
+                Nha khoa SmileCare - Đồng hành cùng nụ cười Việt với dịch vụ chăm sóc răng miệng chất lượng cao, công nghệ chuẩn y khoa quốc tế.
+              </Paragraph>
+            </Col>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-6">Về SmileCare</h3>
-              <div className="flex flex-col gap-3 text-slate-400">
-                <a href="#about" className="hover:text-teal-400 transition-colors">Giới thiệu</a>
-                <a href="#about" className="hover:text-teal-400 transition-colors">Đội ngũ bác sĩ</a>
-                <a href="#about" className="hover:text-teal-400 transition-colors">Cơ sở vật chất</a>
-                <Link to="/login" className="hover:text-teal-400 transition-colors">Đăng nhập</Link>
-              </div>
-            </div>
+            <Col xs={12} md={6}>
+              <Text strong style={{ color: "#fff", fontSize: 16, display: "block", marginBottom: 16 }}>Về SmileCare</Text>
+              <Flex vertical gap={12}>
+                <a href="#about" style={{ color: "#94a3b8", textDecoration: "none" }}>Giới thiệu</a>
+                <a href="#about" style={{ color: "#94a3b8", textDecoration: "none" }}>Đội ngũ bác sĩ</a>
+                <a href="#services" style={{ color: "#94a3b8", textDecoration: "none" }}>Cơ sở vật chất</a>
+                <Link to="/login" style={{ color: "#38bdf8", textDecoration: "none" }}>Đăng nhập</Link>
+              </Flex>
+            </Col>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-6">Hỗ trợ</h3>
-              <div className="flex flex-col gap-3 text-slate-400">
-                <a href="#consultation" className="hover:text-teal-400 transition-colors">Câu hỏi thường gặp</a>
-                <Link to="/register" className="hover:text-teal-400 transition-colors">Tạo tài khoản</Link>
-                <Link to="/booking" className="hover:text-teal-400 transition-colors">Hướng dẫn đặt lịch</Link>
-                <a href={hotlineHref} className="hover:text-teal-400 transition-colors font-semibold text-white">{hotline || "Liên hệ lễ tân"}</a>
-              </div>
-            </div>
-          </div>
+            <Col xs={12} md={6}>
+              <Text strong style={{ color: "#fff", fontSize: 16, display: "block", marginBottom: 16 }}>Hỗ trợ</Text>
+              <Flex vertical gap={12}>
+                <a href="#consultation" style={{ color: "#94a3b8", textDecoration: "none" }}>Câu hỏi thường gặp</a>
+                <Link to="/register" style={{ color: "#94a3b8", textDecoration: "none" }}>Tạo tài khoản</Link>
+                <Link to="/booking" style={{ color: "#94a3b8", textDecoration: "none" }}>Hướng dẫn đặt lịch</Link>
+                <a href={hotlineHref} style={{ color: "#38bdf8", textDecoration: "none", fontWeight: 600 }}>{hotline || "1900 8888"}</a>
+              </Flex>
+            </Col>
+          </Row>
 
-          <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-            <span>© 2026 SmileCare. Tất cả quyền được bảo lưu.</span>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Chính sách bảo mật</a>
-              <span>·</span>
-              <a href="#" className="hover:text-white transition-colors">Điều khoản sử dụng</a>
-            </div>
+          <div style={{ borderTop: "1px solid #1e293b", marginTop: 48, paddingTop: 24, textAlign: "center", fontSize: 14 }}>
+            © 2026 SmileCare. Tất cả quyền được bảo lưu.
           </div>
         </div>
-      </footer>
-    </div>
+      </Footer>
+    </Layout>
   );
 }

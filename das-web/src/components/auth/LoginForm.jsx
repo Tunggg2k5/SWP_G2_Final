@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../redux/AuthContext.jsx";
 import { getErrorMessage } from "../../utils/api.js";
-import { Form, Input, Button, Alert } from "antd";
+import { Form, Input, Button, Alert, Typography, Flex, Card } from "antd";
 import { validatePhone } from "../../utils/validation.js";
+
+const { Title, Text } = Typography;
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -33,46 +35,46 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="max-w-sm w-full mx-auto space-y-6">
-      <div className="text-center space-y-2">
-        <div className="flex justify-center items-center gap-2 mb-6">
-          <Activity className="text-primary-600" size={32} />
-          <span className="text-3xl font-extrabold text-gradient">SmileCare</span>
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900">Đăng nhập</h2>
-        <p className="text-slate-500">Chào mừng bạn quay lại hệ thống</p>
-      </div>
+    <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", padding: 12 }}>
+      <Flex vertical align="center" style={{ textAlign: "center", marginBottom: 28 }}>
+        <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
+          <Activity color="#0284c7" size={32} />
+          <span style={{ fontSize: 26, fontWeight: 800, color: "#0284c7" }}>SmileCare</span>
+        </Flex>
+        <Title level={3} style={{ margin: "0 0 4px", color: "#0f172a" }}>Đăng nhập</Title>
+        <Text type="secondary">Chào mừng bạn quay lại hệ thống</Text>
+      </Flex>
 
-      <Form layout="vertical" onFinish={onFinish} requiredMark={false} className="space-y-4">
-        <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: 'Số điện thoại là bắt buộc.' }]} className="mb-2">
-            <Input prefix={<PhoneOutlined className="text-slate-400" />} type="tel" maxLength={13} placeholder="Nhập số điện thoại" size="large" />
+      <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
+        <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: "Số điện thoại là bắt buộc." }]} style={{ marginBottom: 16 }}>
+          <Input prefix={<PhoneOutlined style={{ color: "#94a3b8" }} />} type="tel" maxLength={13} placeholder="Nhập số điện thoại" size="large" style={{ borderRadius: 8 }} />
         </Form.Item>
 
-        <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: 'Mật khẩu là bắt buộc.' }]} className="mb-2">
-            <Input.Password prefix={<LockOutlined className="text-slate-400" />} minLength={8} maxLength={72} placeholder="Nhập mật khẩu" size="large" />
+        <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: "Mật khẩu là bắt buộc." }]} style={{ marginBottom: 16 }}>
+          <Input.Password prefix={<LockOutlined style={{ color: "#94a3b8" }} />} minLength={8} maxLength={72} placeholder="Nhập mật khẩu" size="large" style={{ borderRadius: 8 }} />
         </Form.Item>
 
-        {error && <Alert message={error} type="error" showIcon />}
+        {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />}
 
-        <Form.Item className="mt-2 mb-0">
-          <Button type="primary" htmlType="submit" size="large" block loading={loading} className="btn-gradient border-none h-12 text-base rounded-xl font-semibold shadow-md transition-all duration-200 hover:shadow-lg">
+        <Form.Item style={{ marginTop: 8, marginBottom: 16 }}>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading} style={{ height: 48, borderRadius: 8, fontWeight: 600, fontSize: 16 }}>
             Đăng nhập
           </Button>
         </Form.Item>
 
-        <div className="text-center mt-4">
-          <Link className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors" to="/forgot-password">
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <Link to="/forgot-password" style={{ color: "#0284c7", fontWeight: 500, fontSize: 14 }}>
             Quên mật khẩu?
           </Link>
         </div>
       </Form>
 
-      <p className="text-center text-sm text-slate-500 pt-4 border-t border-slate-100 mt-6">
-        Chưa có tài khoản?{" "}
-        <Link to="/register" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+      <div style={{ textAlign: "center", paddingTop: 16, borderTop: "1px solid #f1f5f9", fontSize: 14 }}>
+        <Text type="secondary">Chưa có tài khoản? </Text>
+        <Link to="/register" style={{ color: "#0284c7", fontWeight: 600 }}>
           Tạo tài khoản
         </Link>
-      </p>
-    </div>
+      </div>
+    </Card>
   );
 }

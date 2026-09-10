@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { api, getErrorMessage } from "../../utils/api.js";
 import { validateEmail, validatePassword } from "../../utils/validation.js";
 import { usePublicBootstrap } from "../../utils/usePublicBootstrap.js";
-import { Form, Input, Button, Steps, Alert } from "antd";
+import { Form, Input, Button, Steps, Alert, Typography, Card, Flex } from "antd";
+
+const { Title, Text } = Typography;
 
 export default function ForgotPasswordForm() {
   const { clinic, loading: clinicLoading } = usePublicBootstrap();
@@ -72,11 +74,11 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="max-w-sm w-full mx-auto space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-slate-900">Quên mật khẩu</h2>
-        <p className="text-slate-500">Khôi phục quyền truy cập tài khoản</p>
-      </div>
+    <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", padding: 12 }}>
+      <Flex vertical align="center" style={{ textAlign: "center", marginBottom: 24 }}>
+        <Title level={3} style={{ margin: "0 0 4px", color: "#0f172a" }}>Quên mật khẩu</Title>
+        <Text type="secondary">Khôi phục quyền truy cập tài khoản</Text>
+      </Flex>
 
       <Steps
         current={currentStep}
@@ -84,28 +86,28 @@ export default function ForgotPasswordForm() {
           { title: "Gửi email" },
           { title: "Đặt lại MK" }
         ]}
-        className="mb-6"
+        style={{ marginBottom: 24 }}
       />
 
-      <div className="space-y-4">
+      <div style={{ marginBottom: 20 }}>
         <Alert
           message={
-            <div className="flex flex-col gap-2">
-              <p>Nhập email đã cập nhật trong tài khoản để nhận mã OTP. Nếu bạn chưa cập nhật email, vui lòng liên hệ lễ tân để nhận mật khẩu mới.</p>
+            <div>
+              <p style={{ margin: "0 0 8px" }}>Nhập email đã cập nhật trong tài khoản để nhận mã OTP. Nếu bạn chưa cập nhật email, vui lòng liên hệ lễ tân để nhận mật khẩu mới.</p>
               {clinicLoading ? (
-                <div className="text-blue-600/80 font-medium text-xs">Đang tải số điện thoại lễ tân...</div>
+                <div style={{ color: "#0284c7", fontSize: 12, fontWeight: 500 }}>Đang tải số điện thoại lễ tân...</div>
               ) : receptionistPhone ? (
-                <a href={`tel:${receptionistPhone}`} className="inline-flex items-center gap-2 font-semibold hover:text-blue-800 transition-colors bg-white/60 p-2 rounded-md w-max border border-blue-200">
+                <a href={`tel:${receptionistPhone}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600, color: "#0284c7", textDecoration: "none" }}>
                   <PhoneOutlined />
                   <span>Liên hệ lễ tân: {receptionistPhone}</span>
                 </a>
               ) : (
-                <div className="text-rose-600 font-medium text-xs">Chưa có số điện thoại lễ tân trong hệ thống.</div>
+                <div style={{ color: "#ef4444", fontSize: 12, fontWeight: 500 }}>Chưa có số điện thoại lễ tân trong hệ thống.</div>
               )}
             </div>
           }
           type="info"
-          className="bg-blue-50 border-blue-100"
+          showIcon
         />
       </div>
 
@@ -113,46 +115,45 @@ export default function ForgotPasswordForm() {
         form={form} 
         layout="vertical" 
         onFinish={currentStep === 0 ? requestOtp : resetPassword} 
-        requiredMark={false} 
-        className="space-y-4"
+        requiredMark={false}
       >
-        <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Email là bắt buộc.' }]} className="mb-2">
-          <Input prefix={<MailOutlined className="text-slate-400" />} type="email" placeholder="Nhập email của bạn" size="large" readOnly={currentStep === 1} className={currentStep === 1 ? "bg-slate-50 text-slate-500" : ""} />
+        <Form.Item label="Email" name="email" rules={[{ required: true, message: "Email là bắt buộc." }]} style={{ marginBottom: 16 }}>
+          <Input prefix={<MailOutlined style={{ color: "#94a3b8" }} />} type="email" placeholder="Nhập email của bạn" size="large" readOnly={currentStep === 1} style={{ borderRadius: 8 }} />
         </Form.Item>
 
         {currentStep === 1 && (
           <>
-            <Form.Item label="Mã OTP" name="verificationCode" rules={[{ required: true, message: 'Mã OTP là bắt buộc.' }]} className="mb-2">
-              <Input prefix={<KeyOutlined className="text-slate-400" />} maxLength={12} placeholder="Nhập mã 6 số" size="large" className="tracking-widest font-mono" />
+            <Form.Item label="Mã OTP" name="verificationCode" rules={[{ required: true, message: "Mã OTP là bắt buộc." }]} style={{ marginBottom: 16 }}>
+              <Input prefix={<KeyOutlined style={{ color: "#94a3b8" }} />} maxLength={12} placeholder="Nhập mã 6 số" size="large" style={{ letterSpacing: 4, fontFamily: "monospace", borderRadius: 8 }} />
             </Form.Item>
 
-            <Form.Item label="Mật khẩu mới" name="newPassword" rules={[{ required: true, message: 'Mật khẩu mới là bắt buộc.' }]} className="mb-2">
-              <Input.Password prefix={<LockOutlined className="text-slate-400" />} minLength={8} maxLength={72} placeholder="Nhập mật khẩu mới" size="large" />
+            <Form.Item label="Mật khẩu mới" name="newPassword" rules={[{ required: true, message: "Mật khẩu mới là bắt buộc." }]} style={{ marginBottom: 16 }}>
+              <Input.Password prefix={<LockOutlined style={{ color: "#94a3b8" }} />} minLength={8} maxLength={72} placeholder="Nhập mật khẩu mới" size="large" style={{ borderRadius: 8 }} />
             </Form.Item>
           </>
         )}
 
-        {error && <Alert message={error} type="error" showIcon />}
-        {message && <Alert message={message} type="success" showIcon />}
+        {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />}
+        {message && <Alert message={message} type="success" showIcon style={{ marginBottom: 16 }} />}
 
-        <div className="space-y-3 pt-2">
-          <Button type="primary" htmlType="submit" size="large" block loading={loading} className="btn-gradient border-none h-12 text-base rounded-xl font-semibold shadow-md transition-all duration-200 hover:shadow-lg">
+        <Flex vertical gap={12} style={{ marginTop: 8 }}>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading} style={{ height: 48, borderRadius: 8, fontWeight: 600, fontSize: 16 }}>
             {currentStep === 0 ? "Gửi mã OTP" : "Đặt lại mật khẩu"}
           </Button>
           {currentStep === 1 && (
-            <Button onClick={() => setCurrentStep(0)} size="large" block className="h-12 text-base text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl font-medium transition-colors border border-slate-200">
+            <Button onClick={() => setCurrentStep(0)} size="large" block style={{ height: 48, borderRadius: 8, fontWeight: 500 }}>
               Quay lại / Gửi lại OTP
             </Button>
           )}
-        </div>
+        </Flex>
       </Form>
 
-      <p className="text-center text-sm text-slate-500 pt-4 border-t border-slate-100">
-        Đã nhớ mật khẩu?{" "}
-        <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+      <div style={{ textAlign: "center", paddingTop: 16, borderTop: "1px solid #f1f5f9", marginTop: 20, fontSize: 14 }}>
+        <Text type="secondary">Đã nhớ mật khẩu? </Text>
+        <Link to="/login" style={{ color: "#0284c7", fontWeight: 600 }}>
           Đăng nhập
         </Link>
-      </p>
-    </div>
+      </div>
+    </Card>
   );
 }

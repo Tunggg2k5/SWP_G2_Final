@@ -4,35 +4,34 @@ import { Card, Typography } from "antd";
 const { Title, Text } = Typography;
 
 const iconMap = {
-  implant: <Activity size={24} className="text-primary-600" />,
-  cosmetic: <Sparkles size={24} className="text-rose-500" />,
-  ortho: <Smile size={24} className="text-teal-600" />,
-  general: <Stethoscope size={24} className="text-amber-500" />
+  implant: <Activity size={24} color="#0284c7" />,
+  cosmetic: <Sparkles size={24} color="#f43f5e" />,
+  ortho: <Smile size={24} color="#0d9488" />,
+  general: <Stethoscope size={24} color="#f59e0b" />
 };
 
 const bgMap = {
-  implant: "bg-primary-50",
-  cosmetic: "bg-rose-50",
-  ortho: "bg-teal-50",
-  general: "bg-amber-50"
+  implant: "#f0f9ff",
+  cosmetic: "#fff1f2",
+  ortho: "#f0fdfa",
+  general: "#fffbeb"
 };
 
 export default function DentalServiceCard({ service }) {
-  const icon = iconMap[service.accent] || <Stethoscope size={24} className="text-slate-500" />;
-  const bgClass = bgMap[service.accent] || "bg-slate-50";
+  const icon = iconMap[service.accent] || <Stethoscope size={24} color="#64748b" />;
+  const bgColor = bgMap[service.accent] || "#f8fafc";
 
   return (
     <Card 
-      className="h-full border-t-4 border-t-transparent hover:border-t-primary-500 transition-all duration-300 group hover:shadow-md" 
-      bordered={false} 
-      styles={{ body: { display: 'flex', flexDirection: 'column', height: '100%', padding: '24px' } }}
+      style={{ height: "100%", borderRadius: 16, border: "1px solid #f1f5f9", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+      styles={{ body: { display: "flex", flexDirection: "column", height: "100%", padding: 24 } }}
     >
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${bgClass} group-hover:scale-110 transition-transform duration-300`}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: bgColor, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
         {icon}
       </div>
-      <Title level={4} className="text-slate-800 mb-3">{service.name}</Title>
-      {service.priceText && <Text strong className="text-primary-600 mb-4 block text-lg">{service.priceText}</Text>}
-      <Text className="text-slate-600 leading-relaxed flex-grow">{service.description}</Text>
+      <Title level={4} style={{ color: "#1e293b", marginBottom: 8 }}>{service.name}</Title>
+      {service.priceText && <Text strong style={{ color: "#0284c7", marginBottom: 12, display: "block", fontSize: 16 }}>{service.priceText}</Text>}
+      <Text style={{ color: "#64748b", lineHeight: 1.6, flexGrow: 1 }}>{service.description}</Text>
     </Card>
   );
 }

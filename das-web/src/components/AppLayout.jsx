@@ -31,7 +31,7 @@ import EditUserProfile from "./user/EditUserProfile.jsx";
 import LogoutButton from "./user/LogoutButton.jsx";
 import NotificationPanel from "./user/NotificationPanel.jsx";
 import ProfileDropdown from "./user/ProfileDropdown.jsx";
-import { Layout, Drawer, Popover, Dropdown, Badge, Avatar } from "antd";
+import { Layout, Drawer, Popover, Dropdown, Badge, Avatar, Flex, Space, Button } from "antd";
 
 const { Header, Content } = Layout;
 
@@ -309,32 +309,59 @@ export default function AppLayout() {
   }
 
   return (
-    <Layout className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <Layout style={{ minHeight: "100vh", background: "#f8fafc" }}>
       <Feedback error={feedback.error} message={feedback.message} onClear={clearFeedback} />
 
-      <Header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md h-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <button
-            className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+      <Header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          background: "rgba(255, 255, 255, 0.9)",
+          backdropFilter: "blur(12px)",
+          height: 64,
+          padding: "0 24px",
+          borderBottom: "1px solid #e2e8f0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
+        }}
+      >
+        <Flex align="center" gap={16}>
+          <Button
+            type="text"
+            icon={<Menu size={20} />}
             onClick={() => setMobileMenuOpen(true)}
-            title="Mở menu"
-          >
-            <Menu size={24} />
-          </button>
+            style={{ display: "none" }}
+            className="mobile-menu-btn"
+          />
 
           <Link
-            className="flex items-center gap-2.5 group"
             onClick={scrollPageToTop}
             to={user?.role === "patient" ? "/dashboard?tab=home" : "/"}
+            style={{ textDecoration: "none" }}
           >
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-teal-500 rounded-xl shadow-sm text-white group-hover:shadow-md transition-all">
-              <Activity size={20} />
-            </div>
-            <span className="text-gradient font-bold text-xl hidden sm:block tracking-tight">SmileCare</span>
+            <Flex align="center" gap={10}>
+              <div style={{
+                background: "linear-gradient(135deg, #0284c7, #0369a1)",
+                padding: 8,
+                borderRadius: 10,
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <Activity size={20} />
+              </div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "#0284c7", letterSpacing: "-0.5px" }}>
+                SmileCare
+              </span>
+            </Flex>
           </Link>
-        </div>
+        </Flex>
 
-        <nav className="hidden lg:flex items-center gap-1.5" aria-label="Điều hướng chính">
+        <nav style={{ display: "flex", alignItems: "center", gap: 6 }} aria-label="Điều hướng chính">
           {items.map((item) => {
             const Icon = item.icon;
             const badgeCount = navBadges[item.id] || 0;
@@ -343,47 +370,56 @@ export default function AppLayout() {
               (item.section ? location.hash === `#${item.section}` : activeTab === item.id && location.hash !== "#services")
               : false;
 
-            const itemClasses = `relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-              active
-                ? "bg-primary-50 text-primary-700 shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`;
+            const navStyle = {
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 14px",
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 500,
+              textDecoration: "none",
+              transition: "all 0.2s",
+              position: "relative",
+              background: active ? "#e0f2fe" : "transparent",
+              color: active ? "#0369a1" : "#475569"
+            };
 
             return item.isTab ? (
               <Link
                 key={item.id}
                 to={item.to}
-                className={itemClasses}
+                style={navStyle}
                 onClick={() => {
                   if (item.id === "home") scrollPageToTop();
                   if (user?.role) loadNavBadges(user.role);
                 }}
               >
-                <Icon size={18} className={active ? "text-primary-600" : "text-slate-400"} />
+                <Icon size={18} color={active ? "#0284c7" : "#64748b"} />
                 <span>{item.label}</span>
                 {badgeCount > 0 && (
-                  <Badge count={badgeCount > 99 ? "99+" : badgeCount} className="absolute -top-1.5 -right-1.5" />
+                  <Badge count={badgeCount > 99 ? "99+" : badgeCount} size="small" style={{ position: "absolute", top: -4, right: -4 }} />
                 )}
               </Link>
             ) : (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={({ isActive }) => `relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-primary-50 text-primary-700 shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
+                style={({ isActive }) => ({
+                  ...navStyle,
+                  background: isActive ? "#e0f2fe" : "transparent",
+                  color: isActive ? "#0369a1" : "#475569"
+                })}
                 onClick={() => {
                   if (user?.role) loadNavBadges(user.role);
                 }}
               >
                 {({ isActive }) => (
                   <>
-                    <Icon size={18} className={isActive ? "text-primary-600" : "text-slate-400"} />
+                    <Icon size={18} color={isActive ? "#0284c7" : "#64748b"} />
                     <span>{item.label}</span>
                     {badgeCount > 0 && (
-                      <Badge count={badgeCount > 99 ? "99+" : badgeCount} className="absolute -top-1.5 -right-1.5" />
+                      <Badge count={badgeCount > 99 ? "99+" : badgeCount} size="small" style={{ position: "absolute", top: -4, right: -4 }} />
                     )}
                   </>
                 )}
@@ -392,7 +428,7 @@ export default function AppLayout() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <Flex align="center" gap={12}>
           {user ? (
             <>
               <Popover
@@ -411,13 +447,13 @@ export default function AppLayout() {
                 onOpenChange={setShowNotifications}
                 placement="bottomRight"
               >
-                <Badge count={unreadCount} overflowCount={9} size="small" offset={[-4, 4]}>
-                  <button
-                    className={`relative p-2.5 rounded-xl transition-colors ${showNotifications ? "bg-primary-50 text-primary-600" : "text-slate-500 hover:bg-slate-100"}`}
-                    title="Thông báo"
-                  >
-                    <Bell size={20} />
-                  </button>
+                <Badge count={unreadCount} overflowCount={9} size="small">
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<Bell size={18} />}
+                    style={{ background: showNotifications ? "#e0f2fe" : "transparent" }}
+                  />
                 </Badge>
               </Popover>
 
@@ -437,20 +473,19 @@ export default function AppLayout() {
                   />
                 )}
               >
-                <button
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 border-2 border-transparent hover:border-primary-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 overflow-hidden"
-                  title="Tài khoản"
-                >
+                <div style={{ cursor: "pointer" }}>
                   {user.avatarUrl ? (
-                    <Avatar src={user.avatarUrl} alt={user.fullName || "Avatar"} className="w-full h-full object-cover" />
+                    <Avatar src={user.avatarUrl} alt={user.fullName || "Avatar"} size={36} />
                   ) : (
-                    <Avatar className="bg-primary-100 text-primary-700 font-bold">{userInitial}</Avatar>
+                    <Avatar style={{ backgroundColor: "#e0f2fe", color: "#0369a1", fontWeight: 700 }} size={36}>
+                      {userInitial}
+                    </Avatar>
                   )}
-                </button>
+                </div>
               </Dropdown>
             </>
           ) : null}
-        </div>
+        </Flex>
       </Header>
 
       <Drawer
@@ -552,7 +587,7 @@ export default function AppLayout() {
         </div>
       </Drawer>
 
-      <Content className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <Content style={{ flex: 1, maxWidth: 1280, width: "100%", margin: "0 auto", padding: "24px 16px" }}>
         <Outlet />
       </Content>
 

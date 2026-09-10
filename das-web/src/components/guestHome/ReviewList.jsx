@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { Typography } from "antd";
+import { Typography, Row, Col, Tag, Flex } from "antd";
 import EmptyState from "../EmptyState.jsx";
 import ReviewCard from "./ReviewCard.jsx";
 
@@ -7,24 +7,26 @@ const { Title } = Typography;
 
 export default function ReviewList({ reviews }) {
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+    <section style={{ padding: "80px 20px", background: "#fff" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <Flex vertical align="center" style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 48px" }}>
+          <Tag color="gold" style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
             <Star size={16} fill="currentColor" />
             Khách hàng nói gì
-          </span>
-          <Title level={2} className="text-slate-900">Đánh Giá Từ Khách Hàng SmileCare</Title>
-        </div>
+          </Tag>
+          <Title level={2} style={{ color: "#0f172a", margin: 0 }}>Đánh Giá Từ Khách Hàng SmileCare</Title>
+        </Flex>
 
         {reviews.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Row gutter={[24, 24]}>
             {reviews.map((item) => (
-              <ReviewCard review={item} key={item._id} />
+              <Col xs={24} sm={12} lg={8} key={item._id}>
+                <ReviewCard review={item} />
+              </Col>
             ))}
-          </div>
+          </Row>
         ) : (
-          <div className="card-base p-8 text-center max-w-2xl mx-auto">
+          <div style={{ background: "#f8fafc", padding: 32, borderRadius: 16, textAlign: "center", maxWidth: 600, margin: "0 auto", border: "1px solid #f1f5f9" }}>
             <EmptyState
               title="Chưa có đánh giá"
               text="Đánh giá của khách hàng sẽ hiển thị tại đây sau khi bệnh nhân gửi từ hệ thống."

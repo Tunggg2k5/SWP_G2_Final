@@ -11,14 +11,12 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
-    "@tailwindcss/vite": "^4.3.3",
     "antd": "^6.6.3",
     "axios": "^1.13.2",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.6",
-    "tailwindcss": "^4.3.3"
+    "react-router-dom": "^7.9.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

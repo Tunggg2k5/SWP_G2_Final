@@ -1,61 +1,55 @@
-import { CalendarDays, CheckCircle2, Clock, MapPin, UsersRound, ThumbsUp } from "lucide-react";
-import { Card, Typography } from "antd";
+import { CalendarDays, CheckCircle2, Clock, MapPin, UsersRound } from "lucide-react";
+import { Card, Typography, Row, Col, Flex, Tag } from "antd";
 
 const { Title, Text } = Typography;
 
 export default function ClinicInformation({ address, dentistCount, roomCount }) {
   return (
-    <section className="py-16 bg-primary-700 text-white relative overflow-hidden" id="about">
-      {/* Background patterns */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-400 opacity-5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-flex items-center gap-2 text-teal-200 bg-teal-900/50 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+    <section style={{ padding: "64px 20px", background: "#0284c7", color: "#fff", position: "relative" }} id="about">
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <Flex vertical align="center" style={{ textAlign: "center", marginBottom: 48 }}>
+          <Tag color="cyan" style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
             <CheckCircle2 size={16} />
             Về SmileCare
-          </span>
-          <Title level={2} className="!text-white mb-6">Không gian điều trị hiện đại, lịch hẹn rõ ràng</Title>
-          <div className="flex flex-wrap justify-center gap-8 text-primary-100">
-            <span className="flex items-center gap-2">
-              <Clock size={20} className="text-teal-300" />
-              Hằng tuần, 8h-11h30 và 14h-17h30
-            </span>
-          </div>
-        </div>
+          </Tag>
+          <Title level={2} style={{ color: "#fff", marginBottom: 16 }}>Không gian điều trị hiện đại, lịch hẹn rõ ràng</Title>
+          <Flex align="center" gap={8} style={{ color: "#e0f2fe", fontSize: 15 }}>
+            <Clock size={18} />
+            <span>Hằng tuần, 8h-11h30 và 14h-17h30</span>
+          </Flex>
+        </Flex>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-              <MapPin size={32} className="text-blue-600" />
-            </div>
-            <div>
-              <strong className="block text-xl font-bold text-slate-800 mb-2">Vị trí trung tâm</strong>
-              <span className="text-sm text-slate-500 block">{address || "Địa chỉ phòng khám đang được cập nhật."}</span>
-            </div>
-          </Card>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} lg={8}>
+            <Card style={{ textAlign: "center", height: "100%", borderRadius: 16, border: "none" }} styles={{ body: { display: "flex", flexDirection: "column", alignItems: "center", padding: 28 } }}>
+              <div style={{ width: 64, height: 64, background: "#f0f9ff", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                <MapPin size={32} color="#0284c7" />
+              </div>
+              <strong style={{ fontSize: 18, color: "#1e293b", marginBottom: 8, display: "block" }}>Vị trí trung tâm</strong>
+              <Text type="secondary">{address || "Địa chỉ phòng khám đang được cập nhật."}</Text>
+            </Card>
+          </Col>
 
-          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-              <CalendarDays size={32} className="text-blue-600" />
-            </div>
-            <div>
-              <strong className="block text-xl font-bold text-slate-800 mb-2">{roomCount ? `${roomCount} phòng` : "Chưa có"} điều trị</strong>
-              <span className="text-sm text-slate-500 block">Trang thiết bị hiện đại, vô trùng.</span>
-            </div>
-          </Card>
+          <Col xs={24} sm={12} lg={8}>
+            <Card style={{ textAlign: "center", height: "100%", borderRadius: 16, border: "none" }} styles={{ body: { display: "flex", flexDirection: "column", alignItems: "center", padding: 28 } }}>
+              <div style={{ width: 64, height: 64, background: "#f0f9ff", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                <CalendarDays size={32} color="#0284c7" />
+              </div>
+              <strong style={{ fontSize: 18, color: "#1e293b", marginBottom: 8, display: "block" }}>{roomCount ? `${roomCount} phòng` : "Chưa có"} điều trị</strong>
+              <Text type="secondary">Trang thiết bị hiện đại, vô trùng.</Text>
+            </Card>
+          </Col>
 
-          <Card className="border-none text-center h-full rounded-2xl shadow-sm" bordered={false} styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center' } }}>
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-              <UsersRound size={32} className="text-blue-600" />
-            </div>
-            <div>
-              <strong className="block text-xl font-bold text-slate-800 mb-2">{dentistCount} Bác sĩ</strong>
-              <span className="text-sm text-slate-500 block">Giàu kinh nghiệm, tận tâm.</span>
-            </div>
-          </Card>
-        </div>
+          <Col xs={24} sm={12} lg={8}>
+            <Card style={{ textAlign: "center", height: "100%", borderRadius: 16, border: "none" }} styles={{ body: { display: "flex", flexDirection: "column", alignItems: "center", padding: 28 } }}>
+              <div style={{ width: 64, height: 64, background: "#f0f9ff", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                <UsersRound size={32} color="#0284c7" />
+              </div>
+              <strong style={{ fontSize: 18, color: "#1e293b", marginBottom: 8, display: "block" }}>{dentistCount} Bác sĩ</strong>
+              <Text type="secondary">Giàu kinh nghiệm, tận tâm.</Text>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </section>
   );

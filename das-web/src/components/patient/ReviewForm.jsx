@@ -1,13 +1,13 @@
-import { Input, Button, Form } from "antd";
+import { Input, Button, Form, Flex } from "antd";
 import RatingInput from "./RatingInput.jsx";
 
 export default function ReviewForm({ form, onChange, onSubmit, submitLabel = "Gửi đánh giá" }) {
   return (
-    <Form className="space-y-4 mt-3" onFinish={onSubmit} layout="vertical">
-      <Form.Item label="Đánh giá của bạn">
+    <Form onFinish={onSubmit} layout="vertical" style={{ marginTop: 12 }}>
+      <Form.Item label="Đánh giá của bạn" style={{ marginBottom: 16 }}>
         <RatingInput value={form.rating} onChange={(rating) => onChange({ rating })} />
       </Form.Item>
-      <Form.Item>
+      <Form.Item style={{ marginBottom: 16 }}>
         <Input.TextArea
           value={form.comment}
           onChange={(event) => onChange({ comment: event.target.value })}
@@ -16,11 +16,11 @@ export default function ReviewForm({ form, onChange, onSubmit, submitLabel = "G�
           autoSize={{ minRows: 4 }}
         />
       </Form.Item>
-      <div className="flex justify-end">
+      <Flex justify="flex-end">
         <Button type="primary" htmlType="submit">
           {submitLabel}
         </Button>
-      </div>
+      </Flex>
     </Form>
   );
 }

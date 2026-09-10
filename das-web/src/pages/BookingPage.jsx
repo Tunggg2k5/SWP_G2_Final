@@ -171,8 +171,8 @@ export default function BookingPage({ embedded = false }) {
   };
 
   return (
-    <div className={embedded ? "w-full" : "min-h-screen bg-slate-50 py-12 px-4"}>
-      <div className={embedded ? "w-full" : "max-w-2xl mx-auto space-y-6"}>
+    <div style={embedded ? { width: "100%" } : { minHeight: "100vh", background: "#f8fafc", padding: "48px 16px" }}>
+      <div style={embedded ? { width: "100%" } : { maxWidth: 680, margin: "0 auto" }}>
         <Feedback error={error} message={message} onClear={() => { setError(""); setMessage(""); }} />
         <AppointmentBookingForm
           bootstrapLoading={bootstrapLoading}

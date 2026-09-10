@@ -1,4 +1,4 @@
-import { Card, Typography, Tag } from "antd";
+import { Card, Typography, Tag, Avatar } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -6,33 +6,27 @@ export default function DentistCard({ dentist }) {
   const yearsOfExperience = Number(dentist.yearsOfExperience || dentist.experienceYears || 0);
   const experienceText = yearsOfExperience ? `${yearsOfExperience} năm kinh nghiệm` : "Kinh nghiệm đang cập nhật";
   const description = dentist.description || dentist.bio || "Thông tin bác sĩ đang được cập nhật từ hệ thống.";
+  const initial = dentist.fullName?.trim()?.[0]?.toUpperCase() || "B";
 
   return (
     <Card 
-      className="text-center h-full group hover:shadow-md" 
-      bordered={false} 
-      styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', padding: '24px' } }}
+      style={{ textAlign: "center", height: "100%", borderRadius: 16, border: "1px solid #f1f5f9", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+      styles={{ body: { display: "flex", flexDirection: "column", alignItems: "center", height: "100%", padding: 24 } }}
     >
-      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md mb-6 bg-slate-100 group-hover:border-primary-100 transition-colors">
+      <div style={{ marginBottom: 20 }}>
         {dentist.avatarUrl ? (
-          <img
-            className="w-full h-full object-cover"
-            src={dentist.avatarUrl}
-            alt={dentist.fullName}
-            decoding="async"
-            loading="eager"
-          />
+          <Avatar src={dentist.avatarUrl} size={110} style={{ border: "4px solid #f0f9ff", boxShadow: "0 4px 10px rgba(0,0,0,0.08)" }} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-700 text-4xl font-bold">
-            {dentist.fullName?.trim()?.[0]?.toUpperCase() || "B"}
-          </div>
+          <Avatar size={110} style={{ backgroundColor: "#e0f2fe", color: "#0284c7", fontSize: 36, fontWeight: 700, border: "4px solid #f0f9ff" }}>
+            {initial}
+          </Avatar>
         )}
       </div>
-      <Title level={4} className="text-slate-800 mb-2">{dentist.fullName}</Title>
-      <Tag color="cyan" className="mb-4 rounded-full px-3 py-1 text-xs font-bold border-none bg-teal-50 text-teal-700">
+      <Title level={4} style={{ color: "#1e293b", marginBottom: 8 }}>{dentist.fullName}</Title>
+      <Tag color="cyan" style={{ borderRadius: 12, padding: "2px 10px", marginBottom: 12, fontWeight: 600 }}>
         {experienceText}
       </Tag>
-      <Text className="text-slate-600 text-sm leading-relaxed line-clamp-3">
+      <Text type="secondary" style={{ fontSize: 13, lineHeight: 1.6, flexGrow: 1 }}>
         {description}
       </Text>
     </Card>
